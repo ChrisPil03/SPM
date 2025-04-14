@@ -26,6 +26,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintPure)
+	bool IsDead() const;
+	
 	void Interact();
 
 private:
@@ -35,4 +38,7 @@ private:
 	float InteractRange = 100;
 
 	bool IsInRange(FHitResult& HitResult) const;
+
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess))
+	bool bDead;
 };

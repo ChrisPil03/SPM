@@ -32,3 +32,8 @@ bool AEnemyAIController::IsDead() const
 	
 	return true;
 }
+
+void AEnemyAIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}

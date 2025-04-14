@@ -88,4 +88,9 @@ bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 	
 }
 
+bool APlayerCharacter::IsDead() const
+{
+	return bDead;
+}
+
 
