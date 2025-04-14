@@ -33,19 +33,19 @@ private:
 	UStaticMeshComponent* Mesh;
 
 	//can change for other system if needed
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category=Gameplay)
 	UParticleSystem* MuzzleFlash;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category=Gameplay)
 	USoundBase* MuzzleSound;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category=Gameplay)
 	USoundBase* ImpactSound;
 
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	FVector MuzzleOffset;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category=Gameplay)
 	float MaxRange = 1000;
 
 	UPROPERTY(EditAnywhere)
