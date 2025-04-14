@@ -14,46 +14,84 @@ class COOLGANG_API AGun : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AGun();
-	void Shoot();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
 
 	// maybe need to change later
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
 
 	//can change for other system if needed
-	UPROPERTY(EditAnywhere, Category=Gameplay)
+	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
 	UParticleSystem* MuzzleFlash;
 
-	UPROPERTY(EditAnywhere, Category=Gameplay)
+	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
 	USoundBase* MuzzleSound;
 
-	UPROPERTY(EditAnywhere, Category=Gameplay)
-	USoundBase* ImpactSound;
-
-	UPROPERTY(EditAnywhere, Category=Gameplay)
-	FVector MuzzleOffset;
 	
-	UPROPERTY(EditAnywhere, Category=Gameplay)
-	float MaxRange = 1000;
+	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
+	USoundBase* ImpactSound;
 
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactEffect;
+	
+	UPROPERTY(EditAnywhere, Category=Gameplay)
+	FVector MuzzleOffset;
+	
+	
 
-	UPROPERTY(EditAnywhere)
+	
+
+	/////////////////  Gun property  //////////////////////////
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float Damage{10};
 
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float FireRate{10};
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float MaxRange = 1000;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float ReloadTime = 2;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	int MagazineSize = 2;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	int Recoil = 2;
+	
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	bool bIsAutomatic = false;
+
+	
 	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
 	AController* GetOwnerController() const;
+
+	FTimerHandle FireTimerHandle;
+	float TimeBetweenShots;
+	bool bCanFire = true;
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void StartFire();
+	virtual void StopFire();
+	virtual void Fire();
+
+	virtual void Reload();
+
+	// Utility
+	bool CanFire() const;
+
+private:
+	
 };
+
+

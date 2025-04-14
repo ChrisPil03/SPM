@@ -19,7 +19,7 @@ AGun::AGun()
 	Mesh->SetupAttachment(Root);
 }
 
-void AGun::Shoot()
+void AGun::Fire()
 {
 	//UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
 	//UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
@@ -38,12 +38,8 @@ void AGun::Shoot()
 			Hit.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
 		}
 	}
-	
-
-	
-	
-	
 }
+
 
 // Called when the game starts or when spawned
 void AGun::BeginPlay()
@@ -80,6 +76,22 @@ bool AGun::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	Params.AddIgnoredActor(GetOwner());
 	return GetWorld()->LineTraceSingleByChannel(Hit, Location, EndPoint, ECC_GameTraceChannel1, Params);
 	
+}
+void AGun::StartFire()
+{
+}
+
+ void AGun::StopFire()
+{
+}
+
+ void AGun::Reload()
+{
+}
+
+ bool AGun::CanFire() const
+{
+	return false;
 }
 
 AController* AGun::GetOwnerController() const
