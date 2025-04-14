@@ -8,7 +8,7 @@ public class CoolGang : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","UMG", "EnhancedInput", "Niagara" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
