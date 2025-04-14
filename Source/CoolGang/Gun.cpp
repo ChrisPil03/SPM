@@ -77,6 +77,22 @@ bool AGun::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	return GetWorld()->LineTraceSingleByChannel(Hit, Location, EndPoint, ECC_GameTraceChannel1, Params);
 	
 }
+void AGun::StartFire()
+{
+}
+
+ void AGun::StopFire()
+{
+}
+
+ void AGun::Reload()
+{
+}
+
+ bool AGun::CanFire() const
+{
+	return false;
+}
 
 AController* AGun::GetOwnerController() const
 {

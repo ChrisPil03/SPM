@@ -68,6 +68,7 @@ void APlayerCharacter::Interact()
 
 void APlayerCharacter::Shoot()
 {
+	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
 	Gun->Fire();
 }
 

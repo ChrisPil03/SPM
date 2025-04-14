@@ -42,5 +42,8 @@ private:
 	bool IsInRange(FHitResult& HitResult) const;
 
 	UPROPERTY(EditAnywhere, Category=Gameplay)
+	TSubclassOf<AGun> GunClass;
+
+	UPROPERTY()
 	AGun* Gun;
 };
