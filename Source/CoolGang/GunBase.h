@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Gun.generated.h"
+#include "GunBase.generated.h"
 
 UCLASS()
-class COOLGANG_API AGun : public AActor
+class COOLGANG_API AGunBase : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AGun();
+	AGunBase();
 
 protected:
 	// Called when the game starts or when spawned
@@ -61,7 +61,10 @@ protected:
 	float ReloadTime = 2;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	int MagazineSize = 2;
+	int MagazineSize = 30;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat | Ammo")
+	int AmmoInMag = 30;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	int Recoil = 2;
@@ -84,14 +87,16 @@ public:
 	virtual void StartFire();
 	virtual void StopFire();
 	virtual void Fire();
-
 	virtual void Reload();
-
-	// Utility
+	
 	bool CanFire() const;
+	bool bIsFiring = false;
 
 private:
-	
+	void BlinkDebug(FHitResult& h);
+	FTimerHandle BlinkTimerHandle;
+	UPROPERTY()
+	UMaterialInterface* OriginalMaterial;
 };
 
 
