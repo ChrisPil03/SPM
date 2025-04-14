@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
+#include "Gun.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -63,6 +64,11 @@ void APlayerCharacter::Interact()
 				
 	Interface->Interact(this); 
 	
+}
+
+void APlayerCharacter::Shoot()
+{
+	Gun->Fire();
 }
 
 bool APlayerCharacter::IsInRange(FHitResult& HitResult) const

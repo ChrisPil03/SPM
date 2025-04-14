@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class AGun;
 UCLASS()
 class COOLGANG_API APlayerCharacter : public ACharacter
 {
@@ -26,7 +27,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
 	void Interact();
+
+	UFUNCTION(BlueprintCallable)
+	void Shoot();
 
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
@@ -35,4 +40,7 @@ private:
 	float InteractRange = 100;
 
 	bool IsInRange(FHitResult& HitResult) const;
+
+	UPROPERTY(EditAnywhere, Category=Gameplay)
+	AGun* Gun;
 };

@@ -19,7 +19,7 @@ AGun::AGun()
 	Mesh->SetupAttachment(Root);
 }
 
-void AGun::Shoot()
+void AGun::Fire()
 {
 	//UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
 	//UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
@@ -38,12 +38,8 @@ void AGun::Shoot()
 			Hit.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
 		}
 	}
-	
-
-	
-	
-	
 }
+
 
 // Called when the game starts or when spawned
 void AGun::BeginPlay()
