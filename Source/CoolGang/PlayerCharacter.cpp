@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
+#include "InteractInterface.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -36,4 +37,55 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
+void APlayerCharacter::Interact()
+{
+	FHitResult HitResult;
+
+	
+	if (!IsInRange(HitResult))
+	{
+		return;
+	}
+		// Make sure the actor was hit and implements the interact interface
+	AActor* HitActor = HitResult.GetActor();
+        
+	if (!HitActor && !HitActor->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
+	{
+		return;
+	}
+			// Cast to the interface and check if it's valid
+	IInteractInterface* Interface = Cast<IInteractInterface>(HitActor);
+            
+	if (Interface == nullptr)
+	{
+		return;
+	}
+				
+	Interface->Interact(this); 
+	
+}
+
+bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
+{
+	
+		AController* PlayerController  = GetController();
+		if (PlayerController == nullptr)
+		{
+			return false;
+		}
+		FVector Location;
+		FRotator Rotation;
+	
+		PlayerController->GetPlayerViewPoint(Location, Rotation);
+	
+	
+		FVector EndPoint = Location + Rotation.Vector() * InteractRange;
+		DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 2);
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+		return GetWorld()->LineTraceSingleByChannel(HitResult, Location, EndPoint, ECC_GameTraceChannel1, Params);
+	
+	
+}
+
 
