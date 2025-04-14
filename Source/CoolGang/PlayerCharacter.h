@@ -26,7 +26,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void Interact();
+
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
+	UPROPERTY(EditAnywhere, Category=Gameplay)
+	float InteractRange = 100;
+
+	bool IsInRange(FHitResult& HitResult) const;
 };
