@@ -9,6 +9,7 @@
 /**
  * 
  */
+class UEffectComponent;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class COOLGANG_API UPickupComponent : public USphereComponent
