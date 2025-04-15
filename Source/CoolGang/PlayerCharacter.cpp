@@ -112,7 +112,7 @@ bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 
 void APlayerCharacter::Die()
 {
-	Destroy();
+	//Destroy();
 }
 
 bool APlayerCharacter::IsDead() const
