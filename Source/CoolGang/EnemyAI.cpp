@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
+#include "EnemySpawnManager.h"
 
 // Sets default values
 AEnemyAI::AEnemyAI()
@@ -19,20 +20,44 @@ AEnemyAI::AEnemyAI()
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
 	BaseMesh->SetupAttachment(CapsuleComp);
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+
+	
+	
 }
 
-// Called when the game starts or when spawned
 void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+
+	if (EnemySpawnManagerClass) // Ensure the class variable is set
+	{
+		// Use the standard function to get the single actor instance
+		AEnemySpawnManager* FoundManager = Cast<AEnemySpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), EnemySpawnManagerClass));
+
+		if (IsValid(FoundManager)) // Use IsValid() to check for null and pending kill
+		{
+			EnemySpawnManager = FoundManager; // Assign if found
+			UE_LOG(LogTemp, Display, TEXT("AI %s found EnemySpawnManager: %s"), *GetName(), *EnemySpawnManager->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("AI %s could NOT find any actor of class %s!"), *GetName(), *EnemySpawnManagerClass->GetName());
+			// EnemySpawnManager remains null or whatever its default was
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AI %s has EnemySpawnManagerClass unset! Cannot search."), *GetName());
+	}
 }
 
 void AEnemyAI::Attack()
 {
 	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
-	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), 1, MyOwnerInstigator, this, DamageTypeClass);
+	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
 }
 
 float AEnemyAI::GetAttackRange() const
@@ -40,15 +65,23 @@ float AEnemyAI::GetAttackRange() const
 	return AttackRange;
 }
 
+UHealthComponent* AEnemyAI::GetHealthComponent() const
+{
+	return HealthComponent;
+}
+
 void AEnemyAI::Die()
 {
-	Destroy();
+	FVector Location = FVector(10000, 10000, 10000);
+	
+	SetActorLocation(Location);
+	EnemySpawnManager->MarkEnemyAsDead(this);
 }
 
 void AEnemyAI::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (HealthComponent->GetCurrentHealth() <= 0)
+	if (HealthComponent->GetCurrentHealth() <= 0 && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
 		Die();
 	}

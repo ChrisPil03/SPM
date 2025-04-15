@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ObjectivePressButtonsManager.generated.h"
 
+class AObjectiveManager;
 class AObjectiveButton;
 
 UCLASS()
@@ -30,6 +31,9 @@ public:
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess="true"), Category="Objective")
 	TArray<AObjectiveButton*> AllButtons;
+
+	UPROPERTY(EditInstanceOnly)
+	AObjectiveManager* ObjectiveManager;
 
 	UPROPERTY(VisibleAnywhere)
 	int ButtonsPressed = 0;

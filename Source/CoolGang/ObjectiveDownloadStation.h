@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "ObjectiveDownloadStation.generated.h"
 
+class AObjectiveManager;
+
 UCLASS()
 class COOLGANG_API AObjectiveDownloadStation : public AActor, public IInteractInterface
 {
@@ -56,4 +58,7 @@ private:
 
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"))
 	class USphereTriggerComponent* SphereTriggerComponent;
+
+	UPROPERTY(EditInstanceOnly)
+	AObjectiveManager* ObjectiveManager;
 };
