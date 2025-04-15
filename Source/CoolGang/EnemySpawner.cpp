@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "EnemySpawnManager.h" 
 #include "EnemyAI.h"
+#include "GameFramework/FloatingPawnMovement.h"
 
 // Sets default values
 AEnemySpawner::AEnemySpawner()

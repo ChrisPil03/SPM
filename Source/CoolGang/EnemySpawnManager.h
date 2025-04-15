@@ -21,9 +21,9 @@ public:
 	void MarkEnemyAsAlive(AEnemyAI* Enemy);
 	void MarkEnemyAsDead(AEnemyAI* Enemy);
 
-	TArray<AEnemyAI*> GetAliveEnemies();
+	const TArray<AEnemyAI*>& GetAliveEnemies() const;
 	
-	TArray<AEnemyAI*> GetDeadEnemies();
+	const  TArray<AEnemyAI*>& GetDeadEnemies() const;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -40,11 +40,12 @@ private:
 	void SetSpawnTimer();
 
 	void SpawnEnemies();
-	
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	TSubclassOf<AEnemySpawner> EnemySpawnerClass;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	TArray<UObject*> EnemySpawners;
+	TArray<AEnemySpawner*> EnemySpawners;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	double SpawnRate;
@@ -52,8 +53,13 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	double SpawnRateIncreaseTimer;
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	int MaximumEnemies;
+
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
 	TArray<AEnemyAI*> AliveEnemies;
 
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
 	TArray<AEnemyAI*> DeadEnemies;
 
 };

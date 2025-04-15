@@ -20,13 +20,37 @@ AEnemyAI::AEnemyAI()
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
 	BaseMesh->SetupAttachment(CapsuleComp);
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+
+
+	
+	
 }
 
-// Called when the game starts or when spawned
 void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+
+	if (EnemySpawnManagerClass) // Ensure the class variable is set
+	{
+		// Use the standard function to get the single actor instance
+		AEnemySpawnManager* FoundManager = Cast<AEnemySpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), EnemySpawnManagerClass));
+
+		if (IsValid(FoundManager)) // Use IsValid() to check for null and pending kill
+		{
+			EnemySpawnManager = FoundManager; // Assign if found
+			UE_LOG(LogTemp, Display, TEXT("AI %s found EnemySpawnManager: %s"), *GetName(), *EnemySpawnManager->GetName());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("AI %s could NOT find any actor of class %s!"), *GetName(), *EnemySpawnManagerClass->GetName());
+			// EnemySpawnManager remains null or whatever its default was
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AI %s has EnemySpawnManagerClass unset! Cannot search."), *GetName());
+	}
 }
 
 void AEnemyAI::Attack()
@@ -57,7 +81,7 @@ void AEnemyAI::Die()
 void AEnemyAI::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (HealthComponent->GetCurrentHealth() <= 0)
+	if (HealthComponent->GetCurrentHealth() <= 0 && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
 		Die();
 	}

@@ -46,6 +46,9 @@ private:
 	UHealthComponent* HealthComponent;
 
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<AEnemySpawnManager> EnemySpawnManagerClass;
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	AEnemySpawnManager* EnemySpawnManager;
 
 	UPROPERTY(EditAnywhere)
