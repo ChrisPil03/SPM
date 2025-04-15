@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/DamageEvents.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AGunBase::AGunBase()
@@ -13,6 +15,9 @@ AGunBase::AGunBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	GunEffectSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunSpawnPoint"));
+	GunEffectSpawnPoint->SetupAttachment(RootComponent);
+	
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
 	SetRootComponent(Root);
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
@@ -46,7 +51,20 @@ void AGunBase::Fire()
 	{
 		return; // Skip firing if we're no longer supposed to be firing
 	}
+
 	
+	if (MuzzleFlash)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAttached(
+			MuzzleFlash,
+			RootComponent,
+			NAME_None, // No socket
+			FVector::ZeroVector, // Offset
+			FRotator::ZeroRotator, // Rotation
+			EAttachLocation::SnapToTargetIncludingScale,
+			true // Auto destroy
+		);
+	}
 	//UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
 	//UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
 	FHitResult HitResult;
@@ -111,7 +129,6 @@ void AGunBase::StartFire()
 	{
 			Fire(); // Immediate first shot
 			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &AGunBase::Fire, TimeBetweenShots, true);
-		
 	}
 	else
 	{

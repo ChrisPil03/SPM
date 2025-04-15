@@ -28,7 +28,7 @@ protected:
 
 	//can change for other system if needed
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
-	UParticleSystem* MuzzleFlash;
+	class UNiagaraSystem* MuzzleFlash;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
 	USoundBase* MuzzleSound;
@@ -43,7 +43,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	FVector MuzzleOffset;
 	
-	
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* GunEffectSpawnPoint;
 
 	
 
