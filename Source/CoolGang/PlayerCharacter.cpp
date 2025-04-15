@@ -6,7 +6,6 @@
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
-#include "Blueprint/UserWidget.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -17,21 +16,15 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	// HUD = CreateWidget(this, HUDClass);
-	// if (HUD != nullptr)
-	// {
-	// 	HUD->AddToViewport();
-	// }
-	
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
-	
-	EquippedGun->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("WeaponSocket"));
 
 	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
@@ -42,13 +35,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (HealthComponent->GetCurrentHealth() <= 0)
+	{
+		Die();
+	}
 }
 
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
 
 }
 void APlayerCharacter::Interact()
@@ -112,8 +108,11 @@ bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
 		return GetWorld()->LineTraceSingleByChannel(HitResult, Location, EndPoint, ECC_GameTraceChannel2, Params);
-	
-	
+}
+
+void APlayerCharacter::Die()
+{
+	//Destroy();
 }
 
 bool APlayerCharacter::IsDead() const
