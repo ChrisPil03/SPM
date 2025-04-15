@@ -51,7 +51,7 @@ void AObjectiveDownloadStation::StartObjective()
 {
 	// Debugging
 	UE_LOG(LogTemp, Warning, TEXT("Interacted with objective"));
-	//DrawDebugSphere(GetWorld(), GetActorLocation(), ObjectiveRadius, 30, FColor::Blue, true);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), ObjectiveRadius, 30, FColor::Blue, true);
 	
 	ObjectiveInProgress = true;
 	SpawnDownloadZone();
@@ -63,7 +63,7 @@ void AObjectiveDownloadStation::ProgressObjective()
 	ObjectiveProgress = GetWorldTimerManager().GetTimerElapsed(ObjectiveTimer) / CompletionTime;
 	UpdateDownloadSize();
 	
-	//UE_LOG(LogTemp, Warning, TEXT("Objective Completion: %f"), ObjectiveProgress);
+	UE_LOG(LogTemp, Warning, TEXT("Objective Completion: %f"), ObjectiveProgress);
 }
 
 void AObjectiveDownloadStation::AbortObjective()
