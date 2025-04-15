@@ -30,7 +30,7 @@ void USphereTriggerComponent::TickComponent(float DeltaTime, ELevelTick TickType
 			Objective->ResumeObjective();
 		}else
 		{
-			//UE_LOG(LogTemp, Display, TEXT("Pause"));
+			UE_LOG(LogTemp, Display, TEXT("Pause"));
 			Objective->AbortObjective();
 		}
 	}
@@ -44,7 +44,7 @@ AActor* USphereTriggerComponent::GetAcceptableActor() const
 	{
 		if (Actor->ActorHasTag(TagToCheckFor))
 		{
-			//UE_LOG(LogTemp, Display, TEXT("Processing objective: %s"), *Actor->GetName());
+			UE_LOG(LogTemp, Display, TEXT("Processing objective: %s"), *Actor->GetName());
 			return Actor;
 		}
 	}
