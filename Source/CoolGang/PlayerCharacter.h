@@ -42,6 +42,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ReloadCurrentGun();
+	
+	UFUNCTION(BlueprintCallable)
+	void Dash();
 
 	UFUNCTION(BlueprintCallable)
 	AGunBase* GetEquippedGun() const{ return EquippedGun;};
@@ -65,6 +68,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthComponent* HealthComponent;
+
+	UPROPERTY(EditAnywhere)
+	float DashForce = 0.0f;
 	
 	void Die();
 };
