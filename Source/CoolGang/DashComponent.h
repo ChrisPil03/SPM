@@ -28,6 +28,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	float DashForce = 0.0f;
 
+	UPROPERTY(EditAnywhere)
+	float Cooldown = 0.0f;
+	
 	UPROPERTY()
 	 ACharacter* OwnerCharacter;
+
+	FTimerHandle DashTimer;
 };
