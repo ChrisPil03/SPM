@@ -13,14 +13,13 @@ AObjectiveDownloadStation::AObjectiveDownloadStation()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SphereTriggerComponent = CreateDefaultSubobject<USphereTriggerComponent>(TEXT("Sphere Trigger Component"));
-	SphereTriggerComponent->SetSphereRadius(ObjectiveRadius);
 }
 
 // Called when the game starts or when spawned
 void AObjectiveDownloadStation::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	SphereTriggerComponent->SetSphereRadius(ObjectiveRadius);
 }
 
 // Called every frame
@@ -51,15 +50,17 @@ void AObjectiveDownloadStation::StartObjective()
 {
 	// Debugging
 	UE_LOG(LogTemp, Warning, TEXT("Interacted with objective"));
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ObjectiveRadius, 30, FColor::Blue, true);
+	//DrawDebugSphere(GetWorld(), GetActorLocation(), ObjectiveRadius, 30, FColor::Blue, true);
 	
 	ObjectiveInProgress = true;
+	SpawnDownloadZone();
 	GetWorldTimerManager().SetTimer(ObjectiveTimer, this, &AObjectiveDownloadStation::CompleteObjective, CompletionTime, false);
 }
 
 void AObjectiveDownloadStation::ProgressObjective()
 {
 	ObjectiveProgress = GetWorldTimerManager().GetTimerElapsed(ObjectiveTimer) / CompletionTime;
+	UpdateDownloadSize();
 	
 	//UE_LOG(LogTemp, Warning, TEXT("Objective Completion: %f"), ObjectiveProgress);
 }
