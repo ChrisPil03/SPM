@@ -27,11 +27,16 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintPure)
+	bool IsDead() const;
+	
 	UFUNCTION(BlueprintCallable)
 	void Interact();
 
 	UFUNCTION(BlueprintCallable)
 	void Shoot();
+
+	
 
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
@@ -41,6 +46,9 @@ private:
 
 	bool IsInRange(FHitResult& HitResult) const;
 
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess))
+	bool bDead;
+	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	TSubclassOf<AGun> GunClass;
 
