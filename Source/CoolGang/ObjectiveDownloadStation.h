@@ -30,6 +30,12 @@ public:
 	void ResumeObjective();
 	bool GetIsInProgress() const;
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SpawnDownloadZone();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void UpdateDownloadSize();
+
 private:
 	void StartObjective();
 	void ProgressObjective();
@@ -43,7 +49,7 @@ private:
 	float ObjectiveProgress = 0.f;
 
 	UPROPERTY(EditAnywhere)
-	float CompletionTime = 5.f;
+	float CompletionTime = 30.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	float ObjectiveRadius = 600.f;

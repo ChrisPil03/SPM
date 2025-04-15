@@ -92,6 +92,15 @@ public:
 	bool CanFire() const;
 	bool bIsFiring = false;
 
+	UFUNCTION(BlueprintCallable)
+	int GetMagazineSize(){return MagazineSize;};
+
+	UFUNCTION(BlueprintCallable)
+	int GetAmmoInMag(){return AmmoInMag;};
+	UFUNCTION(BlueprintCallable)
+	int GetRecoil(){return Recoil;};
+	UFUNCTION(BlueprintCallable)
+	bool GetIsAutomatic(){return bIsAutomatic;};
 private:
 	void BlinkDebug(FHitResult& h);
 	FTimerHandle BlinkTimerHandle;
