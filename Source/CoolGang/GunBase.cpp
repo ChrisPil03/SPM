@@ -1,0 +1,177 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "GunBase.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
+#include "Engine/DamageEvents.h"
+
+// Sets default values
+AGunBase::AGunBase()
+{
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
+	SetRootComponent(Root);
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
+	Mesh->SetupAttachment(Root);
+}
+
+// Called when the game starts or when spawned
+void AGunBase::BeginPlay()
+{
+	Super::BeginPlay();
+	TimeBetweenShots = 60.0f / FireRate;
+	AmmoInMag = MagazineSize;
+	
+}
+
+// Called every frame
+void AGunBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+void AGunBase::Fire()
+{
+	if (!CanFire())
+	{
+		StopFire();
+		return;
+	}
+	if (!bIsFiring)
+	{
+		return; // Skip firing if we're no longer supposed to be firing
+	}
+	
+	//UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
+	//UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
+	FHitResult HitResult;
+	FVector ShotDirection;
+	
+	if(GunTrace(HitResult, ShotDirection))
+	{
+		//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.Location, ShotDirection.Rotation());
+		//UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
+		if (HitResult.GetActor())
+		{
+			FPointDamageEvent DamageEvent(Damage, HitResult, ShotDirection, nullptr);
+			AController* OwnerController = GetOwnerController();
+			HitResult.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
+			
+			BlinkDebug(HitResult);
+		}
+	}
+	
+	
+
+	AmmoInMag--;
+	
+	UE_LOG(LogTemp, Warning, TEXT(" Pew!! %d"), AmmoInMag);
+}
+
+bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
+{
+	AController* OwnerController = GetOwnerController();
+	if (OwnerController == nullptr)
+	{
+		return false;
+	}
+	FVector Location;
+	FRotator Rotation;
+	
+	OwnerController->GetPlayerViewPoint(Location, Rotation);
+
+	ShotDirection = -Rotation.Vector();
+	
+	FVector EndPoint = Location + Rotation.Vector() * MaxRange;
+	DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 2);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+	
+	return GetWorld()->LineTraceSingleByChannel(Hit, Location, EndPoint, ECC_GameTraceChannel1, Params);
+	
+}
+void AGunBase::StartFire()
+{
+	bIsFiring = true;
+	if (bIsAutomatic)
+	{
+		if (!GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
+		{
+			Fire(); // Immediate first shot
+			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &AGunBase::Fire, TimeBetweenShots, true);
+		}
+	}
+	else
+	{
+		Fire();
+		
+	}
+}
+
+ void AGunBase::StopFire()
+{
+	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+	bIsFiring = false;
+}
+
+ void AGunBase::Reload()
+{
+	bCanFire = false;
+	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, [this]()
+	{
+		AmmoInMag = MagazineSize;
+		bCanFire = true;
+	}, TimeBetweenShots, false);
+}
+
+ bool AGunBase::CanFire() const
+{
+	return bCanFire && AmmoInMag > 0;
+}
+
+
+
+AController* AGunBase::GetOwnerController() const
+{
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (OwnerPawn == nullptr)
+	{
+		return nullptr;
+	}
+	return OwnerPawn->GetController();
+
+	
+}
+
+void AGunBase::BlinkDebug(FHitResult& HitResult)
+{
+	if (UStaticMeshComponent* MeshComponent = HitResult.GetActor()->FindComponentByClass<UStaticMeshComponent>())
+	{
+		// Save original material
+		
+		
+		// Load red material
+		
+		UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Debug.M_Debug"));
+		if (RedMaterial)
+		{
+			MeshComponent->SetMaterial(0, RedMaterial);
+
+			// Start a timer to revert the material after 0.2 seconds
+			
+			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, MeshComponent]()
+			{
+				UMaterialInterface* WhiteMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+				MeshComponent->SetMaterial(0, WhiteMaterial);
+			});
+	
+			GetOwner()->GetWorld()->GetTimerManager().SetTimer(BlinkTimerHandle, TimerDelegate, 0.1, false);
+		}
+	}
+}

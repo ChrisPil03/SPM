@@ -6,7 +6,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
-class AGun;
+class AGunBase;
 UCLASS()
 class COOLGANG_API APlayerCharacter : public ACharacter
 {
@@ -34,7 +34,13 @@ public:
 	void Interact();
 
 	UFUNCTION(BlueprintCallable)
-	void Shoot();
+	void PullTrigger();
+
+	UFUNCTION(BlueprintCallable)
+	void ReleasedTrigger();
+
+	UFUNCTION(BlueprintCallable)
+	void ReloadCurrentGun();
 
 	
 
@@ -50,8 +56,8 @@ private:
 	bool bDead;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
-	TSubclassOf<AGun> GunClass;
+	TSubclassOf<AGunBase> GunClass;
 
 	UPROPERTY()
-	AGun* Gun;
+	AGunBase* EquippedGun;
 };

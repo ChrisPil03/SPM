@@ -5,7 +5,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
-#include "Gun.h"
+#include "GunBase.h"
+#include "MovieSceneTracksComponentTypes.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -22,7 +23,11 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
+	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("WeaponSocket"));
+
+	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
+	EquippedGun->SetOwner(this);
 }
 
 // Called every frame
@@ -66,10 +71,18 @@ void APlayerCharacter::Interact()
 	
 }
 
-void APlayerCharacter::Shoot()
+void APlayerCharacter::PullTrigger()
 {
-	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
-	Gun->Fire();
+	EquippedGun->StartFire();
+}
+void APlayerCharacter::ReleasedTrigger()
+{
+	EquippedGun->StopFire();
+}
+
+void APlayerCharacter::ReloadCurrentGun()
+{
+	EquippedGun->Reload();
 }
 
 bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
@@ -90,7 +103,7 @@ bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 		DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 2);
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
-		return GetWorld()->LineTraceSingleByChannel(HitResult, Location, EndPoint, ECC_GameTraceChannel1, Params);
+		return GetWorld()->LineTraceSingleByChannel(HitResult, Location, EndPoint, ECC_GameTraceChannel2, Params);
 	
 	
 }
