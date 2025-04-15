@@ -51,7 +51,7 @@ void UDashComponent::Dash()
 	OriginalGroundFriction = OwnerCharacter->GetCharacterMovement()->GroundFriction;
 	OwnerCharacter->GetCharacterMovement()->GroundFriction = 0;
 	bIsDashing = true;
-	OwnerCharacter->LaunchCharacter(DashVelocity, true, false);
+	OwnerCharacter->LaunchCharacter(DashVelocity, true, true);
 	
 	GetWorld()->GetTimerManager().SetTimer(CooldownTimer, FTimerDelegate::CreateLambda([this](){}), Cooldown, false);
 }
@@ -89,7 +89,7 @@ void UDashComponent::Reset()
 	OwnerCharacter->GetCharacterMovement()->GroundFriction = OriginalGroundFriction;
 	
 	// Stop movement by resetting velocity
-	OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
+	//OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
 	
 	UE_LOG(LogTemp, Warning, TEXT("Dash Distance: a"));
 	
