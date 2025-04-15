@@ -24,7 +24,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
-	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("WeaponSocket"));
+	EquippedGun->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
