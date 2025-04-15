@@ -63,7 +63,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	int MagazineSize = 30;
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat | Ammo")
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat ")
 	int AmmoInMag = 30;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
