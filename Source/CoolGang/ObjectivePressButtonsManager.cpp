@@ -44,6 +44,8 @@ void AObjectivePressButtonsManager::RegisterButtonPressed()
 
 void AObjectivePressButtonsManager::ResetObjective()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Objective reset"));
+	
 	for (AObjectiveButton* Button : AllButtons)
 	{
 		Button->ResetButton();
@@ -56,7 +58,8 @@ void AObjectivePressButtonsManager::ResetObjective()
 void AObjectivePressButtonsManager::StartObjective()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objective started"));
-	
+
+	ObjectiveInProgress = true;
 	GetWorldTimerManager().SetTimer(ObjectiveTimer, this, &AObjectivePressButtonsManager::OnTimerEnd, TimeLimit, false);
 }
 

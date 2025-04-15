@@ -166,7 +166,7 @@ void AGunBase::BlinkDebug(FHitResult& HitResult)
 		
 		// Load red material
 		
-		UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Debug.M_Debug"));
+		UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Assets/Materials/M_Debug.M_Debug"));
 		if (RedMaterial)
 		{
 			MeshComponent->SetMaterial(0, RedMaterial);
