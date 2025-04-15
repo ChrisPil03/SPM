@@ -60,4 +60,9 @@ private:
 
 	UPROPERTY()
 	AGunBase* EquippedGun;
+
+	// UPROPERTY(EditAnywhere)
+	// TSubclassOf<class UUserWidget> HUDClass;
+	// UPROPERTY()
+	// UUserWidget* HUD;
 };

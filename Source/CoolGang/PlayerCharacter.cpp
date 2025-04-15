@@ -6,7 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
-#include "MovieSceneTracksComponentTypes.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -23,8 +23,15 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	// HUD = CreateWidget(this, HUDClass);
+	// if (HUD != nullptr)
+	// {
+	// 	HUD->AddToViewport();
+	// }
+	
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
-	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("WeaponSocket"));
+	
+	EquippedGun->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
@@ -41,6 +48,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
 
 }
 void APlayerCharacter::Interact()
