@@ -6,7 +6,6 @@
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
-#include "MovieSceneTracksComponentTypes.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -17,6 +16,7 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +35,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (HealthComponent->GetCurrentHealth() <= 0)
+	{
+		Die();
+	}
 }
 
 // Called to bind functionality to input
@@ -104,8 +108,11 @@ bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
 		return GetWorld()->LineTraceSingleByChannel(HitResult, Location, EndPoint, ECC_GameTraceChannel2, Params);
-	
-	
+}
+
+void APlayerCharacter::Die()
+{
+	//Destroy();
 }
 
 bool APlayerCharacter::IsDead() const

@@ -1,10 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "HealthComponent.h"
 #include "EnemyAI.generated.h"
+
 
 UCLASS()
 class COOLGANG_API AEnemyAI : public APawn
@@ -15,21 +15,30 @@ public:
 	// Sets default values for this pawn's properties
 	AEnemyAI();
 
+	virtual void Tick(float DeltaTime) override;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	void Attack();
 
+	float GetAttackRange() const;
+	
 private:
 	UPROPERTY(EditAnywhere)
 	class UCapsuleComponent* CapsuleComp;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* BaseMesh;
+
+	UPROPERTY(EditAnywhere)
+	float AttackRange;
+
+	UPROPERTY(VisibleAnywhere)
+	UHealthComponent* HealthComponent;
+	
+	void Die();
 };
