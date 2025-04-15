@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EnemyAI.h"
+#include "EnemySpawnManager.h"
 #include "GameFramework/Actor.h"
 #include "EnemySpawner.generated.h"
+
+class AEnemyAI;
+class AEnemySpawnManager;
 
 UCLASS()
 class COOLGANG_API AEnemySpawner : public AActor
@@ -16,11 +19,11 @@ public:
 	// Sets default values for this actor's properties
 	AEnemySpawner();
 
+	AEnemyAI* SpawnEnemy();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	FTimerHandle PeriodicSpawnTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning|Timing", meta = (ClampMin = "0.1"))
 	float PeriodicSpawnInterval = 5.0f;
@@ -33,7 +36,9 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	TSubclassOf<AEnemyAI> EnemyClass;
 
-	void HandlePeriodicSpawn();
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	AEnemySpawnManager* EnemySpawnManager;
+	
 };
 
 

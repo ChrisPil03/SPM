@@ -3,6 +3,8 @@
 
 #include "EnemySpawner.h"
 #include "TimerManager.h"
+#include "EnemySpawnManager.h" 
+#include "EnemyAI.h"
 
 // Sets default values
 AEnemySpawner::AEnemySpawner()
@@ -16,14 +18,7 @@ AEnemySpawner::AEnemySpawner()
 void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	GetWorldTimerManager().SetTimer(
-		PeriodicSpawnTimerHandle,
-		this,
-		&AEnemySpawner::HandlePeriodicSpawn,
-		PeriodicSpawnInterval,
-		true, // Loop
-		PeriodicSpawnInterval // Initial delay same as interval
-	);
+
 }
 
 // Called every frame
@@ -32,11 +27,19 @@ void AEnemySpawner::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AEnemySpawner::HandlePeriodicSpawn()
+AEnemyAI* AEnemySpawner::SpawnEnemy()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Spawning"))
 	FVector Location = GetActorLocation();
 	FRotator Rotation = GetActorRotation();
-	AEnemyAI* Enemy = GetWorld()->SpawnActor<AEnemyAI>(EnemyClass, Location, Rotation);
+
+	TArray<AEnemyAI*> DeadEnemies = EnemySpawnManager->GetDeadEnemies();
+	if (DeadEnemies.Num() > 0)
+	{
+		DeadEnemies[0]->SetActorLocationAndRotation(Location, Rotation);
+		DeadEnemies[0]->GetHealthComponent()->ResetHealthToMax();
+		return DeadEnemies[0];
+	}
+	return GetWorld()->SpawnActor<AEnemyAI>(EnemyClass, Location, Rotation);
 }
 

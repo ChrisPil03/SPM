@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
+#include "EnemySpawnManager.h"
 
 // Sets default values
 AEnemyAI::AEnemyAI()
@@ -32,7 +33,7 @@ void AEnemyAI::Attack()
 {
 	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
-	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), 1, MyOwnerInstigator, this, DamageTypeClass);
+	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
 }
 
 float AEnemyAI::GetAttackRange() const
@@ -40,9 +41,17 @@ float AEnemyAI::GetAttackRange() const
 	return AttackRange;
 }
 
+UHealthComponent* AEnemyAI::GetHealthComponent() const
+{
+	return HealthComponent;
+}
+
 void AEnemyAI::Die()
 {
-	Destroy();
+	FVector Location = FVector(10000, 10000, 10000);
+	
+	SetActorLocation(Location);
+	EnemySpawnManager->MarkEnemyAsDead(this);
 }
 
 void AEnemyAI::Tick(float DeltaTime)

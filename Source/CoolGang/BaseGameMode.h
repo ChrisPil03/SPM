@@ -13,5 +13,15 @@ UCLASS()
 class COOLGANG_API ABaseGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+
+private:
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
+	int EnemiesKilled = 0;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	float GameTimer = 0;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	bool bIsObjectiveCompleted = false; 
 };

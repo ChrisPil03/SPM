@@ -16,6 +16,7 @@ public:
 	// Sets default values for this component's properties
 	UHealthComponent();
 
+	void ResetHealthToMax();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

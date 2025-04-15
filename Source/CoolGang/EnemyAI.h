@@ -5,6 +5,9 @@
 #include "HealthComponent.h"
 #include "EnemyAI.generated.h"
 
+class AEnemySpawnManager;
+class UCapsuleComponent;
+class UStaticMeshComponent;
 
 UCLASS()
 class COOLGANG_API AEnemyAI : public APawn
@@ -26,10 +29,12 @@ public:
 	void Attack();
 
 	float GetAttackRange() const;
+
+	UHealthComponent* GetHealthComponent() const;
 	
 private:
 	UPROPERTY(EditAnywhere)
-	class UCapsuleComponent* CapsuleComp;
+	UCapsuleComponent* CapsuleComp;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* BaseMesh;
@@ -39,6 +44,13 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthComponent* HealthComponent;
+
+	UPROPERTY(EditAnywhere)
+	AEnemySpawnManager* EnemySpawnManager;
+
+	UPROPERTY(EditAnywhere)
+	float AttackDamage;
+
 	
 	void Die();
 };
