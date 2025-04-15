@@ -61,7 +61,7 @@ void AGunBase::Fire()
 			FPointDamageEvent DamageEvent(Damage, HitResult, ShotDirection, nullptr);
 			AController* OwnerController = GetOwnerController();
 			HitResult.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
-			
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.GetActor()->GetActorLabel());
 			BlinkDebug(HitResult);
 		}
 	}
@@ -88,7 +88,7 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	ShotDirection = -Rotation.Vector();
 	
 	FVector EndPoint = Location + Rotation.Vector() * MaxRange;
-	DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 2);
+	DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 0.5f);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
@@ -161,7 +161,8 @@ void AGunBase::BlinkDebug(FHitResult& HitResult)
 	if (UStaticMeshComponent* MeshComponent = HitResult.GetActor()->FindComponentByClass<UStaticMeshComponent>())
 	{
 		// Save original material
-		
+		UMaterialInterface* OrginalMaterialInterface = MeshComponent->GetMaterial(0);
+		FString AssetPath = OrginalMaterialInterface->GetPathName();
 		
 		// Load red material
 		
@@ -172,10 +173,10 @@ void AGunBase::BlinkDebug(FHitResult& HitResult)
 
 			// Start a timer to revert the material after 0.2 seconds
 			
-			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, MeshComponent]()
+			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, AssetPath, MeshComponent]()
 			{
-				UMaterialInterface* WhiteMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
-				MeshComponent->SetMaterial(0, WhiteMaterial);
+				UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, *AssetPath );
+				MeshComponent->SetMaterial(0, Material);
 			});
 	
 			GetOwner()->GetWorld()->GetTimerManager().SetTimer(BlinkTimerHandle, TimerDelegate, 0.1, false);
