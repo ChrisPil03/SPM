@@ -13,13 +13,18 @@ UHealthComponent::UHealthComponent()
 	// ...
 }
 
+void UHealthComponent::ResetHealthToMax()
+{
+	Health = MaxHealth;
+}
+
 
 // Called when the game starts
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Health = MaxHealth;
+	ResetHealthToMax();
 
 	GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::DamageTaken);
 }
