@@ -5,7 +5,7 @@
 
 UBTService_PlayerInLineOfSight::UBTService_PlayerInLineOfSight()
 {
-	NodeName = "Player In Line Of Sight";
+	NodeName = "Update If Line Of Sight To Player";
 }
 
 void UBTService_PlayerInLineOfSight::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)

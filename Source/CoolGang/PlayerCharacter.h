@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "HealthComponent.h"
 #include "PlayerCharacter.generated.h"
 
 class AGunBase;
@@ -60,4 +61,9 @@ private:
 
 	UPROPERTY()
 	AGunBase* EquippedGun;
+
+	UPROPERTY(VisibleAnywhere)
+	UHealthComponent* HealthComponent;
+	
+	void Die();
 };

@@ -2,6 +2,8 @@
 
 
 #include "EnemyAI.h"
+
+#include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/DamageType.h"
@@ -16,6 +18,7 @@ AEnemyAI::AEnemyAI()
 	RootComponent = CapsuleComp;
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
 	BaseMesh->SetupAttachment(CapsuleComp);
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -32,17 +35,22 @@ void AEnemyAI::Attack()
 	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), 1, MyOwnerInstigator, this, DamageTypeClass);
 }
 
-// Called every frame
+float AEnemyAI::GetAttackRange() const
+{
+	return AttackRange;
+}
+
+void AEnemyAI::Die()
+{
+	Destroy();
+}
+
 void AEnemyAI::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void AEnemyAI::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	if (HealthComponent->GetCurrentHealth() <= 0)
+	{
+		Die();
+	}
 }
 
