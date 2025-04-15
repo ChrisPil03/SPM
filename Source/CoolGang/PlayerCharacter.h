@@ -42,7 +42,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ReloadCurrentGun();
 
-	
+	UFUNCTION(BlueprintCallable)
+	AGunBase* GetEquippedGun() const{ return EquippedGun;};
 
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
