@@ -3,7 +3,6 @@
 
 #include "PlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
@@ -90,26 +89,6 @@ void APlayerCharacter::ReloadCurrentGun()
 	EquippedGun->Reload();
 }
 
-void APlayerCharacter::Dash()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Dash"));
-	FVector Location;
-	FRotator Rotation;
-	GetController()->GetPlayerViewPoint(Location, Rotation);
-
-	FVector DashDirection = Rotation.Vector();
-	FVector DashVelocity = DashDirection * DashForce;
-	float OriginalGroundFriction = GetCharacterMovement()->GroundFriction;
-	GetCharacterMovement()->GroundFriction = 0.f;
-	float DashDuration = FMath::Clamp(DashForce / 10000.f, 0.05f, 0.25f);
-	FTimerHandle Timer;
-	GetWorld()->GetTimerManager().SetTimer( Timer, FTimerDelegate::CreateLambda([this, OriginalGroundFriction]()
-	{
-		GetCharacterMovement()->GroundFriction = OriginalGroundFriction;
-	}), DashDuration, false);
-	
-	this->LaunchCharacter(DashVelocity, true, true);
-}
 
 bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 {
