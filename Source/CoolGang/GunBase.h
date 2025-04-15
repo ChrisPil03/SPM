@@ -95,8 +95,7 @@ public:
 private:
 	void BlinkDebug(FHitResult& h);
 	FTimerHandle BlinkTimerHandle;
-	UPROPERTY()
-	UMaterialInterface* OriginalMaterial;
+	
 };
 
 

@@ -92,6 +92,7 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
+	
 	return GetWorld()->LineTraceSingleByChannel(Hit, Location, EndPoint, ECC_GameTraceChannel1, Params);
 	
 }
@@ -153,9 +154,10 @@ void AGunBase::BlinkDebug(FHitResult& HitResult)
 	if (UStaticMeshComponent* MeshComponent = HitResult.GetActor()->FindComponentByClass<UStaticMeshComponent>())
 	{
 		// Save original material
-		OriginalMaterial = MeshComponent->GetMaterial(0);
-		 UE_LOG(LogTemp, Warning, TEXT("OriginalMaterial: %s"), *OriginalMaterial->GetName());
+		
+		
 		// Load red material
+		
 		UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Materials/M_Debug.M_Debug"));
 		if (RedMaterial)
 		{
@@ -165,11 +167,11 @@ void AGunBase::BlinkDebug(FHitResult& HitResult)
 			
 			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, MeshComponent]()
 			{
-				UE_LOG(LogTemp, Warning, TEXT("OriginalMaterial inside lamda: %s"), *OriginalMaterial->GetName());
-				MeshComponent->SetMaterial(0, OriginalMaterial);
+				UMaterialInterface* WhiteMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+				MeshComponent->SetMaterial(0, WhiteMaterial);
 			});
 	
-			GetOwner()->GetWorld()->GetTimerManager().SetTimer(BlinkTimerHandle, TimerDelegate, 0.2, false);
+			GetOwner()->GetWorld()->GetTimerManager().SetTimer(BlinkTimerHandle, TimerDelegate, 0.1, false);
 		}
 	}
 }
