@@ -42,7 +42,7 @@ private:
 	float ObjectiveProgress = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess="true"), Category="Objective")
-	float TimeLimit = 15.f;
+	float TimeLimit = 10.f;
 	
 	void ResetObjective();
 	void StartObjective();
