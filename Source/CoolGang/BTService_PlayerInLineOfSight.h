@@ -13,5 +13,10 @@ UCLASS()
 class COOLGANG_API UBTService_PlayerInLineOfSight : public UBTService_BlackboardBase
 {
 	GENERATED_BODY()
+
+public:
+	UBTService_PlayerInLineOfSight ();
 	
+protected:
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 };
