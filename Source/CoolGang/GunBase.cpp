@@ -98,26 +98,34 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 }
 void AGunBase::StartFire()
 {
+	if (!CanFire()) return;
+	
 	bIsFiring = true;
+	if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
+	{
+		return;
+	}
+	
+	
 	if (bIsAutomatic)
 	{
-		if (!GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
-		{
 			Fire(); // Immediate first shot
 			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &AGunBase::Fire, TimeBetweenShots, true);
-		}
+		
 	}
 	else
 	{
 		Fire();
-		
+		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FTimerDelegate::CreateLambda([this](){}), TimeBetweenShots, false);
+		bIsFiring = false;
 	}
 }
 
  void AGunBase::StopFire()
 {
-	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
 	bIsFiring = false;
+	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+	
 }
 
  void AGunBase::Reload()
@@ -134,7 +142,6 @@ void AGunBase::StartFire()
 {
 	return bCanFire && AmmoInMag > 0;
 }
-
 
 
 AController* AGunBase::GetOwnerController() const
