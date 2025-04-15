@@ -28,7 +28,14 @@ void UDashComponent::BeginPlay()
 
 void UDashComponent::Dash()
 {
-	if (!OwnerCharacter) return;
+	if (GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
+	{
+		return;
+	}
+	if (!OwnerCharacter)
+	{
+		return;
+	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("Dash"));
 	FVector Location;
@@ -47,5 +54,6 @@ void UDashComponent::Dash()
 	}), DashDuration, false);
 	
 	OwnerCharacter->LaunchCharacter(DashVelocity, true, true);
+	GetWorld()->GetTimerManager().SetTimer(DashTimer, FTimerDelegate::CreateLambda([this](){}), Cooldown, false);
 }
 
