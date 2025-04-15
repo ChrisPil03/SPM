@@ -2,6 +2,8 @@
 
 
 #include "PlayerCharacter.h"
+
+#include "DashComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
@@ -88,6 +90,17 @@ void APlayerCharacter::ReloadCurrentGun()
 {
 	EquippedGun->Reload();
 }
+
+void APlayerCharacter::Dash()
+{
+	UDashComponent* DashComponent = Cast<UDashComponent>(GetComponentByClass(UDashComponent::StaticClass()));
+	if (DashComponent == nullptr)
+	{
+		return;
+	}
+	DashComponent->Dash();
+}
+
 
 bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 {
