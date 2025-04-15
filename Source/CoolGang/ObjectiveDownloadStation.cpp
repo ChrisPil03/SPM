@@ -3,6 +3,7 @@
 
 #include "ObjectiveDownloadStation.h"
 #include "DrawDebugHelpers.h"
+#include "ObjectiveManager.h"
 #include "SphereTriggerComponent.h"
 #include "TimerManager.h"
 
@@ -82,4 +83,5 @@ void AObjectiveDownloadStation::CompleteObjective()
 	ObjectiveProgress = 1.f;
 	ObjectiveComplete = true;
 	ObjectiveInProgress = false;
+	ObjectiveManager->RegisterCompletedObjective();
 }

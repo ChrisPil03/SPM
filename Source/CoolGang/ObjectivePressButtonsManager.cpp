@@ -4,6 +4,7 @@
 #include "ObjectivePressButtonsManager.h"
 
 #include "ObjectiveButton.h"
+#include "ObjectiveManager.h"
 
 // Sets default values
 AObjectivePressButtonsManager::AObjectivePressButtonsManager()
@@ -75,6 +76,7 @@ void AObjectivePressButtonsManager::CompleteObjective()
 	ObjectiveProgress = 1.0f;
 	ObjectiveComplete = true;
 	ObjectiveInProgress = false;
+	ObjectiveManager->RegisterCompletedObjective();
 }
 
 void AObjectivePressButtonsManager::OnTimerEnd()
