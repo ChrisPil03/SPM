@@ -33,8 +33,13 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
+float UHealthComponent::GetCurrentHealth() const
+{
+	return Health;
+}
+
 void UHealthComponent::DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
-	AController* Instigator, AActor* DamageCauser)
+                                   AController* Instigator, AActor* DamageCauser)
 {
 	if (Damage <= 0.f)
 	{
