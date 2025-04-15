@@ -2,7 +2,10 @@
 
 
 #include "EnemyAI.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/DamageType.h"
+#include "GameFramework/Character.h"
 
 // Sets default values
 AEnemyAI::AEnemyAI()
@@ -20,6 +23,13 @@ void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void AEnemyAI::Attack()
+{
+	UClass* DamageTypeClass = UDamageType::StaticClass();	
+	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
+	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), 1, MyOwnerInstigator, this, DamageTypeClass);
 }
 
 // Called every frame
