@@ -25,10 +25,10 @@ void UBTService_PlayerInLineOfSight::TickNode(UBehaviorTreeComponent& OwnerComp,
 	
 	if (OwnerComp.GetAIOwner()->LineOfSightTo(PlayerPawn))
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), PlayerPawn);
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), true);
 	}
 	else
 	{
-		OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), false);
 	}
 }
