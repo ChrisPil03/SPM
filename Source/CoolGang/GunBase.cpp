@@ -6,17 +6,21 @@
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/DamageEvents.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 AGunBase::AGunBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
-	SetRootComponent(Root);
+	
+	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
-	Mesh->SetupAttachment(Root);
+	SetRootComponent(Mesh);
+	GunEffectSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunSpawnPoint"));
+	GunEffectSpawnPoint->SetupAttachment(Mesh);
+	
 }
 
 // Called when the game starts or when spawned
@@ -46,7 +50,20 @@ void AGunBase::Fire()
 	{
 		return; // Skip firing if we're no longer supposed to be firing
 	}
+
 	
+	if (MuzzleFlash)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAttached(
+			MuzzleFlash,
+			RootComponent,
+			NAME_None, // No socket
+			FVector::ZeroVector, // Offset
+			FRotator::ZeroRotator, // Rotation
+			EAttachLocation::SnapToTargetIncludingScale,
+			true // Auto destroy
+		);
+	}
 	//UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
 	//UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
 	FHitResult HitResult;
@@ -66,9 +83,8 @@ void AGunBase::Fire()
 		}
 	}
 	
-	
-
 	AmmoInMag--;
+	SetAmmoInMagText(AmmoInMag);
 	
 	UE_LOG(LogTemp, Warning, TEXT(" Pew!! %d"), AmmoInMag);
 }
@@ -88,7 +104,7 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	ShotDirection = -Rotation.Vector();
 	
 	FVector EndPoint = Location + Rotation.Vector() * MaxRange;
-	DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 0.5f);
+	//DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 0.5f);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 	Params.AddIgnoredActor(GetOwner());
@@ -111,7 +127,6 @@ void AGunBase::StartFire()
 	{
 			Fire(); // Immediate first shot
 			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &AGunBase::Fire, TimeBetweenShots, true);
-		
 	}
 	else
 	{
@@ -135,6 +150,7 @@ void AGunBase::StartFire()
 	{
 		AmmoInMag = MagazineSize;
 		bCanFire = true;
+		SetAmmoInMagText(AmmoInMag);
 	}, TimeBetweenShots, false);
 }
 

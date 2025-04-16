@@ -5,7 +5,6 @@
 #include "DrawDebugHelpers.h"
 #include "ObjectiveManager.h"
 #include "SphereTriggerComponent.h"
-#include "TimerManager.h"
 
 // Sets default values
 AObjectiveDownloadStation::AObjectiveDownloadStation()
@@ -28,60 +27,113 @@ void AObjectiveDownloadStation::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (ObjectiveInProgress)
+	if (bObjectiveComplete)
 	{
-		ProgressObjective();
+		return;
+	}
+	
+	if (bAbortObjective)
+	{
+		RegressObjective(DeltaTime);
+	}
+	else if (bObjectiveInProgress)
+	{
+		ProgressObjective(DeltaTime);
 	}
 }
 
 void AObjectiveDownloadStation::Interact(AActor* Interactor)
 {
-	if(!ObjectiveInProgress && !ObjectiveComplete)
+	if(!bObjectiveInProgress && !bObjectiveComplete)
 	{
 		StartObjective();
 	}
 }
 
-bool AObjectiveDownloadStation::GetIsInProgress() const
-{
-	return ObjectiveInProgress;
-}
-
 void AObjectiveDownloadStation::StartObjective()
 {
 	// Debugging
-	UE_LOG(LogTemp, Warning, TEXT("Interacted with objective"));
-	DrawDebugSphere(GetWorld(), GetActorLocation(), ObjectiveRadius, 30, FColor::Blue, true);
+	UE_LOG(LogTemp, Warning, TEXT("Objective started"));
+	DrawDebugSphere(GetWorld(),
+		GetActorLocation(),
+		ObjectiveRadius,
+		30,
+		FColor::Blue,
+		true);
 	
-	ObjectiveInProgress = true;
+	bObjectiveInProgress = true;
 	SpawnDownloadZone();
-	GetWorldTimerManager().SetTimer(ObjectiveTimer, this, &AObjectiveDownloadStation::CompleteObjective, CompletionTime, false);
-}
-
-void AObjectiveDownloadStation::ProgressObjective()
-{
-	ObjectiveProgress = GetWorldTimerManager().GetTimerElapsed(ObjectiveTimer) / CompletionTime;
-	UpdateDownloadSize();
-	
-	UE_LOG(LogTemp, Warning, TEXT("Objective Completion: %f"), ObjectiveProgress);
 }
 
 void AObjectiveDownloadStation::AbortObjective()
 {
-	GetWorldTimerManager().PauseTimer(ObjectiveTimer);
+	if (bObjectiveInProgress)
+	{
+		bAbortObjective = true;
+	}
 }
 
 void AObjectiveDownloadStation::ResumeObjective()
 {
-	GetWorldTimerManager().UnPauseTimer(ObjectiveTimer);
+	if (bAbortObjective)
+	{
+		bAbortObjective = false;
+	}
 }
 
 void AObjectiveDownloadStation::CompleteObjective()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objective Complete"));
+	
+	bObjectiveComplete = true;
+	bObjectiveInProgress = false;
+	
+	if (ObjectiveManager)
+	{
+		ObjectiveManager->RegisterCompletedObjective();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ObjectiveManager is null!"));
+	}
 
-	ObjectiveProgress = 1.f;
-	ObjectiveComplete = true;
-	ObjectiveInProgress = false;
-	ObjectiveManager->RegisterCompletedObjective();
+}
+
+void AObjectiveDownloadStation::ResetObjective()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Reset Objective"));
+	ObjectiveProgress = 0.f;
+	bObjectiveInProgress = false;
+	bAbortObjective = false;
+	DestroyDownloadZone();
+}
+
+void AObjectiveDownloadStation::ProgressObjective(float DeltaTime)
+{
+	SetObjectiveProgress(ObjectiveProgress += DeltaTime / CompletionTime);
+
+	if (ObjectiveProgress == 1.f)
+	{
+		CompleteObjective();
+	}
+	
+	//UE_LOG(LogTemp, Warning, TEXT("Progress Objective Completion: %f"), ObjectiveProgress);
+}
+
+void AObjectiveDownloadStation::RegressObjective(float DeltaTime)
+{
+	SetObjectiveProgress(ObjectiveProgress -= DeltaTime / CompletionTime);
+
+	if (ObjectiveProgress == 0.f)
+	{
+		ResetObjective();
+	}
+	
+	//UE_LOG(LogTemp, Warning, TEXT("Regress Objective Completion: %f"), ObjectiveProgress);
+}
+
+void AObjectiveDownloadStation::SetObjectiveProgress(float NewProgress)
+{
+	ObjectiveProgress = FMath::Clamp(NewProgress, 0.f, 1.f);
+	UpdateDownloadSize();
 }

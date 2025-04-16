@@ -21,6 +21,8 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	GunComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun Component"));
+	GunComponent->SetupAttachment(CameraComponent);
 }
 
 // Called when the game starts or when spawned
@@ -28,7 +30,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
-	EquippedGun->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);

@@ -18,17 +18,14 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere)
-	USceneComponent* Root;
-
+	
 	// maybe need to change later
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
 
 	//can change for other system if needed
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
-	UParticleSystem* MuzzleFlash;
+	class UNiagaraSystem* MuzzleFlash;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
 	USoundBase* MuzzleSound;
@@ -43,7 +40,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	FVector MuzzleOffset;
 	
-	
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* GunEffectSpawnPoint;
 
 	
 
@@ -94,6 +92,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetAmmoInMagText(int Ammo);
 
 	UFUNCTION(BlueprintCallable)
 	int GetAmmoInMag(){return AmmoInMag;};
