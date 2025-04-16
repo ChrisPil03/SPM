@@ -29,8 +29,13 @@ protected:
 	class UNiagaraSystem* MuzzleFlash;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* MuzzleSound;
+	USoundBase* BulletSound;
 
+	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
+	USoundBase* PullTriggerSound;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
+	USoundBase* ReloadSound;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
 	USoundBase* ImpactSound;
@@ -44,6 +49,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* GunEffectSpawnPoint;
 
+
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 	
 
 	/////////////////  Gun property  //////////////////////////
@@ -88,6 +96,7 @@ protected:
 	float TimeBetweenShots;
 	bool bCanFire = true;
 	bool bIsRecoiling  = false;
+	bool bIsReloading  = false;
 
 public:	
 	// Called every frame

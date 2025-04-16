@@ -3,14 +3,14 @@
 
 #include "GunBase.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/DamageEvents.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 #include "EnemyAI.h"
-#include "Camera/CameraComponent.h"
-
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 AGunBase::AGunBase()
 {
@@ -49,13 +49,19 @@ void AGunBase::Fire()
 	if (!CanFire())
 	{
 		StopFire();
+		
 		return;
+		
 	}
 	if (!bIsFiring)
 	{
 		return; // Skip firing if we're no longer supposed to be firing
 	}
 
+	if (BulletSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletSound, GetActorLocation());
+	}
 	
 	if (MuzzleFlash)
 	{
@@ -125,7 +131,16 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 
 void AGunBase::StartFire()
 {
-	if (!CanFire()) return;
+	if (bIsReloading)
+	{return;}
+	if (!CanFire())
+	{
+		if (PullTriggerSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PullTriggerSound, GetActorLocation());
+		}
+		return;
+	}
 	
 	bIsFiring = true;
 	if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
@@ -157,50 +172,41 @@ void AGunBase::StartFire()
  void AGunBase::Reload()
 {
 	bCanFire = false;
+	bIsFiring = false;
+	if (bIsReloading)
+	{
+		return;
+	}
+	
+	bIsReloading = true;
+	if (ReloadSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReloadSound, GetActorLocation());
+	}
 	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, [this]()
 	{
 		AmmoInMag = MagazineSize;
 		bCanFire = true;
-		SetAmmoInMagText(AmmoInMag);
-	}, TimeBetweenShots, false);
+		bIsReloading = false;
+		SetAmmoInMagText(MagazineSize);
+
+		
+	}, ReloadTime, false);
 }
 
 void AGunBase::StartRecoil()
 {
-	AController* Controller = GetOwner()->GetInstigatorController();
-	if (!Controller) return;
-
-	FRotator ControlRot = Controller->GetControlRotation();
-
-	StartPitch = ControlRot.Pitch;
-	TargetPitch = StartPitch + FMath::RandRange(MinRecoil, MaxRecoil);
-	ElapsedTime = 0.0f;
-	bIsRecoiling = true;
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetOwnerController()))
+	{
+		PlayerController->PlayerCameraManager->StartCameraShake(CameraShakeClass, 1.0f);
+	}
 }
+
 void AGunBase::Recoil(float DeltaTime)
 {
-	if (!bIsRecoiling) return;
+	
 
-	AController* Controller = GetOwner()->GetInstigatorController();
-	if (!Controller) return;
-	//
-	// ElapsedTime += DeltaTime;
-	// float Alpha = (ElapsedTime) / RecoilDuration;
-	// UE_LOG(LogTemp, Warning, TEXT("%f"), Alpha);
-	// if (Alpha >= 1.0f)
-	// {
-	// 	Alpha = 1.0f;
-	// 	bIsRecoiling = false;
-	// 	ElapsedTime = 0.0f;
-	// }
-	//
-	// float EasedAlpha = FMath::InterpEaseOut(0.f, 1.f, Alpha, RecoilExponent); // Higher exponent = sharper snap
-	// float CurrentPitch = FMath::Lerp(StartPitch, TargetPitch, EasedAlpha);
-	//
-	//  FRotator ControlRot = Controller->GetControlRotation();
-	// ControlRot.Pitch += 1;
-	//
-	// Controller->SetControlRotation(ControlRot);
+	
 	
 	
 }
