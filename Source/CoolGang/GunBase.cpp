@@ -69,6 +69,7 @@ void AGunBase::Fire()
 	
 
 	AmmoInMag--;
+	SetAmmoInMagText(AmmoInMag);
 	
 	UE_LOG(LogTemp, Warning, TEXT(" Pew!! %d"), AmmoInMag);
 }
@@ -136,6 +137,8 @@ void AGunBase::StartFire()
 		AmmoInMag = MagazineSize;
 		bCanFire = true;
 	}, TimeBetweenShots, false);
+
+	SetAmmoInMagText(AmmoInMag);
 }
 
  bool AGunBase::CanFire() const

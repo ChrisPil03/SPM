@@ -95,6 +95,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetAmmoInMagText(int Ammo);
+
 	UFUNCTION(BlueprintCallable)
 	int GetAmmoInMag(){return AmmoInMag;};
 	UFUNCTION(BlueprintCallable)
