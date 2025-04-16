@@ -38,10 +38,7 @@ void AGunBase::BeginPlay()
 void AGunBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (bIsRecoiling)
-	{
-		Recoil(DeltaTime);
-	}
+	
 }
 
 void AGunBase::Fire()
@@ -202,14 +199,6 @@ void AGunBase::StartRecoil()
 	}
 }
 
-void AGunBase::Recoil(float DeltaTime)
-{
-	
-
-	
-	
-	
-}
 
 bool AGunBase::CanFire() const
 {

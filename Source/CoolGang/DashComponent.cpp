@@ -22,7 +22,7 @@ void UDashComponent::BeginPlay()
 	Super::BeginPlay();
 
 	OwnerCharacter = Cast<ACharacter>(GetOwner());
-	
+	OriginalGroundFriction = OwnerCharacter->GetCharacterMovement()->GroundFriction;
 }
 
 
@@ -48,7 +48,6 @@ void UDashComponent::Dash()
 	FVector DashDirection = Rotation.Vector();
 	FVector DashVelocity = DashDirection * DashForce;
 	DashVelocity.Z = 0.f;
-	OriginalGroundFriction = OwnerCharacter->GetCharacterMovement()->GroundFriction;
 	OwnerCharacter->GetCharacterMovement()->GroundFriction = 0;
 	bIsDashing = true;
 	OwnerCharacter->LaunchCharacter(DashVelocity, true, true);

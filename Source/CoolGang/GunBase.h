@@ -106,7 +106,6 @@ public:
 	virtual void StopFire();
 	virtual void Fire();
 	virtual void Reload();
-	void Recoil(float DeltaTime);
 	void StartRecoil();
 	
 	bool CanFire() const;
