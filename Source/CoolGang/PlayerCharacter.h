@@ -69,6 +69,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UHealthComponent* HealthComponent;
 
+	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
+	UStaticMeshComponent* GunComponent;
+
 
 	void Die();
 };

@@ -14,14 +14,13 @@ AGunBase::AGunBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	GunEffectSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunSpawnPoint"));
-	GunEffectSpawnPoint->SetupAttachment(RootComponent);
 	
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
-	SetRootComponent(Root);
+	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
-	Mesh->SetupAttachment(Root);
+	SetRootComponent(Mesh);
+	GunEffectSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunSpawnPoint"));
+	GunEffectSpawnPoint->SetupAttachment(Mesh);
+	
 }
 
 // Called when the game starts or when spawned
