@@ -46,6 +46,9 @@ public:
 	void DisplayObjective();
 
 	UFUNCTION(BlueprintImplementableEvent)
+	void DisplayObjectiveCompleted();
+
+	UFUNCTION(BlueprintImplementableEvent)
 	void StopDisplayObjective();
 
 private:
