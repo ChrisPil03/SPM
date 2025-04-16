@@ -74,4 +74,10 @@ private:
 
 
 	void Die();
+
+	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
+	void ResetCharacterPosition();
+
+	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
+	void ResetCharacterHealth(); 
 };
