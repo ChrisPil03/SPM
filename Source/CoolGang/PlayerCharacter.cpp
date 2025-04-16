@@ -8,6 +8,8 @@
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameMode.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -146,4 +148,19 @@ bool APlayerCharacter::IsDead() const
 	return bDead;
 }
 
+void APlayerCharacter::ResetCharacterHealth()
+{
+	bDead = false;
+	HealthComponent->ResetHealthToMax();
+}
 
+void APlayerCharacter::ResetCharacterPosition()
+{
+	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+	if (GameMode)
+	{
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		AActor* PlayerStartActor = GameMode->FindPlayerStart(PC);
+		SetActorLocationAndRotation(PlayerStartActor->GetActorLocation(), PlayerStartActor->GetActorRotation());
+	}
+}

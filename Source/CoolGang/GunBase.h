@@ -105,6 +105,8 @@ public:
 	virtual void StartFire();
 	virtual void StopFire();
 	virtual void Fire();
+
+	UFUNCTION(BlueprintCallable)
 	virtual void Reload();
 	void StartRecoil();
 	

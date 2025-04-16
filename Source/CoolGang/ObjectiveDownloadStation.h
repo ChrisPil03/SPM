@@ -30,7 +30,8 @@ public:
 	
 	void AbortObjective();
 	void ResumeObjective();
-	bool GetIsInProgress() const;
+	bool GetIsInProgress() const { return bObjectiveInProgress; }
+	bool GetIsCompleted() const { return bObjectiveComplete; }
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SpawnDownloadZone();
@@ -38,14 +39,29 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateDownloadSize();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void DestroyDownloadZone();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisplayObjective();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisplayObjectiveCompleted();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopDisplayObjective();
+
 private:
 	void StartObjective();
-	void ProgressObjective();
 	void CompleteObjective();
+	void ResetObjective();
+	void ProgressObjective(float DeltaTime);
+	void RegressObjective(float DeltaTime);
+	void SetObjectiveProgress(float NewProgress);
 	
-	FTimerHandle ObjectiveTimer;
-	bool ObjectiveInProgress = false;
-	bool ObjectiveComplete = false;
+	bool bObjectiveInProgress = false;
+	bool bObjectiveComplete = false;
+	bool bAbortObjective = false;
 	
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	float ObjectiveProgress = 0.f;
@@ -61,4 +77,10 @@ private:
 
 	UPROPERTY(EditInstanceOnly)
 	AObjectiveManager* ObjectiveManager;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess="true"))
+	UUserWidget* ObjectiveMessageWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	FString ObjectiveName = "Name not set";
 };
