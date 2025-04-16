@@ -92,8 +92,7 @@ void AGunBase::Fire()
 		}
 	}
 
-	
-	bIsRecoiling = true;
+	StartRecoil();
 	AmmoInMag--;
 	SetAmmoInMagText(AmmoInMag);
 	
@@ -166,29 +165,42 @@ void AGunBase::StartFire()
 	}, TimeBetweenShots, false);
 }
 
-
-void AGunBase::Recoil(float DeltaTime)
+void AGunBase::StartRecoil()
 {
-	bIsRecoiling = true;
-	
 	AController* Controller = GetOwner()->GetInstigatorController();
+	if (!Controller) return;
+
 	FRotator ControlRot = Controller->GetControlRotation();
+
 	StartPitch = ControlRot.Pitch;
 	TargetPitch = StartPitch + FMath::RandRange(MinRecoil, MaxRecoil);
-	
-	ElapsedTime += DeltaTime;
-	float Alpha = ElapsedTime / RecoilDuration;
+	ElapsedTime = 0.0f;
+	bIsRecoiling = true;
+}
+void AGunBase::Recoil(float DeltaTime)
+{
+	if (!bIsRecoiling) return;
 
-	if (Alpha >= 1.0f)
-	{
-		Alpha = 1.0f;
-		bIsRecoiling = false;
-	}
-
-	float CurrentPitch = FMath::Lerp(StartPitch, TargetPitch, Alpha);
-	
-	ControlRot.Pitch = CurrentPitch;
-	Controller->SetControlRotation(ControlRot);
+	AController* Controller = GetOwner()->GetInstigatorController();
+	if (!Controller) return;
+	//
+	// ElapsedTime += DeltaTime;
+	// float Alpha = (ElapsedTime) / RecoilDuration;
+	// UE_LOG(LogTemp, Warning, TEXT("%f"), Alpha);
+	// if (Alpha >= 1.0f)
+	// {
+	// 	Alpha = 1.0f;
+	// 	bIsRecoiling = false;
+	// 	ElapsedTime = 0.0f;
+	// }
+	//
+	// float EasedAlpha = FMath::InterpEaseOut(0.f, 1.f, Alpha, RecoilExponent); // Higher exponent = sharper snap
+	// float CurrentPitch = FMath::Lerp(StartPitch, TargetPitch, EasedAlpha);
+	//
+	//  FRotator ControlRot = Controller->GetControlRotation();
+	// ControlRot.Pitch += 1;
+	//
+	// Controller->SetControlRotation(ControlRot);
 	
 	
 }

@@ -54,6 +54,7 @@ void UDashComponent::Dash()
 	OwnerCharacter->LaunchCharacter(DashVelocity, true, true);
 	
 	GetWorld()->GetTimerManager().SetTimer(CooldownTimer, FTimerDelegate::CreateLambda([this](){}), Cooldown, false);
+	GetWorld()->GetTimerManager().SetTimer(DashTimer, FTimerDelegate::CreateLambda([this](){}), StopTime, false);
 }
 
 void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -76,7 +77,7 @@ void UDashComponent::CheckToReset()
 	FVector CurrentLocation = OwnerCharacter->GetActorLocation();
 	float TraveledDistance = FVector::Dist(StartLocation, CurrentLocation);
 
-	if (TraveledDistance >= DashDistance)
+	if (TraveledDistance >= DashDistance || !GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
 	{
 		Reset();
 	}

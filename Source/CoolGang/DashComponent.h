@@ -34,6 +34,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float DashDistance = 0.0f;
+
+	UPROPERTY(EditAnywhere)
+	float StopTime = 0.0f;
 	
 	UPROPERTY()
 	 ACharacter* OwnerCharacter;
@@ -44,8 +47,7 @@ private:
 	bool bIsDashing;
 	FVector StartLocation;
 	float OriginalGroundFriction;
-	float StartTime;
-	float StopTime;
+	
 	void CheckToReset();
 
 	void Reset();

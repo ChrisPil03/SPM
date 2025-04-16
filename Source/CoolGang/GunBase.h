@@ -73,6 +73,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float RecoilDuration = 0.3f;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float RecoilExponent = 2.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
@@ -95,6 +98,7 @@ public:
 	virtual void Fire();
 	virtual void Reload();
 	void Recoil(float DeltaTime);
+	void StartRecoil();
 	
 	bool CanFire() const;
 	bool bIsFiring = false;
@@ -114,7 +118,7 @@ private:
 	void BlinkDebug(FHitResult& h);
 	FTimerHandle BlinkTimerHandle;
 
-	float ElapsedTime = 0;
+	float ElapsedTime =  0.0f;
 	 // 💨 lower value = faster recoil
 
 	float StartPitch = 0.0f;
@@ -122,5 +126,6 @@ private:
 	
 	
 };
+
 
 

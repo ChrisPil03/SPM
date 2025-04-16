@@ -110,7 +110,7 @@ void APlayerCharacter::Dash()
 	Direction = Direction.GetSafeNormal();
 	
 	
-	DashComponent->Dash(Direction);
+	DashComponent->Dash();
 	UE_LOG(LogTemp, Warning, TEXT("Dash Distance: a"));
 }
 
