@@ -8,6 +8,8 @@
 #include "Engine/DamageEvents.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "EnemyAI.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AGunBase::AGunBase()
@@ -36,7 +38,10 @@ void AGunBase::BeginPlay()
 void AGunBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	if (bIsRecoiling)
+	{
+		Recoil(DeltaTime);
+	}
 }
 
 void AGunBase::Fire()
@@ -79,10 +84,16 @@ void AGunBase::Fire()
 			AController* OwnerController = GetOwnerController();
 			HitResult.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
 			UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.GetActor()->GetActorLabel());
-			BlinkDebug(HitResult);
+			if (Cast<AEnemyAI>(HitResult.GetActor()))
+			{
+				BlinkDebug(HitResult);
+			}
+			
 		}
 	}
+
 	
+	bIsRecoiling = true;
 	AmmoInMag--;
 	SetAmmoInMagText(AmmoInMag);
 	
@@ -112,6 +123,7 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	return GetWorld()->LineTraceSingleByChannel(Hit, Location, EndPoint, ECC_GameTraceChannel1, Params);
 	
 }
+
 void AGunBase::StartFire()
 {
 	if (!CanFire()) return;
@@ -154,7 +166,34 @@ void AGunBase::StartFire()
 	}, TimeBetweenShots, false);
 }
 
- bool AGunBase::CanFire() const
+
+void AGunBase::Recoil(float DeltaTime)
+{
+	bIsRecoiling = true;
+	
+	AController* Controller = GetOwner()->GetInstigatorController();
+	FRotator ControlRot = Controller->GetControlRotation();
+	StartPitch = ControlRot.Pitch;
+	TargetPitch = StartPitch + FMath::RandRange(MinRecoil, MaxRecoil);
+	
+	ElapsedTime += DeltaTime;
+	float Alpha = ElapsedTime / RecoilDuration;
+
+	if (Alpha >= 1.0f)
+	{
+		Alpha = 1.0f;
+		bIsRecoiling = false;
+	}
+
+	float CurrentPitch = FMath::Lerp(StartPitch, TargetPitch, Alpha);
+	
+	ControlRot.Pitch = CurrentPitch;
+	Controller->SetControlRotation(ControlRot);
+	
+	
+}
+
+bool AGunBase::CanFire() const
 {
 	return bCanFire && AmmoInMag > 0;
 }
@@ -199,3 +238,4 @@ void AGunBase::BlinkDebug(FHitResult& HitResult)
 		}
 	}
 }
+

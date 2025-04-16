@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "GunBase.generated.h"
 
+
 UCLASS()
 class COOLGANG_API AGunBase : public AActor
 {
@@ -65,7 +66,13 @@ protected:
 	int AmmoInMag = 30;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	int Recoil = 2;
+	float MinRecoil = 0.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float MaxRecoil = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float RecoilDuration = 0.3f;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
@@ -77,6 +84,7 @@ protected:
 	FTimerHandle FireTimerHandle;
 	float TimeBetweenShots;
 	bool bCanFire = true;
+	bool bIsRecoiling  = false;
 
 public:	
 	// Called every frame
@@ -86,6 +94,7 @@ public:
 	virtual void StopFire();
 	virtual void Fire();
 	virtual void Reload();
+	void Recoil(float DeltaTime);
 	
 	bool CanFire() const;
 	bool bIsFiring = false;
@@ -98,13 +107,19 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetAmmoInMag(){return AmmoInMag;};
-	UFUNCTION(BlueprintCallable)
-	int GetRecoil(){return Recoil;};
+	
 	UFUNCTION(BlueprintCallable)
 	bool GetIsAutomatic(){return bIsAutomatic;};
 private:
 	void BlinkDebug(FHitResult& h);
 	FTimerHandle BlinkTimerHandle;
+
+	float ElapsedTime = 0;
+	 // 💨 lower value = faster recoil
+
+	float StartPitch = 0.0f;
+	float TargetPitch = 0.0f;
+	
 	
 };
 
