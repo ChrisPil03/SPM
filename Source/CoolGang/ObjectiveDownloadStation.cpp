@@ -63,7 +63,7 @@ void AObjectiveDownloadStation::ProgressObjective()
 	ObjectiveProgress = GetWorldTimerManager().GetTimerElapsed(ObjectiveTimer) / CompletionTime;
 	UpdateDownloadSize();
 	
-	UE_LOG(LogTemp, Warning, TEXT("Objective Completion: %f"), ObjectiveProgress);
+	//UE_LOG(LogTemp, Warning, TEXT("Objective Completion: %f"), ObjectiveProgress);
 }
 
 void AObjectiveDownloadStation::AbortObjective()
