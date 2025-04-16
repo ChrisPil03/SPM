@@ -50,7 +50,7 @@ bool AObjectiveDownloadStation::GetIsInProgress() const
 void AObjectiveDownloadStation::StartObjective()
 {
 	// Debugging
-	UE_LOG(LogTemp, Warning, TEXT("Interacted with objective"));
+	//UE_LOG(LogTemp, Warning, TEXT("Interacted with objective"));
 	DrawDebugSphere(GetWorld(), GetActorLocation(), ObjectiveRadius, 30, FColor::Blue, true);
 	
 	ObjectiveInProgress = true;
