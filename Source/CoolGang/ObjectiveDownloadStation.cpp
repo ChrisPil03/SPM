@@ -5,6 +5,7 @@
 #include "DrawDebugHelpers.h"
 #include "ObjectiveManager.h"
 #include "SphereTriggerComponent.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 AObjectiveDownloadStation::AObjectiveDownloadStation()
@@ -54,15 +55,16 @@ void AObjectiveDownloadStation::StartObjective()
 {
 	// Debugging
 	UE_LOG(LogTemp, Warning, TEXT("Objective started"));
-	DrawDebugSphere(GetWorld(),
-		GetActorLocation(),
-		ObjectiveRadius,
-		30,
-		FColor::Blue,
-		true);
+	//DrawDebugSphere(GetWorld(),
+	//	GetActorLocation(),
+	//	ObjectiveRadius,
+	//	30,
+	//	FColor::Blue,
+	//	true);
 	
 	bObjectiveInProgress = true;
 	SpawnDownloadZone();
+	DisplayObjective();
 }
 
 void AObjectiveDownloadStation::AbortObjective()
@@ -87,6 +89,7 @@ void AObjectiveDownloadStation::CompleteObjective()
 	
 	bObjectiveComplete = true;
 	bObjectiveInProgress = false;
+	StopDisplayObjective();
 	
 	if (ObjectiveManager)
 	{
@@ -106,6 +109,7 @@ void AObjectiveDownloadStation::ResetObjective()
 	bObjectiveInProgress = false;
 	bAbortObjective = false;
 	DestroyDownloadZone();
+	StopDisplayObjective();
 }
 
 void AObjectiveDownloadStation::ProgressObjective(float DeltaTime)
