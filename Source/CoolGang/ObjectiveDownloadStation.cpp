@@ -90,6 +90,7 @@ void AObjectiveDownloadStation::CompleteObjective()
 	bObjectiveComplete = true;
 	bObjectiveInProgress = false;
 	StopDisplayObjective();
+	DisplayObjectiveCompleted();
 	
 	if (ObjectiveManager)
 	{
