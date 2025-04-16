@@ -23,14 +23,13 @@ void USphereTriggerComponent::TickComponent(float DeltaTime, ELevelTick TickType
 
 	AActor* Actor = GetAcceptableActor();
 	
-	if (Objective)
+	if (Objective && !Objective->GetIsCompleted())
 	{
 		if (Actor)
 		{
 			Objective->ResumeObjective();
 		}else
 		{
-			//UE_LOG(LogTemp, Display, TEXT("Pause"));
 			Objective->AbortObjective();
 		}
 	}

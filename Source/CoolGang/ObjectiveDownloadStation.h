@@ -30,7 +30,8 @@ public:
 	
 	void AbortObjective();
 	void ResumeObjective();
-	bool GetIsInProgress() const;
+	bool GetIsInProgress() const { return bObjectiveInProgress; }
+	bool GetIsCompleted() const { return bObjectiveComplete; }
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SpawnDownloadZone();
@@ -38,14 +39,20 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UpdateDownloadSize();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void DestroyDownloadZone();
+
 private:
 	void StartObjective();
-	void ProgressObjective();
 	void CompleteObjective();
+	void ResetObjective();
+	void ProgressObjective(float DeltaTime);
+	void RegressObjective(float DeltaTime);
+	void SetObjectiveProgress(float NewProgress);
 	
-	FTimerHandle ObjectiveTimer;
-	bool ObjectiveInProgress = false;
-	bool ObjectiveComplete = false;
+	bool bObjectiveInProgress = false;
+	bool bObjectiveComplete = false;
+	bool bAbortObjective = false;
 	
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
 	float ObjectiveProgress = 0.f;
