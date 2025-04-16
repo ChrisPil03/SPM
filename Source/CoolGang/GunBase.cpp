@@ -66,8 +66,6 @@ void AGunBase::Fire()
 		}
 	}
 	
-	
-
 	AmmoInMag--;
 	SetAmmoInMagText(AmmoInMag);
 	
@@ -136,9 +134,8 @@ void AGunBase::StartFire()
 	{
 		AmmoInMag = MagazineSize;
 		bCanFire = true;
+		SetAmmoInMagText(AmmoInMag);
 	}, TimeBetweenShots, false);
-
-	SetAmmoInMagText(AmmoInMag);
 }
 
  bool AGunBase::CanFire() const
