@@ -93,6 +93,8 @@ protected:
 	AController* GetOwnerController() const;
 
 	FTimerHandle FireTimerHandle;
+	FTimerHandle ReloadTimerHandle;
+	
 	float TimeBetweenShots;
 	bool bCanFire = true;
 	bool bIsRecoiling  = false;
