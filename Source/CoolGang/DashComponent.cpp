@@ -42,7 +42,7 @@ void UDashComponent::Dash()
 	FVector Location;
 	FRotator Rotation;
 	OwnerCharacter->GetController()->GetPlayerViewPoint(Location, Rotation);
-	StartLocation = OwnerCharacter->GetActorLocation();
+	
 	
 	Rotation.Pitch = 0.f; // Ignore vertical aim
 	FVector DashDirection = Rotation.Vector();
@@ -50,7 +50,7 @@ void UDashComponent::Dash()
 	DashVelocity.Z = 0.f;
 	OwnerCharacter->GetCharacterMovement()->GroundFriction = 0;
 	bIsDashing = true;
-	OwnerCharacter->LaunchCharacter(DashVelocity, true, true);
+	OwnerCharacter->LaunchCharacter(DashVelocity, false, false);
 	
 	GetWorld()->GetTimerManager().SetTimer(CooldownTimer, FTimerDelegate::CreateLambda([this](){}), Cooldown, false);
 	GetWorld()->GetTimerManager().SetTimer(DashTimer, FTimerDelegate::CreateLambda([this](){}), StopTime, false);
@@ -73,10 +73,9 @@ void UDashComponent::CheckToReset()
 	if (!OwnerCharacter || !bIsDashing)
 		return;
 
-	FVector CurrentLocation = OwnerCharacter->GetActorLocation();
-	float TraveledDistance = FVector::Dist(StartLocation, CurrentLocation);
+	
 
-	if (TraveledDistance >= DashDistance || !GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
+	if (!GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
 	{
 		Reset();
 	}
@@ -91,7 +90,7 @@ void UDashComponent::Reset()
 	// Stop movement by resetting velocity
 	//OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
 	
-	UE_LOG(LogTemp, Warning, TEXT("Dash Distance: a"));
+	UE_LOG(LogTemp, Warning, TEXT("Reset dash"));
 	
 }
 

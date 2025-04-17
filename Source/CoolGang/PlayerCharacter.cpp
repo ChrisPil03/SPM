@@ -143,7 +143,6 @@ void APlayerCharacter::Dash()
 	
 	
 	DashComponent->Dash();
-	UE_LOG(LogTemp, Warning, TEXT("Dash Distance: a"));
 }
 
 
