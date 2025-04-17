@@ -16,7 +16,7 @@ void AEnemyAIController::BeginPlay()
 		RunBehaviorTree(AIBehavior);
 
 		APlayerCharacter *PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
-		if (PlayerCharacter != nullptr)
+		if (PlayerCharacter == nullptr)
 		{
 			return;
 		}
