@@ -139,13 +139,13 @@ void AGunBase::StartFire()
 		return;
 	}
 	
-	bIsFiring = true;
+	
 	if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
 	{
 		return;
 	}
 	
-	
+	bIsFiring = true;
 	if (bIsAutomatic)
 	{
 			Fire(); // Immediate first shot
