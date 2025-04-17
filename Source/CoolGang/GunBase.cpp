@@ -168,19 +168,21 @@ void AGunBase::StartFire()
 
  void AGunBase::Reload()
 {
-	bCanFire = false;
-	bIsFiring = false;
 	if (bIsReloading)
 	{
 		return;
 	}
 	
 	bIsReloading = true;
+	bCanFire = false;
+	StopFire();
+	
+	
 	if (ReloadSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReloadSound, GetActorLocation());
 	}
-	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, [this]()
+	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, [this]()
 	{
 		AmmoInMag = MagazineSize;
 		bCanFire = true;
