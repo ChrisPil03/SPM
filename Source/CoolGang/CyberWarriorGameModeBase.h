@@ -3,18 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerCharacter.h"
 #include "GameFramework/GameModeBase.h"
-#include "BaseGameMode.generated.h"
+#include "CyberWarriorGameModeBase.generated.h"
 
+class APlayerCharacter;
 /**
  * 
  */
 UCLASS()
-class COOLGANG_API ABaseGameMode : public AGameModeBase
+class COOLGANG_API ACyberWarriorGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
-
+public:
+	virtual void PlayerKilled(APlayerCharacter* PlayerKilled);
 private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
 	int EnemiesKilled = 0;

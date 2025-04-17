@@ -3,6 +3,7 @@
 
 #include "PlayerCharacter.h"
 
+#include "CyberWarriorGameModeBase.h"
 #include "DashComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
@@ -10,6 +11,7 @@
 #include "GunBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameMode.h"
+#include "CyberWarriorGameModeBase.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -23,6 +25,34 @@ APlayerCharacter::APlayerCharacter()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	GunComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun Component"));
 	GunComponent->SetupAttachment(CameraComponent);
+}
+
+float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	DamageToApply = FMath::Min(HealthComponent->GetCurrentHealth(), DamageToApply);
+
+	HealthComponent->DamageTaken(this, DamageAmount, UDamageType::StaticClass()->GetDefaultObject<UDamageType>(), EventInstigator, DamageCauser);
+	if (HealthComponent->GetCurrentHealth() == 0)
+	{
+		Die();
+	}
+
+	if (IsDead())
+	{
+		ACyberWarriorGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ACyberWarriorGameModeBase>();
+
+		if (GameMode != nullptr)
+		{
+			GameMode->PlayerKilled(this);
+		}
+		DetachFromControllerPendingDestroy();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	return DamageToApply;
 }
 
 // Called when the game starts or when spawned
@@ -129,7 +159,7 @@ bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 
 void APlayerCharacter::Die()
 {
-	//Destroy();
+	bDead = true;
 }
 
 bool APlayerCharacter::IsDead() const

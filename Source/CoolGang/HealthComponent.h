@@ -27,15 +27,16 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetCurrentHealth() const;
-	
+
+	UFUNCTION()
+	void DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* Instigator, AActor* DamageCauser);
+
 private:
 	UPROPERTY(EditAnywhere)
 	float MaxHealth = 100.f;
 	UPROPERTY(VisibleAnywhere)
 	float Health = 0.f;
 
-	UFUNCTION()
-	void DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* Instigator, AActor* DamageCauser);
 
 	
 };
