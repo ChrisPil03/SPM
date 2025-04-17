@@ -42,6 +42,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void DestroyDownloadZone();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisplayObjective();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void DisplayObjectiveCompleted();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopDisplayObjective();
+
 private:
 	void StartObjective();
 	void CompleteObjective();
@@ -68,4 +77,10 @@ private:
 
 	UPROPERTY(EditInstanceOnly)
 	AObjectiveManager* ObjectiveManager;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess="true"))
+	UUserWidget* ObjectiveMessageWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess="true"))
+	FString ObjectiveName = "Name not set";
 };

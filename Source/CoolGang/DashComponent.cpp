@@ -22,7 +22,7 @@ void UDashComponent::BeginPlay()
 	Super::BeginPlay();
 
 	OwnerCharacter = Cast<ACharacter>(GetOwner());
-	
+	OriginalGroundFriction = OwnerCharacter->GetCharacterMovement()->GroundFriction;
 }
 
 
@@ -48,12 +48,12 @@ void UDashComponent::Dash()
 	FVector DashDirection = Rotation.Vector();
 	FVector DashVelocity = DashDirection * DashForce;
 	DashVelocity.Z = 0.f;
-	OriginalGroundFriction = OwnerCharacter->GetCharacterMovement()->GroundFriction;
 	OwnerCharacter->GetCharacterMovement()->GroundFriction = 0;
 	bIsDashing = true;
 	OwnerCharacter->LaunchCharacter(DashVelocity, true, true);
 	
 	GetWorld()->GetTimerManager().SetTimer(CooldownTimer, FTimerDelegate::CreateLambda([this](){}), Cooldown, false);
+	GetWorld()->GetTimerManager().SetTimer(DashTimer, FTimerDelegate::CreateLambda([this](){}), StopTime, false);
 }
 
 void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -76,7 +76,7 @@ void UDashComponent::CheckToReset()
 	FVector CurrentLocation = OwnerCharacter->GetActorLocation();
 	float TraveledDistance = FVector::Dist(StartLocation, CurrentLocation);
 
-	if (TraveledDistance >= DashDistance)
+	if (TraveledDistance >= DashDistance || !GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
 	{
 		Reset();
 	}

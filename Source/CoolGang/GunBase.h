@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "GunBase.generated.h"
 
+
 UCLASS()
 class COOLGANG_API AGunBase : public AActor
 {
@@ -28,8 +29,13 @@ protected:
 	class UNiagaraSystem* MuzzleFlash;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* MuzzleSound;
+	USoundBase* BulletSound;
 
+	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
+	USoundBase* PullTriggerSound;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
+	USoundBase* ReloadSound;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
 	USoundBase* ImpactSound;
@@ -43,6 +49,9 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* GunEffectSpawnPoint;
 
+
+	UPROPERTY(EditAnywhere, Category = "Camera Shake")
+	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 	
 
 	/////////////////  Gun property  //////////////////////////
@@ -65,7 +74,16 @@ protected:
 	int AmmoInMag = 30;
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	int Recoil = 2;
+	float MinRecoil = 0.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float MaxRecoil = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float RecoilDuration = 0.3f;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float RecoilExponent = 2.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
@@ -77,6 +95,8 @@ protected:
 	FTimerHandle FireTimerHandle;
 	float TimeBetweenShots;
 	bool bCanFire = true;
+	bool bIsRecoiling  = false;
+	bool bIsReloading  = false;
 
 public:	
 	// Called every frame
@@ -88,6 +108,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void Reload();
+	void StartRecoil();
 	
 	bool CanFire() const;
 	bool bIsFiring = false;
@@ -100,14 +121,21 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetAmmoInMag(){return AmmoInMag;};
-	UFUNCTION(BlueprintCallable)
-	int GetRecoil(){return Recoil;};
+	
 	UFUNCTION(BlueprintCallable)
 	bool GetIsAutomatic(){return bIsAutomatic;};
 private:
 	void BlinkDebug(FHitResult& h);
 	FTimerHandle BlinkTimerHandle;
+
+	float ElapsedTime =  0.0f;
+	 // 💨 lower value = faster recoil
+
+	float StartPitch = 0.0f;
+	float TargetPitch = 0.0f;
+	
 	
 };
+
 
 

@@ -3,12 +3,14 @@
 
 #include "GunBase.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/DamageEvents.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
-
+#include "EnemyAI.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 AGunBase::AGunBase()
 {
@@ -36,7 +38,7 @@ void AGunBase::BeginPlay()
 void AGunBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
 
 void AGunBase::Fire()
@@ -44,13 +46,19 @@ void AGunBase::Fire()
 	if (!CanFire())
 	{
 		StopFire();
+		
 		return;
+		
 	}
 	if (!bIsFiring)
 	{
 		return; // Skip firing if we're no longer supposed to be firing
 	}
 
+	if (BulletSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletSound, GetActorLocation());
+	}
 	
 	if (MuzzleFlash)
 	{
@@ -79,10 +87,15 @@ void AGunBase::Fire()
 			AController* OwnerController = GetOwnerController();
 			HitResult.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
 			UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.GetActor()->GetActorLabel());
-			BlinkDebug(HitResult);
+			if (Cast<AEnemyAI>(HitResult.GetActor()))
+			{
+				BlinkDebug(HitResult);
+			}
+			
 		}
 	}
-	
+
+	StartRecoil();
 	AmmoInMag--;
 	SetAmmoInMagText(AmmoInMag);
 	
@@ -112,9 +125,19 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	return GetWorld()->LineTraceSingleByChannel(Hit, Location, EndPoint, ECC_GameTraceChannel1, Params);
 	
 }
+
 void AGunBase::StartFire()
 {
-	if (!CanFire()) return;
+	if (bIsReloading)
+	{return;}
+	if (!CanFire())
+	{
+		if (PullTriggerSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PullTriggerSound, GetActorLocation());
+		}
+		return;
+	}
 	
 	bIsFiring = true;
 	if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
@@ -146,15 +169,38 @@ void AGunBase::StartFire()
  void AGunBase::Reload()
 {
 	bCanFire = false;
+	bIsFiring = false;
+	if (bIsReloading)
+	{
+		return;
+	}
+	
+	bIsReloading = true;
+	if (ReloadSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ReloadSound, GetActorLocation());
+	}
 	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, [this]()
 	{
 		AmmoInMag = MagazineSize;
 		bCanFire = true;
-		SetAmmoInMagText(AmmoInMag);
-	}, TimeBetweenShots, false);
+		bIsReloading = false;
+		SetAmmoInMagText(MagazineSize);
+
+		
+	}, ReloadTime, false);
 }
 
- bool AGunBase::CanFire() const
+void AGunBase::StartRecoil()
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetOwnerController()))
+	{
+		PlayerController->PlayerCameraManager->StartCameraShake(CameraShakeClass, 1.0f);
+	}
+}
+
+
+bool AGunBase::CanFire() const
 {
 	return bCanFire && AmmoInMag > 0;
 }
@@ -199,3 +245,4 @@ void AGunBase::BlinkDebug(FHitResult& HitResult)
 		}
 	}
 }
+

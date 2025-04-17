@@ -132,7 +132,18 @@ void APlayerCharacter::Dash()
 	{
 		return;
 	}
+
+	
+	FVector Direction = GetVelocity();
+	if (Direction.IsNearlyZero())
+	{
+		Direction = GetActorForwardVector();
+	}
+	Direction = Direction.GetSafeNormal();
+	
+	
 	DashComponent->Dash();
+	UE_LOG(LogTemp, Warning, TEXT("Dash Distance: a"));
 }
 
 
