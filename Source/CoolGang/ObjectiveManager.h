@@ -31,5 +31,11 @@ private:
 	UPROPERTY(EditInstanceOnly)
 	TArray<AActor*> ObjectivesInLevel;
 
+	UPROPERTY(EditInstanceOnly)
+	AActor* Portal;
+
+	UPROPERTY(EditInstanceOnly)
+	AActor* ExtractionZone;
+
 	void ObjectivesCompleted();
 };

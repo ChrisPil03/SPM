@@ -31,6 +31,11 @@ void ACyberWarriorPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsW
 	GetWorldTimerManager().SetTimer(RestartTimer, this, &APlayerController::RestartLevel, RestartDelay);
 }
 
+void ACyberWarriorPlayerController::RestartGame()
+{
+	Super::RestartLevel();
+}
+
 
 void ACyberWarriorPlayerController::BeginPlay()
 {

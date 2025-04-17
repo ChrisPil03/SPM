@@ -13,6 +13,13 @@ AObjectiveManager::AObjectiveManager()
 void AObjectiveManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!Portal || !ExtractionZone)
+	{
+		return;
+	}
+	Portal->SetActorScale3D(FVector::ZeroVector);
+	ExtractionZone->SetActorEnableCollision(false);
 }
 
 void AObjectiveManager::RegisterCompletedObjective()
@@ -30,6 +37,13 @@ void AObjectiveManager::RegisterCompletedObjective()
 void AObjectiveManager::ObjectivesCompleted()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objectives Completed!"));
+
+	if (!Portal || !ExtractionZone)
+	{
+		return;
+	}
+	Portal->SetActorScale3D(FVector::One());
+	ExtractionZone->SetActorEnableCollision(true);
 	
 	// TODO: Start count down timer
 }

@@ -18,6 +18,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void GameHasEnded(AActor* EndGameFocus, bool bIsWinner) override;
 
+	UFUNCTION(BlueprintCallable)
+	void RestartGame();
+	
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> HUDClass;
