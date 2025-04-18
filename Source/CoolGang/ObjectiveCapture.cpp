@@ -13,7 +13,6 @@ AObjectiveCapture::AObjectiveCapture()
 	
 	SphereTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Trigger Component"));
 	SphereTrigger->InitSphereRadius(CaptureRadius);
-	SphereTrigger->SetCollisionProfileName(TEXT("Trigger"));
 	RootComponent = SphereTrigger;
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
 	BaseMesh->SetupAttachment(SphereTrigger);
@@ -104,11 +103,11 @@ void AObjectiveCapture::OnSphereBeginOverlap(
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
 		PlayerInZone = Player;
-	}
-
-	if (GetIsAborting())
-	{
-		SetObjectiveState(EObjectiveState::InProgress);
+		
+		if (GetIsAborting())
+		{
+			SetObjectiveState(EObjectiveState::InProgress);
+		}
 	}
 }
 
@@ -123,10 +122,10 @@ void AObjectiveCapture::OnSphereEndOverlap(
 	if (OtherActor == PlayerInZone)
 	{
 		PlayerInZone = nullptr;
-	}
 
-	if (GetIsInProgress())
-	{
-		SetObjectiveState(EObjectiveState::Aborting);
+		if (GetIsInProgress())
+		{
+			SetObjectiveState(EObjectiveState::Aborting);
+		}
 	}
 }
