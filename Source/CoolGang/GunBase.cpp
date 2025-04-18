@@ -99,7 +99,7 @@ void AGunBase::Fire()
 	AmmoInMag--;
 	SetAmmoInMagText(AmmoInMag);
 	
-	UE_LOG(LogTemp, Warning, TEXT(" Pew!! %d"), AmmoInMag);
+	//UE_LOG(LogTemp, Warning, TEXT(" Pew!! %d"), AmmoInMag);
 }
 
 bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)

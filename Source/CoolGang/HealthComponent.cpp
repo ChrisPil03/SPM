@@ -51,6 +51,6 @@ void UHealthComponent::DamageTaken(AActor* DamagedActor, float Damage, const UDa
 		return;
 	}
 	Health -= Damage;
-	UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
+	//UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
 }
 
