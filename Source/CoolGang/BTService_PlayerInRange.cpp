@@ -39,3 +39,4 @@ void UBTService_PlayerInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), false);
 	}
 }
+

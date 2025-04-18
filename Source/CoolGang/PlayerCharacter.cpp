@@ -11,7 +11,6 @@
 #include "GunBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameMode.h"
-#include "CyberWarriorGameModeBase.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -149,7 +148,6 @@ void APlayerCharacter::Dash()
 
 bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 {
-	
 		AController* PlayerController  = GetController();
 		if (PlayerController == nullptr)
 		{

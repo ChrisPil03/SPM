@@ -33,7 +33,6 @@ void AEnemyAI::BeginPlay()
 
 	if (EnemySpawnManagerClass) // Ensure the class variable is set
 	{
-		// Use the standard function to get the single actor instance
 		AEnemySpawnManager* FoundManager = Cast<AEnemySpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), EnemySpawnManagerClass));
 
 		if (IsValid(FoundManager)) // Use IsValid() to check for null and pending kill

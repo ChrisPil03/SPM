@@ -17,8 +17,9 @@ void ADiveGameMode::PlayerKilled(APlayerCharacter* PlayerKilled)
 	}
 }
 
-void ADiveGameMode::EndGame()
+void ADiveGameMode::EndGame() const
 {
 	AController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	Controller->GameHasEnded(Controller->GetPawn(), false);
 }
+
