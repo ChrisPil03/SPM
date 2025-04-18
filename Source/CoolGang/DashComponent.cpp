@@ -88,7 +88,7 @@ void UDashComponent::Reset()
 	OwnerCharacter->GetCharacterMovement()->GroundFriction = OriginalGroundFriction;
 	
 	// Stop movement by resetting velocity
-	//OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
+	OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
 	
 	UE_LOG(LogTemp, Warning, TEXT("Reset dash"));
 	

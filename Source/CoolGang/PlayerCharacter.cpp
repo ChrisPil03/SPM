@@ -12,6 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameMode.h"
 #include "CyberWarriorGameModeBase.h"
+#include "AbilitySystemComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -115,6 +116,7 @@ void APlayerCharacter::PullTrigger()
 {
 	EquippedGun->StartFire();
 }
+
 void APlayerCharacter::ReleasedTrigger()
 {
 	EquippedGun->StopFire();

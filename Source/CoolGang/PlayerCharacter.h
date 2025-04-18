@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "HealthComponent.h"
+
 #include "PlayerCharacter.generated.h"
 
 class AGunBase;
@@ -81,5 +82,8 @@ private:
 	void ResetCharacterPosition();
 
 	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
-	void ResetCharacterHealth(); 
+	void ResetCharacterHealth();
+
+	UPROPERTY()
+	class UPlayerAttributeSet* PlayerAttributeSet;
 };
