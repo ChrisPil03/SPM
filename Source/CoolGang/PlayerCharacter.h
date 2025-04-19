@@ -17,6 +17,8 @@ public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const &DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -53,7 +55,7 @@ private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
 	UPROPERTY(EditAnywhere, Category=Gameplay)
-	float InteractRange = 100;
+	float InteractRange = 200;
 
 	bool IsInRange(FHitResult& HitResult) const;
 
@@ -69,6 +71,15 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UHealthComponent* HealthComponent;
 
+	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
+	UStaticMeshComponent* GunComponent;
+
 
 	void Die();
+
+	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
+	void ResetCharacterPosition();
+
+	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
+	void ResetCharacterHealth(); 
 };

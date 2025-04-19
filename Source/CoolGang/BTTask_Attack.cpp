@@ -18,12 +18,13 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	{
 		return EBTNodeResult::Failed;
 	}
-	AEnemyAI* Character = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn());
-	if (Character == nullptr)
+	AEnemyAI* EnemyAI = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn());
+	if (EnemyAI == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}
-	Character->Attack();
+	EnemyAI->Attack();
 	
 	return EBTNodeResult::Succeeded;
 }
+

@@ -21,20 +21,17 @@ void UBTService_PlayerInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 	AEnemyAI* AIPawn = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn());
 	if (AIPawn == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AI Pawn is null"));
 		return;
 	}
 	
 	if (PlayerPawn == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Player Pawn is null"));
 		return;
 	}
 
 	
 	if (AIPawn->GetDistanceTo(PlayerPawn) <= AIPawn->GetAttackRange())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Distance to Player is: %f and attack range is %f, NPC can attack: %d"), AIPawn->GetDistanceTo(PlayerPawn), AIPawn->GetAttackRange(), AIPawn->GetDistanceTo(PlayerPawn) <= AIPawn->GetAttackRange());
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), true);
 	}
 	else
@@ -42,3 +39,4 @@ void UBTService_PlayerInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), false);
 	}
 }
+

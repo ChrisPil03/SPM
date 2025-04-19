@@ -3,11 +3,14 @@
 
 #include "PlayerCharacter.h"
 
+#include "CyberWarriorGameModeBase.h"
 #include "DashComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameMode.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -19,6 +22,36 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	GunComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun Component"));
+	GunComponent->SetupAttachment(CameraComponent);
+}
+
+float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+	class AController* EventInstigator, AActor* DamageCauser)
+{
+	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	DamageToApply = FMath::Min(HealthComponent->GetCurrentHealth(), DamageToApply);
+
+	HealthComponent->DamageTaken(this, DamageAmount, UDamageType::StaticClass()->GetDefaultObject<UDamageType>(), EventInstigator, DamageCauser);
+	if (HealthComponent->GetCurrentHealth() == 0)
+	{
+		Die();
+	}
+
+	if (IsDead())
+	{
+		ACyberWarriorGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ACyberWarriorGameModeBase>();
+
+		if (GameMode != nullptr)
+		{
+			GameMode->PlayerKilled(this);
+		}
+		DetachFromControllerPendingDestroy();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	return DamageToApply;
 }
 
 // Called when the game starts or when spawned
@@ -26,7 +59,7 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
-	EquippedGun->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
 
 	//EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
@@ -98,13 +131,23 @@ void APlayerCharacter::Dash()
 	{
 		return;
 	}
+
+	
+	FVector Direction = GetVelocity();
+	if (Direction.IsNearlyZero())
+	{
+		Direction = GetActorForwardVector();
+	}
+	Direction = Direction.GetSafeNormal();
+	
+	
 	DashComponent->Dash();
+	UE_LOG(LogTemp, Warning, TEXT("Dash Distance: a"));
 }
 
 
 bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 {
-	
 		AController* PlayerController  = GetController();
 		if (PlayerController == nullptr)
 		{
@@ -125,7 +168,7 @@ bool APlayerCharacter::IsInRange(FHitResult& HitResult) const
 
 void APlayerCharacter::Die()
 {
-	//Destroy();
+	bDead = true;
 }
 
 bool APlayerCharacter::IsDead() const
@@ -133,4 +176,19 @@ bool APlayerCharacter::IsDead() const
 	return bDead;
 }
 
+void APlayerCharacter::ResetCharacterHealth()
+{
+	bDead = false;
+	HealthComponent->ResetHealthToMax();
+}
 
+void APlayerCharacter::ResetCharacterPosition()
+{
+	AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+	if (GameMode)
+	{
+		APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		AActor* PlayerStartActor = GameMode->FindPlayerStart(PC);
+		SetActorLocationAndRotation(PlayerStartActor->GetActorLocation(), PlayerStartActor->GetActorRotation());
+	}
+}
