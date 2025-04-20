@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "HealthComponent.h"
+#include "PlayerCharacter.h"
 #include "EnemyAI.generated.h"
 
 class AEnemySpawnManager;
@@ -10,7 +11,7 @@ class UCapsuleComponent;
 class UStaticMeshComponent;
 
 UCLASS()
-class COOLGANG_API AEnemyAI : public APawn
+class COOLGANG_API AEnemyAI : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -27,15 +28,12 @@ protected:
 public:	
 
 	void Attack();
-
+	
 	float GetAttackRange() const;
 
 	UHealthComponent* GetHealthComponent() const;
 	
 private:
-	UPROPERTY(EditAnywhere)
-	UCapsuleComponent* CapsuleComp;
-
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* BaseMesh;
 

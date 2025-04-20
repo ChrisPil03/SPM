@@ -5,7 +5,6 @@
 
 #include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Components/CapsuleComponent.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
 #include "EnemySpawnManager.h"
@@ -15,10 +14,9 @@ AEnemyAI::AEnemyAI()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	CapsuleComp =  CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule Collider"));
-	RootComponent = CapsuleComp;
+
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
-	BaseMesh->SetupAttachment(CapsuleComp);
+
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 
 
@@ -58,6 +56,7 @@ void AEnemyAI::Attack()
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
 	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
 }
+
 
 float AEnemyAI::GetAttackRange() const
 {
