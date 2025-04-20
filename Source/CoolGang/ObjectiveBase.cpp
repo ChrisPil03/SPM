@@ -13,16 +13,26 @@ AObjectiveBase::AObjectiveBase()
 
 	ObjectiveState = EObjectiveState::NotStarted;
 	ObjectiveManager = nullptr;
-	ObjectiveProgress = ZeroCompletion;
 	ObjectiveDescription = "Missing Description";
 	ObjectiveTime = 30.f;
 	bIsTimeBased = false;
+	Timer = nullptr;
+}
+
+AObjectiveBase::~AObjectiveBase()
+{
+	if (Timer)
+	{
+		delete Timer;
+		Timer = nullptr;
+	}
 }
 
 // Called when the game starts or when spawned
 void AObjectiveBase::BeginPlay()
 {
 	Super::BeginPlay();
+	Timer = new FProgressTimer(ObjectiveTime);
 }
 
 // Called every frame
@@ -66,23 +76,18 @@ void AObjectiveBase::CompleteObjective()
 
 void AObjectiveBase::IncreaseObjectiveProgress(float const DeltaTime)
 {
-	if (bIsTimeBased)
+	if (bIsTimeBased && Timer)
 	{
-		UpdateObjectiveProgress(ObjectiveProgress += DeltaTime / ObjectiveTime);
+		Timer->IncreaseProgress(DeltaTime);
 	}
 }
 
 void AObjectiveBase::DecreaseObjectiveProgress(float const DeltaTime)
 {
-	if (bIsTimeBased)
+	if (bIsTimeBased && Timer)
 	{
-		UpdateObjectiveProgress(ObjectiveProgress -= DeltaTime / ObjectiveTime);
+		Timer->DecreaseProgress(DeltaTime);
 	}
-}
-
-void AObjectiveBase::UpdateObjectiveProgress(float const NewProgress)
-{
-	ObjectiveProgress = FMath::Clamp(NewProgress, ZeroCompletion, Complete);
 }
 
 void AObjectiveBase::SetObjectiveManager(AObjectiveManager* NewManager)

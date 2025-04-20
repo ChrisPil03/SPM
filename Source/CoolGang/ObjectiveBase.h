@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FProgressTimer.h"
 #include "GameFramework/Actor.h"
 #include "ObjectiveBase.generated.h"
 
@@ -24,11 +25,9 @@ class COOLGANG_API AObjectiveBase : public AActor
 	
 public:
 	AObjectiveBase();
-
-protected:
-	static constexpr float Complete = 1.0f;
-	static constexpr float ZeroCompletion = 0.f;
+	virtual ~AObjectiveBase() override;
 	
+protected:
 	virtual void BeginPlay() override;
 
 	virtual void StartObjective();
@@ -36,10 +35,11 @@ protected:
 	virtual void CompleteObjective();
 	virtual void IncreaseObjectiveProgress(float const DeltaTime);
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
-	virtual void UpdateObjectiveProgress(float const NewProgress);
 	
 	void SetIsTimeBased(bool const bNewState) { bIsTimeBased = bNewState; }
-	float GetObjectiveProgress() const { return ObjectiveProgress; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetObjectiveProgress() const { return Timer->GetProgress(); }
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -62,16 +62,13 @@ public:
 	void StopDisplayObjectiveDescription();
 
 private:
-	void ResetProgress() { ObjectiveProgress = ZeroCompletion; }
+	void ResetProgress() const { Timer->Reset(); }
 	
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	EObjectiveState ObjectiveState;
 
 	UPROPERTY(EditAnywhere)
 	AObjectiveManager* ObjectiveManager;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Objective")
-	float ObjectiveProgress;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Objective")
 	float ObjectiveTime;
@@ -80,4 +77,6 @@ private:
 	FString ObjectiveDescription;
 	
 	bool bIsTimeBased;
+	
+	FProgressTimer* Timer;
 };

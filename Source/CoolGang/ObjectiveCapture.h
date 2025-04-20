@@ -24,7 +24,6 @@ protected:
 	virtual void ResetObjective() override;
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
 	virtual void DecreaseObjectiveProgress(float const DeltaTime) override;
-	virtual void UpdateObjectiveProgress(float const NewProgress) override;
 	
 public:
 	virtual void Tick(float DeltaTime) override;
