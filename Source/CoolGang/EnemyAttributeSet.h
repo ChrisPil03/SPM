@@ -23,8 +23,16 @@ class COOLGANG_API UEnemyAttributeSet : public UAttributeSet
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData Health;
-
 	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, Health)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData Damage;
+	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, Damage)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData MovementSpeed;
+	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, MovementSpeed)
+	
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data);
 	

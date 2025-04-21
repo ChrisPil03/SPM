@@ -75,6 +75,8 @@ private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	UStaticMeshComponent* GunComponent;
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	class UAbilitySystemComponent *AbilitySystemComponent;
 
 	void Die();
 

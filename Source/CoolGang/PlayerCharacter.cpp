@@ -25,6 +25,8 @@ APlayerCharacter::APlayerCharacter()
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	GunComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun Component"));
 	GunComponent->SetupAttachment(CameraComponent);
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const &DamageEvent,
