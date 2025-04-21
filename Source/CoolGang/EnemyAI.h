@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "HealthComponent.h"
+#include "AbilitySystemComponent.h"
 #include "EnemyAI.generated.h"
 
 class AEnemySpawnManager;
@@ -31,6 +32,11 @@ public:
 	float GetAttackRange() const;
 
 	UHealthComponent* GetHealthComponent() const;
+
+	UPROPERTY()
+	class UEnemyAttributeSet* EnemyAttributeSet;
+
+	void Die();
 	
 private:
 	UPROPERTY(EditAnywhere)
@@ -51,9 +57,12 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	AEnemySpawnManager* EnemySpawnManager;
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UAbilitySystemComponent* AbilitySystemComponent;
+	
 	UPROPERTY(EditAnywhere)
 	float AttackDamage;
 
 	
-	void Die();
+
 };

@@ -52,6 +52,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
+
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GameplayEffectClass;
 	
 
 	/////////////////  Gun property  //////////////////////////
