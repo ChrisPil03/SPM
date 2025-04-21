@@ -21,7 +21,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void ResetObjective() override;
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
-	virtual void CompleteObjective() override;
 
 public:
 	virtual void Tick(float DeltaTime) override;

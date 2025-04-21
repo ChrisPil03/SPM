@@ -5,11 +5,12 @@
 AInteractableObject::AInteractableObject()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
-	bInteractedWith = false;
+	PrimaryActorTick.bCanEverTick = true;
+	bCanInteractWith = true;
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	RootComponent = Mesh;
+	Mesh->SetupAttachment(RootComponent);
 }
 
 void AInteractableObject::BeginPlay()
@@ -17,18 +18,23 @@ void AInteractableObject::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AInteractableObject::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
 void AInteractableObject::Interact(AActor* Interactor)
 {
-	if (!bInteractedWith)
+	if (bCanInteractWith)
 	{
 		UE_LOG(LogTemp, Display, TEXT("Interacted with object: %s"), *GetName());
 		
 		if (!PerformDelegate.IsBound())
 		{
-			UE_LOG(LogTemp, Error, TEXT("No function bound to perform on interact!"));
+			UE_LOG(LogTemp, Warning, TEXT("No function bound to perform on interact!"));
 			return;
 		}
-		PerformDelegate.ExecuteIfBound(this);
-		bInteractedWith = true;
+		PerformDelegate.Broadcast(this);
+		bCanInteractWith = false;
 	}
 }
