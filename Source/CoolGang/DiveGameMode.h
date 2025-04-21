@@ -18,5 +18,5 @@ public:
 	virtual void PlayerKilled(APlayerCharacter* PlayerKilled) override;
 
 private:
-	void EndGame();
+	void EndGame() const;
 };

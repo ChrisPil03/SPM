@@ -56,7 +56,7 @@ private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
 	UPROPERTY(EditAnywhere, Category=Gameplay)
-	float InteractRange = 100;
+	float InteractRange = 200;
 
 	bool IsInRange(FHitResult& HitResult) const;
 

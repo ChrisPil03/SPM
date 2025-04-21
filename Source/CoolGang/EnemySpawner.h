@@ -19,15 +19,11 @@ public:
 	// Sets default values for this actor's properties
 	AEnemySpawner();
 
-	AEnemyAI* SpawnEnemy();
+	AEnemyAI* SpawnEnemy() const;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning|Timing", meta = (ClampMin = "0.1"))
-	float PeriodicSpawnInterval = 5.0f;
-	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -16,8 +16,6 @@ AEnemySpawnManager::AEnemySpawnManager()
 
 void AEnemySpawnManager::MarkEnemyAsDead(AEnemyAI* Enemy)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Amount of enemies: %d"), AliveEnemies.Num());
-	UE_LOG(LogTemp, Warning, TEXT("Alive enemies contains %s: %d"), *Enemy->GetActorNameOrLabel(), AliveEnemies.Contains(Enemy));
 	if (AliveEnemies.Contains(Enemy))
 	{
 		AliveEnemies.Remove(Enemy);
@@ -104,9 +102,8 @@ void AEnemySpawnManager::SetSpawnTimer()
 
 void AEnemySpawnManager::SpawnEnemies()
 {
-	for (auto EnemySpawner : EnemySpawners)
+	for (AEnemySpawner* EnemySpawner : EnemySpawners)
 	{
-		
 		if (AliveEnemies.Num() >= MaximumEnemies)
 		{
 			return;
@@ -115,7 +112,6 @@ void AEnemySpawnManager::SpawnEnemies()
 		AEnemySpawner* Spawner = Cast<AEnemySpawner>(EnemySpawner);
 		if (Spawner)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Marking enemy as alive"));
 			AEnemyAI* Enemy = Spawner->SpawnEnemy();
 			MarkEnemyAsAlive(Enemy);
 		}

@@ -27,7 +27,6 @@ void ACyberWarriorPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsW
 			LoseScreen->AddToViewport();
 		}
 	}
-
 	GetWorldTimerManager().SetTimer(RestartTimer, this, &APlayerController::RestartLevel, RestartDelay);
 }
 
