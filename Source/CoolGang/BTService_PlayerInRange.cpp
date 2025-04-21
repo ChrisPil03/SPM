@@ -21,17 +21,21 @@ void UBTService_PlayerInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 	AEnemyAI* AIPawn = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn());
 	if (AIPawn == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("No AIPawn"));
 		return;
 	}
 	
 	if (PlayerPawn == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("No Player"));
 		return;
 	}
 
-	
+	UE_LOG(LogTemp, Warning, TEXT("Distance to player is %f and attack range is %f"), AIPawn->GetDistanceTo(PlayerPawn), AIPawn->GetAttackRange());
 	if (AIPawn->GetDistanceTo(PlayerPawn) <= AIPawn->GetAttackRange())
 	{
+		
+		
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), true);
 	}
 	else
