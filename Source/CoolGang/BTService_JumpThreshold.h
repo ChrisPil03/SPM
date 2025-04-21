@@ -16,11 +16,7 @@ class COOLGANG_API UBTService_JumpThreshold : public UBTService_BlackboardBase
 
 public:
 	UBTService_JumpThreshold();
-	
-protected:
-	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
-	UFUNCTION(BlueprintImplementableEvent, Category = "BehaviorTree")
-	void ReceiveSearchStartAI(AAIController* OwnerController, APawn* ControlledPawn);
+
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
 	float JumpThreshold = 1000.f;
