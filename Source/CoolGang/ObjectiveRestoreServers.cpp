@@ -1,14 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "ObjectiveRestoreServers.h"
 #include "ObjectiveServer.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-AObjectiveRestoreServers::AObjectiveRestoreServers() : NumberOfServersToRestore(3)
+AObjectiveRestoreServers::AObjectiveRestoreServers() : NumberOfServers(0), NumberOfServersToRestore(3)
 {
-	AllServers.Empty();
+	ServersToRestore.Reserve(NumberOfServersToRestore);
+	RestoredServers.Reserve(NumberOfServersToRestore);
+	
 	SetIsTimeBased(true);
 
 	BoxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Trigger"));
@@ -18,15 +18,57 @@ AObjectiveRestoreServers::AObjectiveRestoreServers() : NumberOfServersToRestore(
 void AObjectiveRestoreServers::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	SetupTriggerEvents();
+	FindAllServers();
+	SelectServersToRestore();
+	PrepareServersToRestore();
+}
 
+void AObjectiveRestoreServers::SelectServersToRestore()
+{
+	if (NumberOfServers < NumberOfServersToRestore)
+	{
+		return;
+	}
+
+	for (int32 i = 0; i < NumberOfServersToRestore; ++i)
+	{
+		int32 RandomIndex = FMath::RandRange(i, NumberOfServers - 1);
+		AllServers.Swap(i, RandomIndex);
+	}
+	ServersToRestore.Append(&AllServers[0], NumberOfServersToRestore);
+}
+
+void AObjectiveRestoreServers::PrepareServersToRestore()
+{
+	if (ServersToRestore.Num() <= 0)
+	{
+		return;
+	}
+	
+	FPerformDelegate Delegate;
+	Delegate.AddUObject(this, &AObjectiveRestoreServers::RegisterInteraction);
+	
+	for (AObjectiveServer* Server : ServersToRestore)
+	{
+		Server->SetCanInteractWith(true);
+		Server->SetServerState(EServerState::NeedRestoring);
+		Server->SetInteractFunction(Delegate);
+	}
+}
+
+void AObjectiveRestoreServers::SetupTriggerEvents()
+{
 	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxBeginOverlap);
 	BoxTrigger->OnComponentEndOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxEndOverlap);
-	
-	TArray<AActor*> ServerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ObjectiveServerClass, ServerActors);
-	UE_LOG(LogTemp, Warning, TEXT("Found Actors: %d"), ServerActors.Num());
+}
 
-	AllServers.Empty();
+void AObjectiveRestoreServers::FindAllServers()
+{
+	TArray<AActor*> ServerActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AObjectiveServer::StaticClass(), ServerActors);
+	
 	AllServers.Reserve(ServerActors.Num());
 	
 	for (AActor* Actor : ServerActors)
@@ -37,52 +79,7 @@ void AObjectiveRestoreServers::BeginPlay()
 			AllServers.Add(Server);
 		}
 	}
-
-	SetServersToRestore();
-}
-
-void AObjectiveRestoreServers::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (GetIsComplete())
-	{
-		return;
-	}
-
-	if (GetIsInProgress())
-	{
-		IncreaseObjectiveProgress(DeltaTime);
-	}
-}
-
-void AObjectiveRestoreServers::SetServersToRestore()
-{
-	if (AllServers.Num() < NumberOfServersToRestore)
-	{
-		return;
-	}
-	
-	for (int i = 0; i < NumberOfServersToRestore; ++i)
-	{
-		int32 RandomIndex = FMath::RandRange(0, AllServers.Num() - 1);
-		AObjectiveServer* RandomServer = AllServers[RandomIndex];
-			
-		if (!ServersToRestore.Contains(RandomServer) && !RestoredServers.Contains(RandomServer))
-		{
-			RandomServer->SetCanInteractWith(true);
-			RandomServer->SetServerState(EServerState::NeedRestoring);
-			ServersToRestore.Add(RandomServer);
-
-			FPerformDelegate Delegate;
-			Delegate.AddUObject(this, &AObjectiveRestoreServers::RegisterInteraction);
-			RandomServer->SetInteractFunction(Delegate);
-		}
-		else
-		{
-			--i;
-		}
-	}
+	NumberOfServers = AllServers.Num();
 }
 
 void AObjectiveRestoreServers::RegisterInteraction(AInteractableObject* InteractableObject)
@@ -95,7 +92,6 @@ void AObjectiveRestoreServers::RegisterInteraction(AInteractableObject* Interact
 			RestoredServers.Add(Server);
 		}
 	}
-
 	if (RestoredServers.Num() == NumberOfServersToRestore)
 	{
 		CompleteObjective();
@@ -105,10 +101,12 @@ void AObjectiveRestoreServers::RegisterInteraction(AInteractableObject* Interact
 void AObjectiveRestoreServers::ResetObjective()
 {
 	Super::ResetObjective();
-
 	ServersToRestore.Empty();
-	SetServersToRestore();
-	
+	ServersToRestore.Reserve(NumberOfServersToRestore);
+	RestoredServers.Empty();
+	RestoredServers.Reserve(NumberOfServersToRestore);
+	SelectServersToRestore();
+	PrepareServersToRestore();
 }
 
 void AObjectiveRestoreServers::CompleteObjective()
@@ -148,5 +146,6 @@ void AObjectiveRestoreServers::OnBoxEndOverlap(UPrimitiveComponent* OverlappedCo
 		return;
 	}
 
+	//ResetObjective();
 	UE_LOG(LogTemp, Display, TEXT("Exited server room"));
 }

@@ -24,11 +24,11 @@ protected:
 	virtual void CompleteObjective() override;
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
 
-public:
-	virtual void Tick(float DeltaSeconds) override;
-
 private:
-	void SetServersToRestore();
+	void SelectServersToRestore();
+	void PrepareServersToRestore();
+	void SetupTriggerEvents();
+	void FindAllServers();
 
 	UFUNCTION()
 	void OnBoxBeginOverlap(
@@ -48,7 +48,7 @@ private:
 	UFUNCTION()
 	void RegisterInteraction(AInteractableObject* InteractableObject);
 	
-	UPROPERTY(VisibleAnywhere, Category = "Objective")
+	UPROPERTY()
 	TArray<AObjectiveServer*> AllServers;
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
@@ -62,6 +62,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* BoxTrigger;
+
+	UPROPERTY(VisibleAnywhere, Category = "Objective")
+	int NumberOfServers;
 
 	UPROPERTY(EditAnywhere, Category = "Objective")
 	int NumberOfServersToRestore;

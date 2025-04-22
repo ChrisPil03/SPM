@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 
+DECLARE_DELEGATE(FTimerCompletionDelegate)
+
 class COOLGANG_API FProgressTimer
 {
 public:
@@ -20,10 +22,14 @@ public:
 	bool GetIsPaused() const { return bIsPaused; }
 	float GetProgress() const { return Progress; }
 
+	void SetCompletionDelegate(const FTimerCompletionDelegate& NewDelegate) { CompletionDelegate = NewDelegate; }
+
 private:
 	void UpdateProgress(const float NewProgress);
 	
 	float Duration;
 	float Progress;
 	bool bIsPaused;
+
+	FTimerCompletionDelegate CompletionDelegate;
 };

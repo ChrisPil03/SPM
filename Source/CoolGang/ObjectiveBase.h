@@ -25,7 +25,6 @@ class COOLGANG_API AObjectiveBase : public AActor
 	
 public:
 	AObjectiveBase();
-	virtual ~AObjectiveBase() override;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -37,9 +36,10 @@ protected:
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
 	
 	void SetIsTimeBased(bool const bNewState) { bIsTimeBased = bNewState; }
+	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
 
 	UFUNCTION(BlueprintCallable)
-	float GetObjectiveProgress() const { return Timer->GetProgress(); }
+	virtual float GetObjectiveProgress() const;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -62,12 +62,13 @@ public:
 	void StopDisplayObjectiveDescription();
 
 private:
-	void ResetProgress() const { Timer->Reset(); }
+	void ResetProgress() const { ProgressTimer->Reset(); }
+	void FindObjectiveManager();
 	
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	EObjectiveState ObjectiveState;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	AObjectiveManager* ObjectiveManager;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Objective")
@@ -78,5 +79,8 @@ private:
 	
 	bool bIsTimeBased;
 	
-	FProgressTimer* Timer;
+	TUniquePtr<FProgressTimer> ProgressTimer;
+
+	UPROPERTY(VisibleAnywhere)
+	float Progress = 0.f;
 };
