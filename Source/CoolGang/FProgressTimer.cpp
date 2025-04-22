@@ -5,7 +5,15 @@ FProgressTimer::FProgressTimer(const float InDuration) :
 
 void FProgressTimer::IncreaseProgress(const float DeltaTime)
 {
-	if (Progress >= FullCompletion || bIsPaused)
+	if (Progress >= FullCompletion)
+	{
+		if (CompletionDelegate.IsBound())
+		{
+			CompletionDelegate.Execute();
+		}
+		return;
+	}
+	if (bIsPaused)
 	{
 		return;
 	}
