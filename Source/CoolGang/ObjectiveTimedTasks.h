@@ -22,9 +22,6 @@ protected:
 	virtual void ResetObjective() override;
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
 
-public:
-	virtual void Tick(float DeltaTime) override;
-
 private:
 	UFUNCTION()
 	void RegisterInteraction(AInteractableObject* InteractableObject);
