@@ -54,9 +54,9 @@ void AEnemyAI::Attack()
 {
 	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
+	AttackDamage = FGameplayTag::RequestGameplayTag(FName("EnemyAttributes.Damage"));
 	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
 }
-
 
 float AEnemyAI::GetAttackRange() const
 {

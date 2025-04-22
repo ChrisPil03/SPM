@@ -32,8 +32,12 @@ APlayerCharacter::APlayerCharacter()
 float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const &DamageEvent,
 								   class AController *EventInstigator, AActor *DamageCauser)
 {
-	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	UE_LOG(LogTemp, Warning, TEXT("Damage Amount: %f"), DamageAmount);
+	
+	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	
 	DamageToApply = FMath::Min(HealthComponent->GetCurrentHealth(), DamageToApply);
 
 	HealthComponent->DamageTaken(this, DamageAmount, UDamageType::StaticClass()->GetDefaultObject<UDamageType>(), EventInstigator, DamageCauser);
