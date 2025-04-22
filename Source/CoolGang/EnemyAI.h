@@ -33,7 +33,7 @@ public:
 
 	UHealthComponent *GetHealthComponent() const;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	class UEnemyAttributeSet *EnemyAttributeSet;
 
 	void Die();
