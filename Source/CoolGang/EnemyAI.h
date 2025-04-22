@@ -59,4 +59,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float AttackDamage;
+
+	UPROPERTY(EditAnywhere)
+	float Health;
+
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
 };
