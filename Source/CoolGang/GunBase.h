@@ -141,7 +141,8 @@ private:
 	float StartPitch = 0.0f;
 	float TargetPitch = 0.0f;
 	
-	
+	UPROPERTY()
+	class UPistolAttributeSet* PistolAttributeSet; 
 };
 
 

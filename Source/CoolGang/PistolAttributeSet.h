@@ -16,21 +16,32 @@ GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
 GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
-#define DECLARE_GAS_ATTRIBUTE(Type, Name) \
-UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes") \
-FGameplayAttributeData Name; \
-ATTRIBUTE_ACCESSORS(Type, Name)
+
 
 UCLASS()
 class COOLGANG_API UPistolAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 public:
-	DECLARE_GAS_ATTRIBUTE(UPistolAttributeSet, Damage)
-	DECLARE_GAS_ATTRIBUTE(UPistolAttributeSet, FireRate)
-	DECLARE_GAS_ATTRIBUTE(UPistolAttributeSet, MagazineSize)
-	DECLARE_GAS_ATTRIBUTE(UPistolAttributeSet, AmmoInMag)
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData Damage;
+	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, Damage)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData FireRate;
+	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, FireRate)
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData AmmoInMag;
+	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, AmmoInMag)
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData MagazineSize;
+	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, MagazineSize)
+	
 	
 
 };

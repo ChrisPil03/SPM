@@ -26,5 +26,9 @@ class COOLGANG_API UGA_PistolFire : public UGameplayAbility
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle,
 					   const FGameplayAbilityActorInfo* ActorInfo,
 					   FGameplayTagContainer* OptionalRelevantTags) const override;
+
+	
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_AmmoConsumed;
 };
 
