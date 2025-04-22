@@ -37,6 +37,8 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float StopTime = 0.0f;
+	UPROPERTY(EditAnywhere)
+	float DecelerationSpeed{0};
 	
 	UPROPERTY()
 	 ACharacter* OwnerCharacter;
@@ -45,6 +47,7 @@ private:
 	FTimerHandle DashTimer;
 	
 	bool bIsDashing;
+	bool bShouldDecelerate;
 	FVector StartLocation;
 	float OriginalGroundFriction;
 	
