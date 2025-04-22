@@ -25,6 +25,7 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 				
 				
 			}
+			
 		}
 	}
 }
