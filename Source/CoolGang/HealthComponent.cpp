@@ -51,6 +51,11 @@ void UHealthComponent::DamageTaken(AActor* DamagedActor, float Damage, const UDa
 		return;
 	}
 	Health -= Damage;
+
+	if (DeathDelegate.IsBound())
+	{
+		DeathDelegate.Execute();
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
 }
 
