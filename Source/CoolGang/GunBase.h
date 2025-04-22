@@ -25,9 +25,9 @@ protected:
 	UStaticMeshComponent* Mesh;
 
 	//can change for other system if needed
-	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
-	class UNiagaraSystem* MuzzleFlash;
+	
 
+	///   Sound   ///
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
 	USoundBase* BulletSound;
 
@@ -40,21 +40,22 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
 	USoundBase* ImpactSound;
 
+	///   Effect   ///
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactEffect;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
+	class UNiagaraSystem* MuzzleFlash;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
-	FVector MuzzleOffset;
+	USceneComponent* MuzzlePosition;
 	
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent* GunEffectSpawnPoint;
-
-
+	
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
-	TSubclassOf<class UGameplayEffect> GameplayEffectClass;
+	TSubclassOf<class UGameplayEffect> GE_OnHit;
 	
 
 	/////////////////  Gun property  //////////////////////////
@@ -65,28 +66,28 @@ protected:
 	float FireRate{10};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float MaxRange = 1000;
+	float MaxRange {1000};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float ReloadTime = 2;
+	float ReloadTime {2};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	int MagazineSize = 30;
+	int MagazineSize {30};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat ")
-	int AmmoInMag = 30;
+	int AmmoInMag {30};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float MinRecoil = 0.5f;
+	float MinRecoil {0.5f};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float MaxRecoil = 1.0f;
+	float MaxRecoil {1.0f};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float RecoilDuration = 0.3f;
+	float RecoilDuration {0.3f};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float RecoilExponent = 2.0f;
+	float RecoilExponent {2.0f};
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
@@ -125,16 +126,17 @@ public:
 	void SetAmmoInMagText(int Ammo);
 
 	UFUNCTION(BlueprintCallable)
-	int GetAmmoInMag(){return AmmoInMag;};
+	int GetAmmoInMag(){return AmmoInMag;}
 	
 	UFUNCTION(BlueprintCallable)
-	bool GetIsAutomatic(){return bIsAutomatic;};
+	bool GetIsAutomatic(){return bIsAutomatic;}
+	
 private:
 	void BlinkDebug(FHitResult& h);
 	FTimerHandle BlinkTimerHandle;
 
 	float ElapsedTime =  0.0f;
-	 // 💨 lower value = faster recoil
+	 
 
 	float StartPitch = 0.0f;
 	float TargetPitch = 0.0f;
