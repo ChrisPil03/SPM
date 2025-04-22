@@ -18,7 +18,7 @@ AEnemyAI::AEnemyAI()
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 
 	
 	
@@ -83,6 +83,7 @@ void AEnemyAI::Tick(float DeltaTime)
 	{
 		return;
 	}
+	
 	if (HealthComponent->GetCurrentHealth() <= 0 && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
 		Die();
