@@ -4,19 +4,12 @@ AObjectiveServer::AObjectiveServer() :
 	RestoreTime(0.f),
 	RestoreProgress(FProgressTimer::ZeroCompletion),
 	ServerState(EServerState::Idle),
-	Timer(nullptr),
-	bInstantRestoration(true)
+	ProgressTimer(nullptr),
+	bInstantRestoration(true),
+	HeatGeneration(3),
+	CoolingTime(3)
 {
 	PrimaryActorTick.bCanEverTick = true;
-}
-
-AObjectiveServer::~AObjectiveServer()
-{
-	if (Timer)
-	{
-		delete Timer;
-		Timer = nullptr;
-	}
 }
 
 void AObjectiveServer::BeginPlay()
@@ -26,11 +19,7 @@ void AObjectiveServer::BeginPlay()
 	if (RestoreTime > 0.f)
 	{
 		bInstantRestoration = false;
-		Timer = new FProgressTimer(RestoreTime);
-		if (!Timer)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ObjectiveServer: Timer is nullptr"));
-		}
+		InitiateTimers();
 	}
 }
 
@@ -38,16 +27,34 @@ void AObjectiveServer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetIsRestoring() && Timer)
+	if (GetIsPaused())
+	{
+		return;
+	}
+
+	if (GetIsRestoring())
 	{
 		IncreaseRestorationProgress(DeltaTime);
 	}
+
+	if (GetIsCooling())
+	{
+		CoolDown(DeltaTime);
+	}
+}
+
+void AObjectiveServer::InitiateTimers()
+{
+	ProgressTimer = MakeUnique<FProgressTimer>(RestoreTime);
+	CoolingTimer = MakeUnique<FProgressTimer>(CoolingTime);
+
+	FTimerCompletionDelegate CoolingDelegate;
+	CoolingDelegate.BindUObject(this, &AObjectiveServer::ResumeRestoration);
+	CoolingTimer->SetCompletionDelegate(CoolingDelegate);
 }
 
 void AObjectiveServer::Interact(AActor* Interactor)
 {
-	//Super::Interact(Interactor);
-
 	if (GetNeedsRestoring())
 	{
 		StartRestoration();
@@ -78,17 +85,34 @@ void AObjectiveServer::StartRestoration()
 
 void AObjectiveServer::IncreaseRestorationProgress(float DeltaTime)
 {
-	if (Timer)
-	{
-		Timer->IncreaseProgress(DeltaTime);
-		RestoreProgress = Timer->GetProgress();
+	ProgressTimer->IncreaseProgress(DeltaTime);
+	RestoreProgress = ProgressTimer->GetProgress();
+	GenerateHeat(DeltaTime);
 
-		UE_LOG(LogTemp, Warning, TEXT("Progress: %f"), RestoreProgress);
+	UE_LOG(LogTemp, Warning, TEXT("Progress: %f"), RestoreProgress);
 		
-		if (RestoreProgress == FProgressTimer::FullCompletion)
-		{
-			CompleteRestoration();
-		}
+	if (RestoreProgress == FProgressTimer::FullCompletion)
+	{
+		CompleteRestoration();
+	}
+}
+
+void AObjectiveServer::BeginCooling()
+{
+	SetServerState(EServerState::Cooling);
+}
+
+void AObjectiveServer::CoolDown(float DeltaTime)
+{
+	CoolingTimer->IncreaseProgress(DeltaTime);
+	UE_LOG(LogTemp, Warning, TEXT("Cooling progress: %f"), CoolingTimer->GetProgress());
+}
+
+void AObjectiveServer::GenerateHeat(float DeltaTime)
+{
+	if (HeatUpDelegate.IsBound())
+	{
+		HeatUpDelegate.Execute(HeatGeneration * DeltaTime);
 	}
 }
 
@@ -101,6 +125,21 @@ void AObjectiveServer::CompleteRestoration()
 	if (PerformDelegate.IsBound())
 	{
 		PerformDelegate.Broadcast(this);
+	}
+}
+
+void AObjectiveServer::PauseRestoration()
+{
+	ProgressTimer->SetIsPaused(true);
+	SetServerState(EServerState::Paused);
+}
+
+void AObjectiveServer::ResumeRestoration()
+{
+	if (GetIsPaused() || GetIsCooling())
+	{
+		ProgressTimer->SetIsPaused(false);
+		SetServerState(EServerState::Restoring);	
 	}
 }
 

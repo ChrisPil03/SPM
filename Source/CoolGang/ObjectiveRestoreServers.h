@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,6 +8,14 @@ class UBoxComponent;
 class AInteractableObject;
 class AObjectiveServer;
 
+UENUM(BlueprintType)
+enum class EServerHallStatus : uint8
+{
+	Idle,
+	Operating,
+	Overheated
+};
+
 UCLASS()
 class COOLGANG_API AObjectiveRestoreServers : public AObjectiveBase
 {
@@ -19,16 +25,30 @@ public:
 	AObjectiveRestoreServers();
 	
 protected:
+	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
 	virtual void ResetObjective() override;
 	virtual void CompleteObjective() override;
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
 
+public:
+	void SetServerHallStatus(const EServerHallStatus NewStatus) { ServerHallStatus = NewStatus; }
+	bool GetIsIdle() const { return ServerHallStatus == EServerHallStatus::Idle; }
+	bool GetIsOperating() const { return ServerHallStatus == EServerHallStatus::Operating; }
+	bool GetIsOverheated() const { return ServerHallStatus == EServerHallStatus::Overheated; }
+
+	float GetHeatProgress() const { return CurrentHeatBuildup / 100; }
+	
 private:
+	void InitializeServerHall();
 	void SelectServersToRestore();
 	void PrepareServersToRestore();
 	void SetupTriggerEvents();
 	void FindAllServers();
+	void TriggerOverheat();
+	void InitiateCoolingCycle();
+	void BindControlPanel();
+	void ResetHeatBuildup();
 
 	UFUNCTION()
 	void OnBoxBeginOverlap(
@@ -46,7 +66,13 @@ private:
 		int32 OtherBodyIndex);
 	
 	UFUNCTION()
-	void RegisterInteraction(AInteractableObject* InteractableObject);
+	void RegisterServerRestored(AInteractableObject* InteractableObject);
+
+	UFUNCTION()
+	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
+
+	UFUNCTION()
+	void AddHeatBuildup(float Heat);
 	
 	UPROPERTY()
 	TArray<AObjectiveServer*> AllServers;
@@ -58,9 +84,6 @@ private:
 	TArray<AObjectiveServer*> RestoredServers;
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AObjectiveServer> ObjectiveServerClass;
-
-	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	UBoxComponent* BoxTrigger;
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
@@ -68,4 +91,19 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Objective")
 	int NumberOfServersToRestore;
+
+	UPROPERTY(VisibleAnywhere, Category = "Overheat")
+	EServerHallStatus ServerHallStatus;
+
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	AInteractableObject* ControlPanelCoolingSystem;
+
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	float MaxHeatBuildup;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Overheat")
+	float CurrentHeatBuildup;
+
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	float DefaultHeatGeneration;
 };

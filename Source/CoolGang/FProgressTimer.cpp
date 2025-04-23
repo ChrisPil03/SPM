@@ -1,37 +1,40 @@
 #include "FProgressTimer.h"
 
 FProgressTimer::FProgressTimer(const float InDuration) :
-	Duration(InDuration), Progress(ZeroCompletion), bIsPaused(false) {}
+	Duration(InDuration), Progress(ZeroCompletion),
+	bIsPaused(false), bIsCompleted(false) {}
 
 void FProgressTimer::IncreaseProgress(const float DeltaTime)
 {
+	if (bIsPaused || bIsCompleted)
+	{
+		return;
+	}
+	
+	UpdateProgress(Progress += DeltaTime / Duration);
+	
 	if (Progress >= FullCompletion)
 	{
+		bIsCompleted = true;
 		if (CompletionDelegate.IsBound())
 		{
 			CompletionDelegate.Execute();
 		}
-		return;
 	}
-	if (bIsPaused)
-	{
-		return;
-	}
-	UpdateProgress(Progress += DeltaTime / Duration);
 }
 
 void FProgressTimer::DecreaseProgress(const float DeltaTime)
 {
-	if (Progress <= ZeroCompletion || bIsPaused)
+	if (!bIsPaused || Progress > ZeroCompletion)
 	{
-		return;
+		UpdateProgress(Progress -= DeltaTime / Duration);
 	}
-	UpdateProgress(Progress -= DeltaTime / Duration);
 }
 
 void FProgressTimer::Reset()
 {
-	Progress = 0.f;
+	Progress = ZeroCompletion;
+	bIsCompleted = false;
 }
 
 void FProgressTimer::UpdateProgress(const float NewProgress)
