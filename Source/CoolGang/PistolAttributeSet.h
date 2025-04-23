@@ -34,8 +34,8 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	FGameplayAttributeData AmmoInMag;
-	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, AmmoInMag)
+	FGameplayAttributeData Ammo;
+	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, Ammo)
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
