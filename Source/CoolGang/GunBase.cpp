@@ -29,7 +29,7 @@ AGunBase::AGunBase()
 	SetRootComponent(Mesh);
 	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
 	MuzzlePosition->SetupAttachment(Mesh);
-	
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -38,7 +38,13 @@ void AGunBase::BeginPlay()
 	Super::BeginPlay();
 	TimeBetweenShots = 60.0f / FireRate;
 	AmmoInMag = MagazineSize;
-	
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	InitWeaponStats();
+
+	if (AbilitySystemComponent && FireAbilityClass)
+	{
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, /*Level=*/1));
+	}
 }
 
 // Called every frame
@@ -46,6 +52,33 @@ void AGunBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+}
+
+void AGunBase::InitWeaponStats()
+{
+	if (AbilitySystemComponent)
+	{
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitWeaponStats, 1.f, Context);
+
+		if (Spec.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Init Spec is valid"));
+
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.AmmoCount"), 20);
+			//Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), 20);
+
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Init Spec is NOT valid"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
+	}
 }
 
 void AGunBase::Fire()

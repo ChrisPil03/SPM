@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "AttributeSet.h"
 #include "AbilitySystemComponent.h"
-#include "PistolAttributeSet.generated.h"
+#include "WeaponAttributeSet.generated.h"
 
 /**
  * 
@@ -19,28 +19,28 @@ GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
 
 UCLASS()
-class COOLGANG_API UPistolAttributeSet : public UAttributeSet
+class COOLGANG_API UWeaponAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData Damage;
-	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, Damage)
+	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, Damage)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData FireRate;
-	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, FireRate)
+	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, FireRate)
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	FGameplayAttributeData AmmoInMag;
-	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, AmmoInMag)
+	FGameplayAttributeData AmmoCount;
+	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, AmmoCount)
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData MagazineSize;
-	ATTRIBUTE_ACCESSORS(UPistolAttributeSet, MagazineSize)
+	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, MagazineSize)
 	
 	
 

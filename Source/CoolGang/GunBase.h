@@ -130,9 +130,15 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	bool GetIsAutomatic(){return bIsAutomatic;}
+
+	class UAbilitySystemComponent* GetAbilitySystemComponent() const
+	{
+		return AbilitySystemComponent;
+	}
 	
 private:
 	void BlinkDebug(FHitResult& h);
+	void InitWeaponStats();
 	FTimerHandle BlinkTimerHandle;
 
 	float ElapsedTime =  0.0f;
@@ -142,7 +148,17 @@ private:
 	float TargetPitch = 0.0f;
 	
 	UPROPERTY()
-	class UPistolAttributeSet* PistolAttributeSet; 
+	class UWeaponAttributeSet* WeaponAttributeSet;
+
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	class UAbilitySystemComponent *AbilitySystemComponent;
+
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_InitWeaponStats;
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UGameplayAbility> FireAbilityClass;
 };
 
 
