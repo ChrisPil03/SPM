@@ -66,6 +66,32 @@ void APlayerCharacter::BeginPlay()
 
 	// EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
+
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitGunStats, 1.f, Context);
+
+		if (Spec.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Init Spec is valid"));
+
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Gun.Data.Ammo"), 5);
+			
+
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Init Spec is NOT valid"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
+	}
 }
 
 // Called every frame

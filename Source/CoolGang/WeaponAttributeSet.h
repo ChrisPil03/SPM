@@ -8,22 +8,19 @@
 #include "WeaponAttributeSet.generated.h"
 
 /**
- * 
+ *
  */
-#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
-GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
-GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
-GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
-GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
-
-
+#define ATTRIBUTE_ACCESSORS(ClassName, PropertyName)           \
+	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
+	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName)               \
+	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName)               \
+	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
 UCLASS()
 class COOLGANG_API UWeaponAttributeSet : public UAttributeSet
 {
 	GENERATED_BODY()
 public:
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData Damage;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, Damage)
@@ -32,16 +29,11 @@ public:
 	FGameplayAttributeData FireRate;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, FireRate)
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData AmmoCount;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, AmmoCount)
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData MagazineSize;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, MagazineSize)
-	
-	
-
 };

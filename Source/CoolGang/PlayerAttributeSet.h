@@ -25,4 +25,6 @@ public:
 	FGameplayAttributeData Damage;
 
 	ATTRIBUTE_ACCESSORS(UPlayerAttributeSet, Damage)
+
+	
 };
