@@ -93,7 +93,7 @@ void AGunBase::Fire()
 		{
 			FPointDamageEvent DamageEvent(Damage, HitResult, ShotDirection, nullptr);
 			AController* OwnerController = GetOwnerController();
-			//HitResult.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
+			HitResult.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
 			
 			if (Cast<AEnemyAI>(HitResult.GetActor()))
 			{
