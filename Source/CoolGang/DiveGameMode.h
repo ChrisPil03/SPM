@@ -15,8 +15,24 @@ class COOLGANG_API ADiveGameMode : public ACyberWarriorGameModeBase
 	GENERATED_BODY()
 
 public:
+	ADiveGameMode();
+	
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void PlayerKilled(APlayerCharacter* PlayerKilled) override;
 
+	float GetRemainingGameTime() const;
+
+protected:
+	
+	 virtual void BeginPlay() override;
+	
 private:
 	void EndGame() const;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	float TimerTime = 180.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	int32 EnemiesKilled = 0;
+
 };

@@ -54,6 +54,10 @@ void AEnemyAI::Attack()
 {
 	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
+<<<<<<< Updated upstream
+=======
+	
+>>>>>>> Stashed changes
 	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
 }
 

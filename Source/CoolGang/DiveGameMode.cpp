@@ -2,9 +2,16 @@
 
 
 #include "DiveGameMode.h"
-#include "EngineUtils.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
+
+
+
+void ADiveGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
 
 
 void ADiveGameMode::PlayerKilled(APlayerCharacter* PlayerKilled)
@@ -17,9 +24,29 @@ void ADiveGameMode::PlayerKilled(APlayerCharacter* PlayerKilled)
 	}
 }
 
+float ADiveGameMode::GetRemainingGameTime() const
+{
+	return TimerTime;
+}
+
+ADiveGameMode::ADiveGameMode()
+{
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+}
+
+void ADiveGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	TimerTime -= DeltaSeconds;
+	if (TimerTime <= 0)
+	{
+		EndGame();
+	}
+}
+
 void ADiveGameMode::EndGame() const
 {
 	AController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	Controller->GameHasEnded(Controller->GetPawn(), false);
 }
-
