@@ -29,6 +29,11 @@ void FProgressTimer::DecreaseProgress(const float DeltaTime)
 	{
 		UpdateProgress(Progress -= DeltaTime / Duration);
 	}
+
+	if (bIsCompleted)
+	{
+		bIsCompleted = false;
+	}
 }
 
 void FProgressTimer::Reset()

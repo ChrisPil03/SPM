@@ -34,7 +34,8 @@ protected:
 	virtual void CompleteObjective();
 	virtual void IncreaseObjectiveProgress(float const DeltaTime);
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
-	
+
+	void SetObjectiveProgress(const float NewProgress);
 	void SetIsTimeBased(bool const bNewState) { bIsTimeBased = bNewState; }
 	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
 
@@ -81,6 +82,6 @@ private:
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	float Progress = 0.f;
 };

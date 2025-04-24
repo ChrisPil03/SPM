@@ -6,8 +6,7 @@ AObjectiveServer::AObjectiveServer() :
 	ServerState(EServerState::Idle),
 	ProgressTimer(nullptr),
 	bInstantRestoration(true),
-	HeatGeneration(3),
-	CoolingTime(3)
+	HeatGeneration(3)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -19,7 +18,7 @@ void AObjectiveServer::BeginPlay()
 	if (RestoreTime > 0.f)
 	{
 		bInstantRestoration = false;
-		InitiateTimers();
+		ProgressTimer = MakeUnique<FProgressTimer>(RestoreTime);
 	}
 }
 
@@ -36,21 +35,6 @@ void AObjectiveServer::Tick(float DeltaTime)
 	{
 		IncreaseRestorationProgress(DeltaTime);
 	}
-
-	if (GetIsCooling())
-	{
-		CoolDown(DeltaTime);
-	}
-}
-
-void AObjectiveServer::InitiateTimers()
-{
-	ProgressTimer = MakeUnique<FProgressTimer>(RestoreTime);
-	CoolingTimer = MakeUnique<FProgressTimer>(CoolingTime);
-
-	FTimerCompletionDelegate CoolingDelegate;
-	CoolingDelegate.BindUObject(this, &AObjectiveServer::ResumeRestoration);
-	CoolingTimer->SetCompletionDelegate(CoolingDelegate);
 }
 
 void AObjectiveServer::Interact(AActor* Interactor)
@@ -97,17 +81,6 @@ void AObjectiveServer::IncreaseRestorationProgress(float DeltaTime)
 	}
 }
 
-void AObjectiveServer::BeginCooling()
-{
-	SetServerState(EServerState::Cooling);
-}
-
-void AObjectiveServer::CoolDown(float DeltaTime)
-{
-	CoolingTimer->IncreaseProgress(DeltaTime);
-	UE_LOG(LogTemp, Warning, TEXT("Cooling progress: %f"), CoolingTimer->GetProgress());
-}
-
 void AObjectiveServer::GenerateHeat(float DeltaTime)
 {
 	if (HeatUpDelegate.IsBound())
@@ -130,16 +103,21 @@ void AObjectiveServer::CompleteRestoration()
 
 void AObjectiveServer::PauseRestoration()
 {
-	ProgressTimer->SetIsPaused(true);
-	SetServerState(EServerState::Paused);
+	if (!GetIsPaused())
+	{
+		SetServerState(EServerState::Paused);
+		ProgressTimer->SetIsPaused(true);
+		UE_LOG(LogTemp, Warning, TEXT("Pause Restoration"));
+	}
 }
 
 void AObjectiveServer::ResumeRestoration()
 {
-	if (GetIsPaused() || GetIsCooling())
+	if (!GetIsRestoring())
 	{
+		SetServerState(EServerState::Restoring);
 		ProgressTimer->SetIsPaused(false);
-		SetServerState(EServerState::Restoring);	
+		UE_LOG(LogTemp, Warning, TEXT("Resume Restoration"));
 	}
 }
 

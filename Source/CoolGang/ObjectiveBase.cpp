@@ -96,6 +96,16 @@ void AObjectiveBase::DecreaseObjectiveProgress(float const DeltaTime)
 	Progress = ProgressTimer->GetProgress();
 }
 
+void AObjectiveBase::SetObjectiveProgress(const float NewProgress)
+{
+	Progress = NewProgress;
+
+	if (bIsTimeBased)
+	{
+		ProgressTimer->SetProgress(NewProgress);
+	}
+}
+
 void AObjectiveBase::SetObjectiveManager(AObjectiveManager* NewManager)
 {
 	if (!NewManager)
