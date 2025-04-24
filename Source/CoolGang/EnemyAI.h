@@ -34,7 +34,7 @@ public:
 	UHealthComponent *GetHealthComponent() const;
 
 	UPROPERTY()
-	class UEnemyAttributeSet *EnemyAttributeSet;
+	const class UEnemyAttributeSet *EnemyAttributeSet;
 
 	void Die();
 

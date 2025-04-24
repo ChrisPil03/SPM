@@ -31,8 +31,11 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_AmmoConsumed;
 
-private:
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
 	bool SingleTrace(FHitResult& Hit);
+
+private:
+	
 	
 };
 

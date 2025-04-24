@@ -67,12 +67,13 @@ void AEnemyAI::BeginPlay()
 
 		if (Spec.IsValid())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Init Spec is valid"));
+			UE_LOG(LogTemp, Warning, TEXT("Init Enemy Spec is valid"));
 
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), AttackDamage);
-
+			EnemyAttributeSet = AbilitySystemComponent->GetSet<UEnemyAttributeSet>();
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+			
 		}
 		else
 		{
@@ -91,8 +92,16 @@ void AEnemyAI::Attack()
 {
 	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
+	if (EnemyAttributeSet != nullptr)
+	{
+		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("EnemyAttributeSet is null !"));
+	}
 	
-	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), EnemyAttributeSet->Damage.GetBaseValue(), MyOwnerInstigator, this, DamageTypeClass);
+	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
 }
 
 

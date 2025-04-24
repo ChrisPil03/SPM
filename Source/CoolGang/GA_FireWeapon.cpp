@@ -42,13 +42,13 @@ void UGA_FireWeapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	
 
 	
-	//UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
+	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
 	//if (AbilitySystemComponent == nullptr)
 	//{
 	//	return;
 	//}
 	
-	//AbilitySystemComponent->ApplyGameplayEffectToSelf(Cast<UGameplayEffect>(GE_AmmoConsumed), 1, AbilitySystemComponent->MakeEffectContext());
+	AbilitySystemComponent->ApplyGameplayEffectToSelf(Cast<UGameplayEffect>(GE_AmmoConsumed), 1, AbilitySystemComponent->MakeEffectContext());
 	
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
