@@ -136,10 +136,11 @@ public:
 	{
 		return AbilitySystemComponent;
 	}
-	
+	void InitAbilitySystemComponent();
 private:
 	void BlinkDebug(FHitResult& h);
 	void InitWeaponStats();
+	
 	FTimerHandle BlinkTimerHandle;
 
 	float ElapsedTime =  0.0f;

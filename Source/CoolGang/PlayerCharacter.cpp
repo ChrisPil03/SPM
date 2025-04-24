@@ -66,7 +66,7 @@ void APlayerCharacter::BeginPlay()
 
 	// EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
-
+	EquippedGun->InitAbilitySystemComponent();
 }
 
 // Called every frame

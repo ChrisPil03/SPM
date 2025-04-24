@@ -67,13 +67,14 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 
 bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 {
-	ACharacter* const CharacterAvatar = Cast<ACharacter>(GetAvatarActorFromActorInfo());
-	if (CharacterAvatar == nullptr)
+	
+	APawn* OwningPawn = Cast<APawn>(GetOwningActorFromActorInfo()); 
+	if (OwningPawn == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CharacterAvatar is nullptr") );
+		UE_LOG(LogTemp, Warning, TEXT("OwningPawn is nullptr") );
 		return false;
 	}
-	AController* OwnerController = CharacterAvatar->GetController();
+	AController* OwnerController = OwningPawn->GetController();
 	if (OwnerController == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController is nullptr") );
@@ -89,7 +90,7 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 	
 	//DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor::Red, false, 0.5f);
 	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(CharacterAvatar);
+	Params.AddIgnoredActor(OwningPawn);
 	
 	return GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, Params);
 	

@@ -30,6 +30,7 @@ AGunBase::AGunBase()
 	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
 	MuzzlePosition->SetupAttachment(Mesh);
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	
 }
 
 // Called when the game starts or when spawned
@@ -38,13 +39,10 @@ void AGunBase::BeginPlay()
 	Super::BeginPlay();
 	TimeBetweenShots = 60.0f / FireRate;
 	AmmoInMag = MagazineSize;
-	AbilitySystemComponent->InitAbilityActorInfo(this, this);
-	InitWeaponStats();
 
-	if (AbilitySystemComponent && FireAbilityClass)
-	{
-		FireHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, 1, 0, this));
-	}
+	InitAbilitySystemComponent();
+	InitWeaponStats();
+	
 }
 
 // Called every frame
@@ -56,29 +54,44 @@ void AGunBase::Tick(float DeltaTime)
 
 void AGunBase::InitWeaponStats()
 {
-	if (AbilitySystemComponent)
+	if (AbilitySystemComponent == nullptr)
 	{
-		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
-		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitWeaponStats, 1.f, Context);
+		UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
+		return;
+	}
+	
+	FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+	FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitWeaponStats, 1.f, Context);
 
-		if (Spec.IsValid())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Init Gun Spec is valid"));
+	if (Spec.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Init Gun Spec is valid"));
 
-			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.AmmoCount"), 20);
-			//Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), 20);
+		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.AmmoCount"), 20);
+		//Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), 20);
 
-			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Init Gun Spec is NOT valid"));
-		}
+		AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
+		UE_LOG(LogTemp, Error, TEXT("Init Gun Spec is NOT valid"));
 	}
+}
+
+void AGunBase::InitAbilitySystemComponent()
+{
+	if (GetOwner() == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GunOwner is nullptr"));
+		return;
+	}
+	AbilitySystemComponent->InitAbilityActorInfo(GetOwner(), this);
+
+	if (AbilitySystemComponent && FireAbilityClass)
+	{
+		FireHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, 1, 0, this));
+	}
+	
 }
 
 void AGunBase::Fire()
