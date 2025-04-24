@@ -28,16 +28,18 @@ void UGA_FireWeapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Shoot") );
-
-	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Avatar);
 	
-	if (PlayerCharacter == nullptr)
-	{
-		return;
-	}
 	FHitResult HitResult;
 	SingleTrace(HitResult);
-	UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.GetActor()->GetActorNameOrLabel());
+	if (HitResult.GetActor() == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Actor is nullptr") );
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.GetActor()->GetActorNameOrLabel());
+	}
+	
 
 	
 	//UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
@@ -66,9 +68,15 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 {
 	ACharacter* const CharacterAvatar = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+	if (CharacterAvatar == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CharacterAvatar is nullptr") );
+		return false;
+	}
 	AController* OwnerController = CharacterAvatar->GetController();
 	if (OwnerController == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerController is nullptr") );
 		return false;
 	}
 	FVector StartPoint;

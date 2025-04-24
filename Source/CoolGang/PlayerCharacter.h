@@ -89,6 +89,5 @@ private:
 	UPROPERTY()
 	class UPlayerAttributeSet* PlayerAttributeSet;
 
-	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
-	TSubclassOf<class UGameplayEffect> GE_InitGunStats;
+
 };

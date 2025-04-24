@@ -43,7 +43,7 @@ void AGunBase::BeginPlay()
 
 	if (AbilitySystemComponent && FireAbilityClass)
 	{
-		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, /*Level=*/1));
+		FireHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, 1, 0, this));
 	}
 }
 
@@ -63,7 +63,7 @@ void AGunBase::InitWeaponStats()
 
 		if (Spec.IsValid())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Init Spec is valid"));
+			UE_LOG(LogTemp, Warning, TEXT("Init Gun Spec is valid"));
 
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.AmmoCount"), 20);
 			//Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), 20);
@@ -72,7 +72,7 @@ void AGunBase::InitWeaponStats()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Init Spec is NOT valid"));
+			UE_LOG(LogTemp, Error, TEXT("Init Gun Spec is NOT valid"));
 		}
 	}
 	else
@@ -186,35 +186,41 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 
 void AGunBase::StartFire()
 {
-	if (bIsReloading)
-	{return;}
-	if (!CanFire())
-	{
-		if (PullTriggerSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PullTriggerSound, GetActorLocation());
-		}
-		return;
-	}
-	
-	
-	if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
+	if (AbilitySystemComponent == nullptr)
 	{
 		return;
 	}
+	AbilitySystemComponent->TryActivateAbility(FireHandle);
 	
-	bIsFiring = true;
-	if (bIsAutomatic)
-	{
-			Fire(); // Immediate first shot
-			GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &AGunBase::Fire, TimeBetweenShots, true);
-	}
-	else
-	{
-		Fire();
-		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FTimerDelegate::CreateLambda([this](){}), TimeBetweenShots, false);
-		bIsFiring = false;
-	}
+	// if (bIsReloading)
+	// {return;}
+	// if (!CanFire())
+	// {
+	// 	if (PullTriggerSound)
+	// 	{
+	// 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PullTriggerSound, GetActorLocation());
+	// 	}
+	// 	return;
+	// }
+	//
+	//
+	// if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
+	// {
+	// 	return;
+	// }
+	//
+	// bIsFiring = true;
+	// if (bIsAutomatic)
+	// {
+	// 		Fire(); // Immediate first shot
+	// 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &AGunBase::Fire, TimeBetweenShots, true);
+	// }
+	// else
+	// {
+	// 	Fire();
+	// 	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FTimerDelegate::CreateLambda([this](){}), TimeBetweenShots, false);
+	// 	bIsFiring = false;
+	// }
 }
 
  void AGunBase::StopFire()

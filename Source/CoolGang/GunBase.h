@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayAbilitySpec.h"
 #include "GunBase.generated.h"
 
 
@@ -159,6 +160,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UGameplayAbility> FireAbilityClass;
+
+	UPROPERTY()
+	FGameplayAbilitySpecHandle FireHandle;
 };
 
 

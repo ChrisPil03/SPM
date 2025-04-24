@@ -124,7 +124,10 @@ void AEnemyAI::Tick(float DeltaTime)
 	
 	if (HealthComponent->GetCurrentHealth() <= 0 && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
+		
 		Die();
+
+		
 	}
 }
 
