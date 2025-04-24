@@ -92,7 +92,8 @@ void AEnemyAI::Attack()
 	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
 	
-	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), EnemyAttributeSet->Damage.GetBaseValue(), MyOwnerInstigator, this, DamageTypeClass);
+	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)),
+		AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
 }
 
 
