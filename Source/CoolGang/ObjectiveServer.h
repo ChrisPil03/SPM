@@ -35,12 +35,19 @@ public:
 	virtual void Interact(AActor* Interactor) override;
 
 	void SetServerState(const EServerState NewState);
-	bool GetNeedsRestoring() const { return ServerState == EServerState::NeedRestoring; }
-	bool GetIsRestoring() const { return ServerState == EServerState::Restoring; }
-	bool GetIsRestored() const { return ServerState == EServerState::Restored; }
-	bool GetIsPaused() const { return ServerState == EServerState::Paused; }
-	bool GetIsIdle() const { return ServerState == EServerState::Idle; }
 	
+	UFUNCTION(BlueprintCallable, Category = "Server States")
+	bool GetNeedsRestoring() const { return ServerState == EServerState::NeedRestoring; }
+	UFUNCTION(BlueprintCallable, Category = "Server States")
+	bool GetIsRestoring() const { return ServerState == EServerState::Restoring; }
+	UFUNCTION(BlueprintCallable, Category = "Server States")
+	bool GetIsRestored() const { return ServerState == EServerState::Restored; }
+	UFUNCTION(BlueprintCallable, Category = "Server States")
+	bool GetIsPaused() const { return ServerState == EServerState::Paused; }
+	UFUNCTION(BlueprintCallable, Category = "Server States")
+	bool GetIsIdle() const { return ServerState == EServerState::Idle; }
+
+	UFUNCTION(BlueprintCallable, Category = "Progress")
 	float GetProgress() const { return ProgressTimer->GetProgress(); }
 	
 	void PauseRestoration();

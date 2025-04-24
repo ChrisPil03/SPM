@@ -33,11 +33,18 @@ protected:
 
 public:
 	void SetServerHallStatus(const EServerHallStatus NewStatus) { ServerHallStatus = NewStatus; }
+
+	UFUNCTION(BlueprintCallable, Category = "Server Hall States")
 	bool GetIsOperating() const { return ServerHallStatus == EServerHallStatus::Operating; }
+	UFUNCTION(BlueprintCallable, Category = "Server Hall States")
 	bool GetIsCooling() const { return ServerHallStatus == EServerHallStatus::Cooling; }
+	UFUNCTION(BlueprintCallable, Category = "Server Hall States")
 	bool GetIsOverheated() const { return ServerHallStatus == EServerHallStatus::Overheated; }
 
+	UFUNCTION(BlueprintCallable, Category = "Progress")
 	float GetHeatProgress() const { return CurrentHeatBuildup / 100; }
+	UFUNCTION(BlueprintCallable, Category = "Progress")
+	float GetCoolingProgress() const { return CoolingProgress; }
 	
 private:
 	void InitializeServerHall();
@@ -99,6 +106,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Objective")
 	int NumberOfServersToRestore;
+
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	bool bCanOverheat;
 
 	UPROPERTY(VisibleAnywhere, Category = "Overheat")
 	EServerHallStatus ServerHallStatus;

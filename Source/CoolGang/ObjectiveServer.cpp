@@ -18,8 +18,8 @@ void AObjectiveServer::BeginPlay()
 	if (RestoreTime > 0.f)
 	{
 		bInstantRestoration = false;
-		ProgressTimer = MakeUnique<FProgressTimer>(RestoreTime);
 	}
+	ProgressTimer = MakeUnique<FProgressTimer>(RestoreTime);
 }
 
 void AObjectiveServer::Tick(float DeltaTime)
@@ -72,8 +72,6 @@ void AObjectiveServer::IncreaseRestorationProgress(float DeltaTime)
 	ProgressTimer->IncreaseProgress(DeltaTime);
 	RestoreProgress = ProgressTimer->GetProgress();
 	GenerateHeat(DeltaTime);
-
-	UE_LOG(LogTemp, Warning, TEXT("Progress: %f"), RestoreProgress);
 		
 	if (RestoreProgress == FProgressTimer::FullCompletion)
 	{

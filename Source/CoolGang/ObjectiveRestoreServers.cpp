@@ -8,6 +8,7 @@ AObjectiveRestoreServers::AObjectiveRestoreServers() :
 	NumberOfServers(0),
 	NumberOfServersToRestore(3),
 	ServerHallStatus(EServerHallStatus::Operating),
+	bCanOverheat(true),
 	MaxHeatBuildup(100.f),
 	CurrentHeatBuildup(0.f),
 	CoolingTime(3.f),
@@ -29,15 +30,13 @@ void AObjectiveRestoreServers::Tick(float DeltaTime)
 	{
 		return;
 	}
-
-	if (GetIsCooling())
-	{
-		CoolDown(DeltaTime);
-	}
-
 	if (GetIsOperating())
 	{
 		IncreaseObjectiveProgress(DeltaTime);
+	}
+	if (GetIsCooling())
+	{
+		CoolDown(DeltaTime);
 	}
 }
 
@@ -134,7 +133,6 @@ void AObjectiveRestoreServers::ActivateControlPanel(const bool NewState)
 {
 	if (ControlPanel)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Set can interact with control panel"));
 		ControlPanel->SetCanInteractWith(NewState);
 	}
 }
@@ -161,7 +159,10 @@ void AObjectiveRestoreServers::RegisterServerRestored(AInteractableObject* Inter
 
 void AObjectiveRestoreServers::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
 {
-	InitiateCoolingCycle();
+	if (bCanOverheat)
+	{
+		InitiateCoolingCycle();
+	}
 }
 
 void AObjectiveRestoreServers::ResetObjective()
@@ -224,7 +225,7 @@ void AObjectiveRestoreServers::OnBoxEndOverlap(UPrimitiveComponent* OverlappedCo
 
 void AObjectiveRestoreServers::AddHeatBuildup(float Heat)
 {
-	if (GetIsOverheated())
+	if (!bCanOverheat || GetIsOverheated())
 	{
 		return;
 	}
@@ -273,7 +274,7 @@ void AObjectiveRestoreServers::CoolDown(float DeltaTime)
 
 void AObjectiveRestoreServers::ResumeOperating()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Resume"))
+	UE_LOG(LogTemp, Warning, TEXT("Resume Operating"));
 	if (GetIsCooling())
 	{
 		SetServerHallStatus(EServerHallStatus::Operating);
