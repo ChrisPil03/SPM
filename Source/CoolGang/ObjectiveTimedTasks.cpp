@@ -21,21 +21,6 @@ void AObjectiveTimedTasks::BeginPlay()
 	}
 }
 
-void AObjectiveTimedTasks::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (GetIsComplete())
-	{
-		return;
-	}
-
-	if (GetIsInProgress())
-	{
-		IncreaseObjectiveProgress(DeltaTime);
-	}
-}
-
 void AObjectiveTimedTasks::ResetObjective()
 {
 	Super::ResetObjective();

@@ -9,6 +9,14 @@
 #include "GameFramework/Character.h"
 #include "EnemySpawnManager.h"
 
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayEffect.h"
+#include "GameplayEffectTypes.h"
+#include "GameplayTagContainer.h"
+
+#include "EnemyAttributeSet.h"
+
 // Sets default values
 AEnemyAI::AEnemyAI()
 {
@@ -48,17 +56,44 @@ void AEnemyAI::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("AI %s has EnemySpawnManagerClass unset! Cannot search."), *GetName());
 	}
+
+	
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitEnemyStats, 1.f, Context);
+
+		if (Spec.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Init Spec is valid"));
+
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), AttackDamage);
+
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Init Spec is NOT valid"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
+	}
 }
+	
+
 
 void AEnemyAI::Attack()
 {
 	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
-<<<<<<< Updated upstream
-=======
 	
->>>>>>> Stashed changes
-	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
+	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)),
+		AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
 }
 
 

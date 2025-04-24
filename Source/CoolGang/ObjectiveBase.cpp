@@ -1,9 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "ObjectiveBase.h"
-
 #include "ObjectiveManager.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AObjectiveBase::AObjectiveBase()
@@ -16,29 +15,34 @@ AObjectiveBase::AObjectiveBase()
 	ObjectiveDescription = "Missing Description";
 	ObjectiveTime = 30.f;
 	bIsTimeBased = false;
-	Timer = nullptr;
-}
-
-AObjectiveBase::~AObjectiveBase()
-{
-	if (Timer)
-	{
-		delete Timer;
-		Timer = nullptr;
-	}
 }
 
 // Called when the game starts or when spawned
 void AObjectiveBase::BeginPlay()
 {
 	Super::BeginPlay();
-	Timer = new FProgressTimer(ObjectiveTime);
+	FindObjectiveManager();
+	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
+}
+
+float AObjectiveBase::GetObjectiveProgress() const
+{
+	if (!ProgressTimer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: Timer is nullptr, cannot get progress"));
+	}
+	return ProgressTimer->GetProgress();
 }
 
 // Called every frame
 void AObjectiveBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bIsTimeBased && GetIsInProgress())
+	{
+		IncreaseObjectiveProgress(DeltaTime);
+	}
 }
 
 void AObjectiveBase::StartObjective()
@@ -76,27 +80,50 @@ void AObjectiveBase::CompleteObjective()
 
 void AObjectiveBase::IncreaseObjectiveProgress(float const DeltaTime)
 {
-	if (bIsTimeBased && Timer)
+	if (bIsTimeBased && ProgressTimer)
 	{
-		Timer->IncreaseProgress(DeltaTime);
+		ProgressTimer->IncreaseProgress(DeltaTime);
 	}
+	Progress = ProgressTimer->GetProgress();
 }
 
 void AObjectiveBase::DecreaseObjectiveProgress(float const DeltaTime)
 {
-	if (bIsTimeBased && Timer)
+	if (bIsTimeBased && ProgressTimer)
 	{
-		Timer->DecreaseProgress(DeltaTime);
+		ProgressTimer->DecreaseProgress(DeltaTime);
+	}
+	Progress = ProgressTimer->GetProgress();
+}
+
+void AObjectiveBase::SetObjectiveProgress(const float NewProgress)
+{
+	Progress = NewProgress;
+
+	if (bIsTimeBased)
+	{
+		ProgressTimer->SetProgress(NewProgress);
 	}
 }
 
 void AObjectiveBase::SetObjectiveManager(AObjectiveManager* NewManager)
 {
-	if (NewManager == nullptr)
+	if (!NewManager)
 	{
 		UE_LOG(LogTemp, Error, TEXT("ObjectiveBase: NewManager is nullptr"));
 		return;
 	}
 	ObjectiveManager = NewManager;
+}
+
+void AObjectiveBase::FindObjectiveManager()
+{
+	TArray<AActor*> ObjectiveManagerActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AObjectiveManager::StaticClass(), ObjectiveManagerActors);
+
+	if (ObjectiveManagerActors.Num() > 0)
+	{
+		SetObjectiveManager(ObjectiveManager = Cast<AObjectiveManager>(ObjectiveManagerActors[0]));
+	}
 }
 

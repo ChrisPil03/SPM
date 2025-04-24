@@ -24,11 +24,12 @@ public:
 
 private:
 	bool GetIsObjectivesCompleted() const;
+	void FindObjectivesInLevel();
 	
 	UPROPERTY(VisibleAnywhere)
 	int CompletedObjectives = 0;
 
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(VisibleAnywhere)
 	TArray<AActor*> ObjectivesInLevel;
 
 	UPROPERTY(EditInstanceOnly)

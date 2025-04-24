@@ -27,8 +27,8 @@ AGunBase::AGunBase()
 	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	SetRootComponent(Mesh);
-	GunEffectSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunSpawnPoint"));
-	GunEffectSpawnPoint->SetupAttachment(Mesh);
+	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
+	MuzzlePosition->SetupAttachment(Mesh);
 	
 }
 
@@ -86,6 +86,7 @@ void AGunBase::Fire()
 	
 	if(GunTrace(HitResult, ShotDirection))
 	{
+		
 		//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.Location, ShotDirection.Rotation());
 		//UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
 		if (HitResult.GetActor())
@@ -103,7 +104,7 @@ void AGunBase::Fire()
 				BlinkDebug(HitResult);
 				
 				FGameplayEffectContextHandle Context = SourceASC->MakeEffectContext();
-				FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(GameplayEffectClass, 1.0f, Context);
+				FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(GE_OnHit, 1.0f, Context);
 
 				if (SpecHandle.IsValid())
 				{
