@@ -182,6 +182,11 @@ void AObjectiveRestoreServers::CompleteObjective()
 	Super::CompleteObjective();
 	ResetHeatBuildup();
 	SetObjectiveProgress(1.f);
+
+	if (ControlPanel)
+	{
+		ControlPanel->SetCanInteractWith(false);
+	}
 }
 
 void AObjectiveRestoreServers::IncreaseObjectiveProgress(float const DeltaTime)
@@ -225,7 +230,7 @@ void AObjectiveRestoreServers::OnBoxEndOverlap(UPrimitiveComponent* OverlappedCo
 
 void AObjectiveRestoreServers::AddHeatBuildup(float Heat)
 {
-	if (!bCanOverheat || GetIsOverheated())
+	if (!bCanOverheat || GetIsOverheated() || GetIsCooling())
 	{
 		return;
 	}
@@ -258,9 +263,12 @@ void AObjectiveRestoreServers::TriggerOverheat()
 
 void AObjectiveRestoreServers::InitiateCoolingCycle()
 {
-	if (GetIsOverheated() && !GetIsCooling())
+	if (!GetIsCooling() && GetIsInProgress())
 	{
 		SetServerHallStatus(EServerHallStatus::Cooling);
+	}else
+	{
+		ControlPanel->SetCanInteractWith(true);
 	}
 }
 
@@ -284,7 +292,7 @@ void AObjectiveRestoreServers::ResumeOperating()
 
 		for (AObjectiveServer* Server : ServersToRestore)
 		{
-			if (ValidServerToRestore(Server))
+			if (ValidServerToRestore(Server) && Server->GetIsPaused())
 			{
 				Server->ResumeRestoration();
 			}

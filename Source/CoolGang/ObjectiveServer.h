@@ -80,7 +80,6 @@ private:
 	EServerState ServerState;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
-	TUniquePtr<FProgressTimer> CoolingTimer;
 
 	bool bInstantRestoration;
 
