@@ -47,15 +47,6 @@ void AEnemySpawnManager::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetWorldTimerManager().SetTimer(
-		PeriodicSpawnTimerHandle,
-		this,
-		&AEnemySpawnManager::SetSpawnTimer,
-		SpawnRateIncreaseTimer,
-		true,
-		0
-		);
-
 	TArray<UObject*> FoundObjects;
 	if (EnemySpawnerClass)
 	{
@@ -84,8 +75,6 @@ void AEnemySpawnManager::BeginPlay()
 void AEnemySpawnManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-
 }
 
 void AEnemySpawnManager::SetSpawnTimer()
@@ -100,7 +89,7 @@ void AEnemySpawnManager::SetSpawnTimer()
 );
 }
 
-void AEnemySpawnManager::SpawnEnemies()
+void AEnemySpawnManager::SpawnEnemy()
 {
 	for (AEnemySpawner* EnemySpawner : EnemySpawners)
 	{

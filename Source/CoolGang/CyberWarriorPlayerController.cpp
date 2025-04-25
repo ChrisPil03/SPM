@@ -11,7 +11,7 @@ void ACyberWarriorPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsW
 	Super::GameHasEnded(EndGameFocus, bIsWinner);
 	HUD->RemoveFromParent();
 	ADiveGameMode* GameMode = Cast<ADiveGameMode>(UGameplayStatics::GetGameMode(this));
-	float TimeLeft = GameMode->GetRemainingGameTime();
+	float TimeLeft = GameMode->GetTimeUntilNextObjective();
 	if (TimeLeft <= 0)
 	{
 		UUserWidget* OutOfTimeScreen = CreateWidget(this, OutOfTimeScreenClass);

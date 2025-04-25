@@ -39,7 +39,7 @@ private:
 
 	void SetSpawnTimer();
 
-	void SpawnEnemies();
+	void SpawnEnemy();
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	TSubclassOf<AEnemySpawner> EnemySpawnerClass;

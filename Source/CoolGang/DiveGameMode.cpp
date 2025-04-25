@@ -2,6 +2,9 @@
 
 
 #include "DiveGameMode.h"
+#include <cmath>
+#include <algorithm>
+
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -24,9 +27,9 @@ void ADiveGameMode::PlayerKilled(APlayerCharacter* PlayerKilled)
 	}
 }
 
-float ADiveGameMode::GetRemainingGameTime() const
+float ADiveGameMode::GetTimeUntilNextObjective() const
 {
-	return TimerTime;
+	return NextObjectiveTimer;
 }
 
 ADiveGameMode::ADiveGameMode()
@@ -38,10 +41,12 @@ ADiveGameMode::ADiveGameMode()
 void ADiveGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	TimerTime -= DeltaSeconds;
-	if (TimerTime <= 0)
+	NextObjectiveTimer -= DeltaSeconds;
+	if (NextObjectiveTimer <= 0)
 	{
-		EndGame();
+		NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
+		//ActivateRandomObjective();
+	
 	}
 }
 
@@ -49,4 +54,10 @@ void ADiveGameMode::EndGame() const
 {
 	AController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	Controller->GameHasEnded(Controller->GetPawn(), false);
+}
+
+float ADiveGameMode::ComputeTimer(int cycleIndex, float T0, float Tmin, float k)
+{
+	float t = T0 - k * std::logf(cycleIndex + 1);
+	return std::max(Tmin, t);
 }
