@@ -47,10 +47,12 @@ void AObjectiveBase::Tick(float DeltaTime)
 
 void AObjectiveBase::StartObjective()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Objective Started"));
-	
-	SetObjectiveState(EObjectiveState::InProgress);
-	DisplayObjectiveDescription();
+	if (GetIsNotStarted())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Objective Started"));
+		SetObjectiveState(EObjectiveState::InProgress);
+		DisplayObjectiveDescription();
+	}
 }
 
 void AObjectiveBase::ResetObjective()
@@ -94,6 +96,16 @@ void AObjectiveBase::DecreaseObjectiveProgress(float const DeltaTime)
 		ProgressTimer->DecreaseProgress(DeltaTime);
 	}
 	Progress = ProgressTimer->GetProgress();
+}
+
+void AObjectiveBase::SetObjectiveProgress(const float NewProgress)
+{
+	Progress = NewProgress;
+
+	if (bIsTimeBased)
+	{
+		ProgressTimer->SetProgress(NewProgress);
+	}
 }
 
 void AObjectiveBase::SetObjectiveManager(AObjectiveManager* NewManager)
