@@ -34,6 +34,7 @@ public:
 	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
 
 private:
+	UPROPERTY(VisibleAnywhere)
 	bool bCanInteractWith;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))

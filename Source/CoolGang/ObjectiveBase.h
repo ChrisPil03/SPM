@@ -34,12 +34,10 @@ protected:
 	virtual void CompleteObjective();
 	virtual void IncreaseObjectiveProgress(float const DeltaTime);
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
-	
+
+	void SetObjectiveProgress(const float NewProgress);
 	void SetIsTimeBased(bool const bNewState) { bIsTimeBased = bNewState; }
 	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
-
-	UFUNCTION(BlueprintCallable)
-	virtual float GetObjectiveProgress() const;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -47,10 +45,18 @@ public:
 	void SetObjectiveManager(AObjectiveManager* NewManager);
 
 	void SetObjectiveState(EObjectiveState const NewObjectiveState) { ObjectiveState = NewObjectiveState; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsNotStarted() const { return ObjectiveState == EObjectiveState::NotStarted; }
+	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsInProgress() const { return ObjectiveState == EObjectiveState::InProgress; }
+	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsAborting() const { return ObjectiveState == EObjectiveState::Aborting; }
+	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsComplete() const { return ObjectiveState == EObjectiveState::Complete; }
+
+	UFUNCTION(BlueprintCallable, Category = "Progress")
+	virtual float GetObjectiveProgress() const;
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisplayObjectiveDescription();
@@ -81,6 +87,6 @@ private:
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	float Progress = 0.f;
 };

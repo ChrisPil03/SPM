@@ -4,25 +4,56 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-AObjectiveRestoreServers::AObjectiveRestoreServers() : NumberOfServers(0), NumberOfServersToRestore(3)
+AObjectiveRestoreServers::AObjectiveRestoreServers() :
+	NumberOfServers(0),
+	NumberOfServersToRestore(3),
+	ServerHallStatus(EServerHallStatus::Operating),
+	bCanOverheat(true),
+	MaxHeatBuildup(100.f),
+	CurrentHeatBuildup(0.f),
+	CoolingTime(3.f),
+	CoolingProgress(0.f)
 {
 	ServersToRestore.Reserve(NumberOfServersToRestore);
-	RestoredServers.Reserve(NumberOfServersToRestore);
 	
-	SetIsTimeBased(true);
+	SetIsTimeBased(false);
 
 	BoxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Trigger"));
 	RootComponent = BoxTrigger;
 }
 
+void AObjectiveRestoreServers::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (GetIsComplete())
+	{
+		return;
+	}
+	if (GetIsOperating())
+	{
+		IncreaseObjectiveProgress(DeltaTime);
+	}
+	if (GetIsCooling())
+	{
+		CoolDown(DeltaTime);
+	}
+}
+
 void AObjectiveRestoreServers::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	InitializeServerHall();
+}
+
+void AObjectiveRestoreServers::InitializeServerHall()
+{
 	SetupTriggerEvents();
 	FindAllServers();
 	SelectServersToRestore();
 	PrepareServersToRestore();
+	BindControlPanel();
+	InitializeTimer();
 }
 
 void AObjectiveRestoreServers::SelectServersToRestore()
@@ -47,14 +78,17 @@ void AObjectiveRestoreServers::PrepareServersToRestore()
 		return;
 	}
 	
-	FPerformDelegate Delegate;
-	Delegate.AddUObject(this, &AObjectiveRestoreServers::RegisterInteraction);
+	FPerformDelegate RestoredDelegate;
+	RestoredDelegate.AddUObject(this, &AObjectiveRestoreServers::RegisterServerRestored);
+	FServerHeatUpDelegate HeatUpDelegate;
+	HeatUpDelegate.BindUObject(this, &AObjectiveRestoreServers::AddHeatBuildup);
 	
 	for (AObjectiveServer* Server : ServersToRestore)
 	{
 		Server->SetCanInteractWith(true);
 		Server->SetServerState(EServerState::NeedRestoring);
-		Server->SetInteractFunction(Delegate);
+		Server->SetInteractFunction(RestoredDelegate);
+		Server->SetHeatUpFunction(HeatUpDelegate);
 	}
 }
 
@@ -82,19 +116,52 @@ void AObjectiveRestoreServers::FindAllServers()
 	NumberOfServers = AllServers.Num();
 }
 
-void AObjectiveRestoreServers::RegisterInteraction(AInteractableObject* InteractableObject)
+void AObjectiveRestoreServers::BindControlPanel()
+{
+	if (ControlPanel)
+	{
+		FPerformDelegate CoolingCycleDelegate;
+		CoolingCycleDelegate.AddUObject(this, &AObjectiveRestoreServers::RegisterControlPanelInteraction);
+		ControlPanel->SetInteractFunction(CoolingCycleDelegate);
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ObjectiveRestoreServers: ControlPanel is missing"));
+	}
+}
+
+void AObjectiveRestoreServers::ActivateControlPanel(const bool NewState)
+{
+	if (ControlPanel)
+	{
+		ControlPanel->SetCanInteractWith(NewState);
+	}
+}
+
+bool AObjectiveRestoreServers::ValidServerToRestore(const AObjectiveServer* Server) const
+{
+	return Server && !Server->GetIsRestored();
+}
+
+void AObjectiveRestoreServers::RegisterServerRestored(AInteractableObject* InteractableObject)
 {
 	if (AObjectiveServer* Server = Cast<AObjectiveServer>(InteractableObject))
 	{
 		if (ServersToRestore.Contains(Server))
 		{
-			ServersToRestore.Remove(Server);
-			RestoredServers.Add(Server);
+			++RestoredServers;
 		}
 	}
-	if (RestoredServers.Num() == NumberOfServersToRestore)
+	if (GetIsServersRestored())
 	{
 		CompleteObjective();
+	}
+}
+
+void AObjectiveRestoreServers::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
+{
+	if (bCanOverheat)
+	{
+		InitiateCoolingCycle();
 	}
 }
 
@@ -103,25 +170,34 @@ void AObjectiveRestoreServers::ResetObjective()
 	Super::ResetObjective();
 	ServersToRestore.Empty();
 	ServersToRestore.Reserve(NumberOfServersToRestore);
-	RestoredServers.Empty();
-	RestoredServers.Reserve(NumberOfServersToRestore);
 	SelectServersToRestore();
 	PrepareServersToRestore();
+	SetServerHallStatus(EServerHallStatus::Operating);
+	ResetHeatBuildup();
+	ActivateControlPanel(true);
 }
 
 void AObjectiveRestoreServers::CompleteObjective()
 {
 	Super::CompleteObjective();
+	ResetHeatBuildup();
+	SetObjectiveProgress(1.f);
+
+	if (ControlPanel)
+	{
+		ControlPanel->SetCanInteractWith(false);
+	}
 }
 
 void AObjectiveRestoreServers::IncreaseObjectiveProgress(float const DeltaTime)
 {
-	Super::IncreaseObjectiveProgress(DeltaTime);
-
-	if (GetObjectiveProgress() == FProgressTimer::FullCompletion)
+	float ObjectiveProgress = 0;
+	for (AObjectiveServer* Server : ServersToRestore)
 	{
-		ResetObjective();
+		ObjectiveProgress += Server->GetProgress();
 	}
+	ObjectiveProgress /= NumberOfServersToRestore;
+	SetObjectiveProgress(ObjectiveProgress);
 }
 
 void AObjectiveRestoreServers::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -145,7 +221,100 @@ void AObjectiveRestoreServers::OnBoxEndOverlap(UPrimitiveComponent* OverlappedCo
 	{
 		return;
 	}
-
-	//ResetObjective();
+	
 	UE_LOG(LogTemp, Display, TEXT("Exited server room"));
+}
+
+// ________________________________________________________________
+// ____________________ Overheat / Cooling ________________________
+
+void AObjectiveRestoreServers::AddHeatBuildup(float Heat)
+{
+	if (!bCanOverheat || GetIsOverheated() || GetIsCooling())
+	{
+		return;
+	}
+	CurrentHeatBuildup += Heat;
+
+	if (CurrentHeatBuildup >= MaxHeatBuildup)
+	{
+		CurrentHeatBuildup = MaxHeatBuildup;
+		TriggerOverheat();
+	}
+}
+
+void AObjectiveRestoreServers::TriggerOverheat()
+{
+	if (GetIsOverheated())
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Trigger Overheat"));
+	SetServerHallStatus(EServerHallStatus::Overheated);
+
+	for (AObjectiveServer* Server : ServersToRestore)
+	{
+		if (ValidServerToRestore(Server))
+		{
+			Server->PauseRestoration();
+		}
+	}
+}
+
+void AObjectiveRestoreServers::InitiateCoolingCycle()
+{
+	if (!GetIsCooling() && GetIsInProgress())
+	{
+		SetServerHallStatus(EServerHallStatus::Cooling);
+	}else
+	{
+		ControlPanel->SetCanInteractWith(true);
+	}
+}
+
+void AObjectiveRestoreServers::CoolDown(float DeltaTime)
+{
+	CoolingTimer->IncreaseProgress(DeltaTime);
+	CoolingProgress = CoolingTimer->GetProgress();
+	CurrentHeatBuildup -= CoolingProgress;
+	CurrentHeatBuildup = FMath::Clamp(CurrentHeatBuildup, 0.f, MaxHeatBuildup);
+}
+
+void AObjectiveRestoreServers::ResumeOperating()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Resume Operating"));
+	if (GetIsCooling())
+	{
+		SetServerHallStatus(EServerHallStatus::Operating);
+		ResetHeatBuildup();
+		ResetCoolingTimerProgress();
+		ActivateControlPanel(true);
+
+		for (AObjectiveServer* Server : ServersToRestore)
+		{
+			if (ValidServerToRestore(Server) && Server->GetIsPaused())
+			{
+				Server->ResumeRestoration();
+			}
+		}
+	}
+}
+
+void AObjectiveRestoreServers::InitializeTimer()
+{
+	CoolingTimer = MakeUnique<FProgressTimer>(CoolingTime);
+
+	FTimerCompletionDelegate CoolingDelegate;
+	CoolingDelegate.BindUObject(this, &AObjectiveRestoreServers::ResumeOperating);
+	CoolingTimer->SetCompletionDelegate(CoolingDelegate);
+}
+
+void AObjectiveRestoreServers::ResetCoolingTimerProgress() const
+{
+	CoolingTimer->Reset();
+}
+
+void AObjectiveRestoreServers::ResetHeatBuildup()
+{
+	CurrentHeatBuildup = 0.f;
 }
