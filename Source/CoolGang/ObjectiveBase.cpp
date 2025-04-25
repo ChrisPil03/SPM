@@ -47,10 +47,12 @@ void AObjectiveBase::Tick(float DeltaTime)
 
 void AObjectiveBase::StartObjective()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Objective Started"));
-	
-	SetObjectiveState(EObjectiveState::InProgress);
-	DisplayObjectiveDescription();
+	if (GetIsNotStarted())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Objective Started"));
+		SetObjectiveState(EObjectiveState::InProgress);
+		DisplayObjectiveDescription();
+	}
 }
 
 void AObjectiveBase::ResetObjective()
