@@ -25,9 +25,6 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
 
-	//can change for other system if needed
-	
-
 	///   Sound   ///
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
 	USoundBase* BulletSound;
@@ -54,11 +51,7 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
-
-	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
-	TSubclassOf<class UGameplayEffect> GE_OnHit;
 	
-
 	/////////////////  Gun property  //////////////////////////
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float Damage{10};
