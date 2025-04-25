@@ -22,9 +22,6 @@ public:
 private:
 	UFUNCTION()
 	void SystemShutdown();
-	
-	UPROPERTY(EditAnywhere, Category = "Integrity")
-	UHealthComponent* HealthComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Integrity")
 	float MaxIntegrity;
