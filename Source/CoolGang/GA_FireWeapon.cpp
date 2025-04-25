@@ -17,10 +17,6 @@ void UGA_FireWeapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
-	
-	
-	
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
 
@@ -31,21 +27,20 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
 	UE_LOG(LogTemp, Warning, TEXT("Check cost for shoot") );
 	float CurrentAmmo = Attributes->GetAmmoCount();
-	UE_LOG(LogTemp, Warning, TEXT("Ammo: %f"), CurrentAmmo );
+	UE_LOG(LogTemp, Warning, TEXT("Ammo before shoot: %f"), CurrentAmmo );
 	// Check that at least 1 bullet is available
 	return CurrentAmmo >= 1;
 }
 
 void UGA_FireWeapon::Fire()
 {
-
 	UE_LOG(LogTemp, Warning, TEXT("Shoot") );
 	
 	FHitResult HitResult;
 	SingleTrace(HitResult);
 	if (HitResult.GetActor() == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Actor is nullptr") );
+		UE_LOG(LogTemp, Warning, TEXT("No hit") );
 	}
 	else
 	{
@@ -54,7 +49,7 @@ void UGA_FireWeapon::Fire()
 	FGameplayAbilityTargetDataHandle TargetData;
 	FGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FGameplayAbilityTargetData_SingleTargetHit();
 	NewTargetData->HitResult = HitResult;
-
+	
 	TargetData.Add(NewTargetData);
 	OnRangedWeaponTargetDataReady(TargetData);
 }

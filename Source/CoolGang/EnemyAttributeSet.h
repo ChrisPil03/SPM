@@ -34,7 +34,7 @@ public:
 	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, MovementSpeed)
 	
 
-	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data);
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 	
 
 };

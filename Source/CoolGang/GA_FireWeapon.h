@@ -27,7 +27,7 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 					   const FGameplayAbilityActorInfo* ActorInfo,
 					   FGameplayTagContainer* OptionalRelevantTags) const override;
 	
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
 	bool SingleTrace(FHitResult& Hit);
 	

@@ -16,6 +16,9 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName)               \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoChanged, float, Ammo);
+
 UCLASS()
 class COOLGANG_API UWeaponAttributeSet : public UAttributeSet
 {
@@ -36,4 +39,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData MagazineSize;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, MagazineSize)
+	
+	
+	
+	UPROPERTY(BlueprintAssignable, Category="Gameplay")
+	FOnAmmoChanged OnAmmoChanged;
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 };

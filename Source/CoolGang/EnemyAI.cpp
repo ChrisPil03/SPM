@@ -69,8 +69,8 @@ void AEnemyAI::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Init Enemy Spec is valid"));
 
-			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
-			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), AttackDamage);
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), 1);
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), 100);
 			EnemyAttributeSet = AbilitySystemComponent->GetSet<UEnemyAttributeSet>();
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 			

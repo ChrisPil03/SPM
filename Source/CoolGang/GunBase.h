@@ -76,7 +76,7 @@ protected:
 	int MagazineSize {30};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat ")
-	int AmmoInMag {30};
+	int AmmoCount {30};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float MinRecoil {0.5f};
@@ -94,7 +94,6 @@ protected:
 	bool bIsAutomatic = false;
 
 	
-	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
 	AController* GetOwnerController() const;
 
 	FTimerHandle FireTimerHandle;
@@ -105,44 +104,9 @@ protected:
 	bool bIsRecoiling  = false;
 	bool bIsReloading  = false;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
-	UFUNCTION(BlueprintImplementableEvent)
-	void StartFire();
-	
-	virtual void StopFire();
-	virtual void Fire();
-
-	UFUNCTION(BlueprintCallable)
-	virtual void Reload();
-	void StartRecoil();
-	
-	bool CanFire() const;
-	bool bIsFiring = false;
-
-	UFUNCTION(BlueprintCallable)
-	int GetMagazineSize(){return MagazineSize;};
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void SetAmmoInMagText(int Ammo);
-
-	UFUNCTION(BlueprintCallable)
-	int GetAmmoInMag(){return AmmoInMag;}
-	
-	UFUNCTION(BlueprintCallable)
-	bool GetIsAutomatic(){return bIsAutomatic;}
-
-	class UAbilitySystemComponent* GetAbilitySystemComponent() const
-	{
-		return AbilitySystemComponent;
-	}
-	void InitAbilitySystemComponent();
-private:
 	void BlinkDebug(FHitResult& h);
 	void InitWeaponStats();
-	
+	void InitAbilitySystemComponent();
 	FTimerHandle BlinkTimerHandle;
 
 	float ElapsedTime =  0.0f;
@@ -152,7 +116,7 @@ private:
 	float TargetPitch = 0.0f;
 	
 	UPROPERTY()
-	class UWeaponAttributeSet* WeaponAttributeSet;
+	const class UWeaponAttributeSet* WeaponAttributeSet;
 
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -164,8 +128,45 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UGameplayAbility> FireAbilityClass;
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UGameplayAbility> ReloadAbilityClass;
+
 	UPROPERTY()
 	FGameplayAbilitySpecHandle FireHandle;
+
+	UPROPERTY()
+	FGameplayAbilitySpecHandle ReloadHandle;
+	
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartFire();
+	
+	virtual void StopFire();
+	virtual void Fire();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void Reload();
+	void StartRecoil();
+	
+	bool CanFire() const;
+	bool bIsFiring = false;
+
+	UFUNCTION(BlueprintCallable)
+	int GetMagazineSize(){return MagazineSize;};
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetAmmoCountText(float Ammo);
+
+	class UAbilitySystemComponent* GetAbilitySystemComponent() const
+	{
+		return AbilitySystemComponent;
+	}
+	
+	void Initialize();
+	
 };
 
 
