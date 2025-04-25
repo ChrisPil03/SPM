@@ -59,8 +59,8 @@ private:
 	bool ValidServerToRestore(const AObjectiveServer* Server) const;
 	bool GetIsServersRestored() const { return RestoredServers == NumberOfServersToRestore; }
 
-	void OnEnterRoom();
-	void OnExitRoom();
+	void OnEnterRoom(APlayerLocationDetection* Room);
+	void OnExitRoom(APlayerLocationDetection* Room);
 
 	void InitializeTimer();
 	void ResetCoolingTimerProgress() const;

@@ -7,8 +7,8 @@
 #include "PlayerLocationDetection.generated.h"
 
 class UBoxComponent;
-DECLARE_MULTICAST_DELEGATE(FOnTriggerEnterDelegate)
-DECLARE_MULTICAST_DELEGATE(FOnTriggerExitDelegate)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTriggerEnterDelegate, APlayerLocationDetection*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTriggerExitDelegate, APlayerLocationDetection*)
 
 UCLASS()
 class COOLGANG_API APlayerLocationDetection : public AActor
@@ -41,7 +41,7 @@ public:
 		int32 OtherBodyIndex);
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	UBoxComponent* TriggerBox;
 	
 	FOnTriggerEnterDelegate OnTriggerEnter;

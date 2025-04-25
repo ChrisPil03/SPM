@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "EnemySpawnManager.generated.h"
 
+class APlayerLocationDetection;
 class AEnemySpawner;
 class AEnemyAI;
 
@@ -29,29 +30,47 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	FTimerHandle PeriodicSpawnTimerHandle;
-	FTimerHandle SpawnRateIncreaseHandle;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	void RegisterSpawner(APlayerLocationDetection*, AEnemySpawner*);
 private:
-
-	void SetSpawnTimer();
+	
+	TMap<APlayerLocationDetection*, TArray<AEnemySpawner*>> SpawnersByLocation;
+	
+	void BindPlayerLocationDetection();
+	void OnEnterTriggerBox(APlayerLocationDetection* SpawnBox);
+	void OnExitTriggerBox(APlayerLocationDetection* SpawnBox);
+	
+	static float CalculateSpawnTimer(int cycleIndex, float T0, float Tmin, float k);
 
 	void SpawnEnemy();
 
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
+	TArray<AEnemySpawner*> CurrentEnemySpawners;
+
+	TArray<AEnemySpawner*> CopyCurrentEnemySpawners;
+
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	TSubclassOf<AEnemySpawner> EnemySpawnerClass;
+	double BaselineSpawnInterval;
+	
+	UPROPERTY(VisibleAnywhere)
+	double SpawnInterval;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	double MinimumSpawnInterval;
+
+	UPROPERTY(VisibleAnywhere)
+	double SpawnIntervalIncreaseCount;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	double SpawnIntervalScale;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	TArray<AEnemySpawner*> EnemySpawners;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	double SpawnRate;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	double SpawnRateIncreaseTimer;
+	double SpawnIntervalIncreaseTimer;
+	
+	UPROPERTY(VisibleAnywhere)
+	double SpawnIntervalIncreaseProgress;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	int MaximumEnemies;

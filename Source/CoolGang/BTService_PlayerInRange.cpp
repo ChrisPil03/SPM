@@ -30,8 +30,7 @@ void UBTService_PlayerInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 		UE_LOG(LogTemp, Warning, TEXT("No Player"));
 		return;
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Distance to player is %f and attack range is %f"), AIPawn->GetDistanceTo(PlayerPawn), AIPawn->GetAttackRange());
+	
 	if (AIPawn->GetDistanceTo(PlayerPawn) <= AIPawn->GetAttackRange())
 	{
 		
