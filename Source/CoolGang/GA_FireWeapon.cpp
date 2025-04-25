@@ -18,14 +18,26 @@ void UGA_FireWeapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (!CommitAbility(Handle, ActorInfo, ActivationInfo)) return;
-
-	AActor* Avatar = ActorInfo->AvatarActor.Get();
 	
-	if (Avatar == nullptr)
-	{
-		return;
-	}
+	
+	
+	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+}
+
+bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	FGameplayTagContainer* OptionalRelevantTags) const
+{
+	const UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
+	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
+	UE_LOG(LogTemp, Warning, TEXT("Check cost for shoot") );
+	float CurrentAmmo = Attributes->GetAmmoCount();
+	UE_LOG(LogTemp, Warning, TEXT("Ammo: %f"), CurrentAmmo );
+	// Check that at least 1 bullet is available
+	return CurrentAmmo >= 1;
+}
+
+void UGA_FireWeapon::Fire()
+{
 
 	UE_LOG(LogTemp, Warning, TEXT("Shoot") );
 	
@@ -39,30 +51,12 @@ void UGA_FireWeapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.GetActor()->GetActorNameOrLabel());
 	}
-	
+	FGameplayAbilityTargetDataHandle TargetData;
+	FGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FGameplayAbilityTargetData_SingleTargetHit();
+	NewTargetData->HitResult = HitResult;
 
-	
-	UAbilitySystemComponent* AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-	//if (AbilitySystemComponent == nullptr)
-	//{
-	//	return;
-	//}
-	
-	AbilitySystemComponent->ApplyGameplayEffectToSelf(Cast<UGameplayEffect>(GE_AmmoConsumed), 1, AbilitySystemComponent->MakeEffectContext());
-	
-	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
-}
-
-bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-	FGameplayTagContainer* OptionalRelevantTags) const
-{
-	const UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
-	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
-	UE_LOG(LogTemp, Warning, TEXT("Check cost for shoot") );
-	float CurrentAmmo = Attributes->GetAmmoCount();
-
-	// Check that at least 1 bullet is available
-	return CurrentAmmo >= 1;
+	TargetData.Add(NewTargetData);
+	OnRangedWeaponTargetDataReady(TargetData);
 }
 
 bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
@@ -84,7 +78,7 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 	FRotator Rotation;
 	
 	OwnerController->GetPlayerViewPoint(StartPoint, Rotation);
-	const FVector BulletDirection = -Rotation.Vector();
+	const FVector BulletDirection = Rotation.Vector();
 	
 	FVector EndPoint = StartPoint + Rotation.Vector() * 20000;
 	
@@ -93,6 +87,9 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 	Params.AddIgnoredActor(OwningPawn);
 	
 	return GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, Params);
+
+	
+
 	
 }
 

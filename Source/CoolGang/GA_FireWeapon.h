@@ -26,16 +26,19 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle,
 					   const FGameplayAbilityActorInfo* ActorInfo,
 					   FGameplayTagContainer* OptionalRelevantTags) const override;
-
 	
-	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
-	TSubclassOf<class UGameplayEffect> GE_AmmoConsumed;
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
 	bool SingleTrace(FHitResult& Hit);
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRangedWeaponTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetData);
 
+	UFUNCTION(BlueprintCallable)
+	void Fire();
 private:
 	
 	
 };
+
 

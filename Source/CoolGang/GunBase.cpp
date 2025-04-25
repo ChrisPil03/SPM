@@ -197,44 +197,6 @@ bool AGunBase::GunTrace(FHitResult& Hit, FVector& ShotDirection)
 	
 }
 
-void AGunBase::StartFire()
-{
-	if (AbilitySystemComponent == nullptr)
-	{
-		return;
-	}
-	AbilitySystemComponent->TryActivateAbility(FireHandle);
-	
-	// if (bIsReloading)
-	// {return;}
-	// if (!CanFire())
-	// {
-	// 	if (PullTriggerSound)
-	// 	{
-	// 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PullTriggerSound, GetActorLocation());
-	// 	}
-	// 	return;
-	// }
-	//
-	//
-	// if (GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
-	// {
-	// 	return;
-	// }
-	//
-	// bIsFiring = true;
-	// if (bIsAutomatic)
-	// {
-	// 		Fire(); // Immediate first shot
-	// 		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &AGunBase::Fire, TimeBetweenShots, true);
-	// }
-	// else
-	// {
-	// 	Fire();
-	// 	GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FTimerDelegate::CreateLambda([this](){}), TimeBetweenShots, false);
-	// 	bIsFiring = false;
-	// }
-}
 
  void AGunBase::StopFire()
 {
