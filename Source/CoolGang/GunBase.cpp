@@ -11,6 +11,13 @@
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayEffect.h"
+#include "GameplayEffectTypes.h"
+#include "GameplayTagContainer.h"
+
 // Sets default values
 AGunBase::AGunBase()
 {
@@ -20,8 +27,8 @@ AGunBase::AGunBase()
 	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	SetRootComponent(Mesh);
-	GunEffectSpawnPoint = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GunSpawnPoint"));
-	GunEffectSpawnPoint->SetupAttachment(Mesh);
+	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
+	MuzzlePosition->SetupAttachment(Mesh);
 	
 }
 
@@ -79,6 +86,7 @@ void AGunBase::Fire()
 	
 	if(GunTrace(HitResult, ShotDirection))
 	{
+		
 		//UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.Location, ShotDirection.Rotation());
 		//UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, Hit.Location);
 		if (HitResult.GetActor())
@@ -86,10 +94,27 @@ void AGunBase::Fire()
 			FPointDamageEvent DamageEvent(Damage, HitResult, ShotDirection, nullptr);
 			AController* OwnerController = GetOwnerController();
 			HitResult.GetActor()->TakeDamage(Damage, DamageEvent, OwnerController, this);
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.GetActor()->GetActorLabel());
+			
 			if (Cast<AEnemyAI>(HitResult.GetActor()))
 			{
+				
+				UAbilitySystemComponent* EnemyASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(HitResult.GetActor());
+				UAbilitySystemComponent* SourceASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner());
+				
 				BlinkDebug(HitResult);
+				
+				FGameplayEffectContextHandle Context = SourceASC->MakeEffectContext();
+				FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(GE_OnHit, 1.0f, Context);
+
+				if (SpecHandle.IsValid())
+				{
+					// Set the caller magnitude BEFORE applying
+					SpecHandle.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Damage.Type.Bullet")), -Damage);
+
+					// Apply to target
+					SourceASC->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), EnemyASC);
+				}
+				
 			}
 			
 		}

@@ -28,17 +28,8 @@ void AObjectiveCapture::BeginPlay()
 void AObjectiveCapture::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (GetIsComplete())
-	{
-		return;
-	}
 	
-	if (GetIsInProgress())
-	{
-		IncreaseObjectiveProgress(DeltaTime);
-	}
-	else if (GetIsAborting())
+	if (GetIsAborting())
 	{
 		DecreaseObjectiveProgress(DeltaTime);
 	}
@@ -67,8 +58,9 @@ void AObjectiveCapture::ResetObjective()
 void AObjectiveCapture::IncreaseObjectiveProgress(float const DeltaTime)
 {
 	Super::IncreaseObjectiveProgress(DeltaTime);
+	UpdateCaptureZoneSize();
 
-	if (GetObjectiveProgress() == Complete)
+	if (GetObjectiveProgress() == FProgressTimer::FullCompletion)
 	{
 		CompleteObjective();
 	}
@@ -77,17 +69,12 @@ void AObjectiveCapture::IncreaseObjectiveProgress(float const DeltaTime)
 void AObjectiveCapture::DecreaseObjectiveProgress(float const DeltaTime)
 {
 	Super::DecreaseObjectiveProgress(DeltaTime);
+	UpdateCaptureZoneSize();
 
-	if (GetObjectiveProgress() == ZeroCompletion)
+	if (GetObjectiveProgress() == FProgressTimer::ZeroCompletion)
 	{
 		ResetObjective();
 	}
-}
-
-void AObjectiveCapture::UpdateObjectiveProgress(float const NewProgress)
-{
-	Super::UpdateObjectiveProgress(NewProgress);
-	UpdateCaptureZoneSize();
 }
 
 void AObjectiveCapture::OnSphereBeginOverlap(
@@ -98,7 +85,10 @@ void AObjectiveCapture::OnSphereBeginOverlap(
 		bool bFromSweep,
 		const FHitResult& SweepResult)
 {
-	if (!OtherActor || OtherActor == this) return;
+	if (!OtherActor || OtherActor == this)
+	{
+		return;
+	}
 	
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
@@ -117,7 +107,10 @@ void AObjectiveCapture::OnSphereEndOverlap(
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex)
 {
-	if (!OtherActor || OtherActor == this) return;
+	if (!OtherActor || OtherActor == this)
+	{
+		return;
+	}
 	
 	if (OtherActor == PlayerInZone)
 	{

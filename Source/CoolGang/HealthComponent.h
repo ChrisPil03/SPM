@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_DELEGATE(FDeathDelegate)
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class COOLGANG_API UHealthComponent : public UActorComponent
@@ -30,13 +31,13 @@ public:
 
 	UFUNCTION()
 	void DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* Instigator, AActor* DamageCauser);
-
+	void SetDeathFunction(const FDeathDelegate& NewFunction) { DeathDelegate = NewFunction; }
+	
 private:
 	UPROPERTY(EditAnywhere)
 	float MaxHealth = 100.f;
 	UPROPERTY(VisibleAnywhere)
 	float Health = 0.f;
 
-
-	
+	FDeathDelegate DeathDelegate;
 };

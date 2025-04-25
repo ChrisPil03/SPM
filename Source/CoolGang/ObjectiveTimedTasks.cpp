@@ -16,23 +16,8 @@ void AObjectiveTimedTasks::BeginPlay()
 	for (AInteractableObject* Interactable : AllInteractableObjects)
 	{
 		FPerformDelegate Delegate;
-		Delegate.BindUObject(this, &AObjectiveTimedTasks::RegisterInteraction);
+		Delegate.AddUObject(this, &AObjectiveTimedTasks::RegisterInteraction);
 		Interactable->SetInteractFunction(Delegate);
-	}
-}
-
-void AObjectiveTimedTasks::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (GetIsComplete())
-	{
-		return;
-	}
-
-	if (GetIsInProgress())
-	{
-		IncreaseObjectiveProgress(DeltaTime);
 	}
 }
 
@@ -51,15 +36,10 @@ void AObjectiveTimedTasks::IncreaseObjectiveProgress(float const DeltaTime)
 {
 	Super::IncreaseObjectiveProgress(DeltaTime);
 
-	if (GetObjectiveProgress() == Complete)
+	if (GetObjectiveProgress() == FProgressTimer::FullCompletion)
 	{
 		ResetObjective();
 	}
-}
-
-void AObjectiveTimedTasks::CompleteObjective()
-{
-	Super::CompleteObjective();
 }
 
 void AObjectiveTimedTasks::RegisterInteraction(AInteractableObject* InteractableObject)

@@ -2,17 +2,24 @@
 
 #include "ObjectiveManager.h"
 
+#include "ObjectiveBase.h"
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 AObjectiveManager::AObjectiveManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	ObjectivesInLevel.Empty();
+	Portal = nullptr;
+	ExtractionZone = nullptr;
 }
 
 // Called when the game starts or when spawned
 void AObjectiveManager::BeginPlay()
 {
 	Super::BeginPlay();
+	FindObjectivesInLevel();
 
 	if (!Portal || !ExtractionZone)
 	{
@@ -51,4 +58,9 @@ void AObjectiveManager::ObjectivesCompleted()
 bool AObjectiveManager::GetIsObjectivesCompleted() const
 {
 	return CompletedObjectives == ObjectivesInLevel.Num();
+}
+
+void AObjectiveManager::FindObjectivesInLevel()
+{
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AObjectiveBase::StaticClass(), ObjectivesInLevel);
 }

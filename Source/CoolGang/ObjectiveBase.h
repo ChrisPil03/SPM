@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FProgressTimer.h"
 #include "GameFramework/Actor.h"
 #include "ObjectiveBase.generated.h"
 
@@ -24,11 +25,8 @@ class COOLGANG_API AObjectiveBase : public AActor
 	
 public:
 	AObjectiveBase();
-
-protected:
-	static constexpr float Complete = 1.0f;
-	static constexpr float ZeroCompletion = 0.f;
 	
+protected:
 	virtual void BeginPlay() override;
 
 	virtual void StartObjective();
@@ -36,10 +34,10 @@ protected:
 	virtual void CompleteObjective();
 	virtual void IncreaseObjectiveProgress(float const DeltaTime);
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
-	virtual void UpdateObjectiveProgress(float const NewProgress);
-	
+
+	void SetObjectiveProgress(const float NewProgress);
 	void SetIsTimeBased(bool const bNewState) { bIsTimeBased = bNewState; }
-	float GetObjectiveProgress() const { return ObjectiveProgress; }
+	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -47,10 +45,18 @@ public:
 	void SetObjectiveManager(AObjectiveManager* NewManager);
 
 	void SetObjectiveState(EObjectiveState const NewObjectiveState) { ObjectiveState = NewObjectiveState; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsNotStarted() const { return ObjectiveState == EObjectiveState::NotStarted; }
+	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsInProgress() const { return ObjectiveState == EObjectiveState::InProgress; }
+	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsAborting() const { return ObjectiveState == EObjectiveState::Aborting; }
+	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsComplete() const { return ObjectiveState == EObjectiveState::Complete; }
+
+	UFUNCTION(BlueprintCallable, Category = "Progress")
+	virtual float GetObjectiveProgress() const;
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisplayObjectiveDescription();
@@ -62,16 +68,14 @@ public:
 	void StopDisplayObjectiveDescription();
 
 private:
-	void ResetProgress() { ObjectiveProgress = ZeroCompletion; }
+	void ResetProgress() const { ProgressTimer->Reset(); }
+	void FindObjectiveManager();
 	
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	EObjectiveState ObjectiveState;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	AObjectiveManager* ObjectiveManager;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Objective")
-	float ObjectiveProgress;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Objective")
 	float ObjectiveTime;
@@ -80,4 +84,9 @@ private:
 	FString ObjectiveDescription;
 	
 	bool bIsTimeBased;
+	
+	TUniquePtr<FProgressTimer> ProgressTimer;
+
+	UPROPERTY(VisibleAnywhere, Category = "Objective")
+	float Progress = 0.f;
 };

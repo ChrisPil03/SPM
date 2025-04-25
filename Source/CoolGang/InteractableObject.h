@@ -7,7 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "InteractableObject.generated.h"
 
-DECLARE_DELEGATE_OneParam(FPerformDelegate, AInteractableObject*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FPerformDelegate, AInteractableObject*)
 
 UCLASS()
 class COOLGANG_API AInteractableObject : public AActor, public IInteractInterface
@@ -22,17 +22,21 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+	UStaticMeshComponent* GetMesh() const { return Mesh; }
+
+	FPerformDelegate PerformDelegate;
+public:
+	virtual void Tick(float DeltaTime) override;
 	virtual void Interact(AActor* Interactor) override;
-	virtual void ResetInteractable() { bInteractedWith = false; }
-	bool GetInteractedWith() const { return bInteractedWith; };
-	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; };
+	virtual void ResetInteractable() { bCanInteractWith = false; }
+	bool GetCanInteractWith() const { return bCanInteractWith; }
+	void SetCanInteractWith(bool const bState) { bCanInteractWith = bState; }
+	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
 
 private:
-	bool bInteractedWith;
-	
-	FPerformDelegate PerformDelegate;
+	UPROPERTY(VisibleAnywhere)
+	bool bCanInteractWith;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
 };
