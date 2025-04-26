@@ -72,7 +72,7 @@ void AGunBase::InitWeaponStats()
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), Damage);
 		WeaponAttributeSet = AbilitySystemComponent->GetSet<UWeaponAttributeSet>();
 		AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
-		UE_LOG(LogTemp, Warning, TEXT("MagSize: %f"), WeaponAttributeSet->GetMagazineSize());
+		UE_LOG(LogTemp, Warning, TEXT("Damage: %f"), WeaponAttributeSet->GetDamage());
 	}
 	else
 	{

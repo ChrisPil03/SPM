@@ -69,20 +69,20 @@ void AEnemyAI::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Init Enemy Spec is valid"));
 
-			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), 1);
-			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), 100);
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), AttackDamage);
 			EnemyAttributeSet = AbilitySystemComponent->GetSet<UEnemyAttributeSet>();
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 			
 		}
 		else
 		{
-			UE_LOG(LogTemp, Error, TEXT("Init Spec is NOT valid"));
+			UE_LOG(LogTemp, Error, TEXT("Init Enemy Spec is NOT valid"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
+		UE_LOG(LogTemp, Error, TEXT("Enemy AbilitySystemComponent is null in BeginPlay!"));
 	}
 }
 	
@@ -101,7 +101,7 @@ void AEnemyAI::Attack()
 		UE_LOG(LogTemp, Error, TEXT("EnemyAttributeSet is null !"));
 	}
 	
-	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)), AttackDamage, MyOwnerInstigator, this, DamageTypeClass);
+	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)),  EnemyAttributeSet->GetDamage(), MyOwnerInstigator, this, DamageTypeClass);
 }
 
 
@@ -130,11 +130,12 @@ void AEnemyAI::Tick(float DeltaTime)
 	{
 		return;
 	}
-	
-	if (HealthComponent->GetCurrentHealth() <= 0 && EnemySpawnManager->GetAliveEnemies().Contains(this))
+	//|| EnemyAttributeSet->GetHealth() <= 0
+
+	if ((HealthComponent->GetCurrentHealth() <= 0 ) && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
 		
-		Die();
+		//Die();
 
 		
 	}

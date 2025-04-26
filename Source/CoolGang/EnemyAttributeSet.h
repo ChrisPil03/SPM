@@ -26,6 +26,11 @@ public:
 	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, Health)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData MaxHealth;
+	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, MaxHealth)
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData Damage;
 	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, Damage)
 
