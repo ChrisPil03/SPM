@@ -144,13 +144,13 @@ void AObjectiveRestoreServers::BindPlayerLocationDetection()
 	}
 }
 
-void AObjectiveRestoreServers::OnEnterRoom()
+void AObjectiveRestoreServers::OnEnterRoom(APlayerLocationDetection* Room)
 {
 	UE_LOG(LogTemp, Display, TEXT("Entered server room"));
 	StartObjective();
 }
 
-void AObjectiveRestoreServers::OnExitRoom()
+void AObjectiveRestoreServers::OnExitRoom(APlayerLocationDetection* Room)
 {
 	UE_LOG(LogTemp, Display, TEXT("Exited server room PlayerLocationDetection"));
 }

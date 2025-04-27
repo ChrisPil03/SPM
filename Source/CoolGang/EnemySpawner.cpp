@@ -5,7 +5,6 @@
 #include "TimerManager.h"
 #include "EnemySpawnManager.h" 
 #include "EnemyAI.h"
-#include "GameFramework/FloatingPawnMovement.h"
 
 AEnemySpawner::AEnemySpawner()
 {
@@ -15,7 +14,8 @@ AEnemySpawner::AEnemySpawner()
 void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
+	EnemySpawnManager->RegisterSpawner(SpawnArea, this);
 }
 
 
