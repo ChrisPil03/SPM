@@ -83,7 +83,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float RecoilExponent {2.0f};
 	
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
 
 	
@@ -92,6 +92,7 @@ protected:
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ReloadTimerHandle;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun | Stat")
 	float TimeBetweenShots;
 	bool bCanFire = true;
 	bool bIsRecoiling  = false;
@@ -137,9 +138,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartFire();
 	
-	virtual void StopFire();
-	virtual void Fire();
-
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopFire();
+	
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void Fire();
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void Reload();
 	void StartRecoil();
@@ -149,6 +153,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};
+
+	UFUNCTION(BlueprintCallable)
+	bool IsAutomatic(){return bIsAutomatic;};
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetAmmoCountText(float Ammo);

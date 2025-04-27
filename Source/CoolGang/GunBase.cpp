@@ -70,9 +70,10 @@ void AGunBase::InitWeaponStats()
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.AmmoCount"), AmmoCount);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MagazineSize"), MagazineSize);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), Damage);
+		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.FireRate"), FireRate);
 		WeaponAttributeSet = AbilitySystemComponent->GetSet<UWeaponAttributeSet>();
 		AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
-		UE_LOG(LogTemp, Warning, TEXT("Damage: %f"), WeaponAttributeSet->GetDamage());
+		UE_LOG(LogTemp, Warning, TEXT("Damage: %f"), WeaponAttributeSet->GetFireRate());
 	}
 	else
 	{
@@ -94,18 +95,6 @@ void AGunBase::InitAbilitySystemComponent()
 		FireHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, 1, 0, this));
 		ReloadHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(ReloadAbilityClass, 1, 0, this));
 	}
-	
-}
-
-void AGunBase::Fire()
-{
-}
-
-
- void AGunBase::StopFire()
-{
-	bIsFiring = false;
-	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
 	
 }
 
