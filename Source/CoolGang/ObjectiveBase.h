@@ -65,7 +65,7 @@ public:
 	bool GetIsActive() const { return bIsActive; }
 
 	UFUNCTION(BlueprintCallable, Category = "Active")
-	void SetIsActive(const bool bNewState) { bIsActive = bNewState; }
+	virtual void SetIsActive(const bool bNewState) { bIsActive = bNewState; }
 
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	virtual float GetObjectiveProgress() const;

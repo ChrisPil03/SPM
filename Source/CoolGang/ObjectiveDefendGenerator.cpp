@@ -23,6 +23,10 @@ void AObjectiveDefendGenerator::BeginPlay()
 
 void AObjectiveDefendGenerator::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
 {
+	if (!GetIsActive())
+	{
+		return;
+	}
 	StartObjective();
 }
 

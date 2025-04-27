@@ -87,6 +87,7 @@ void AObjectiveBase::CompleteObjective()
 		return;
 	}
 	ObjectiveManager->RegisterCompletedObjective();
+	SetIsActive(false);
 }
 
 void AObjectiveBase::FailObjective()
@@ -94,6 +95,7 @@ void AObjectiveBase::FailObjective()
 	if (!GetIsFailed())
 	{
 		SetObjectiveState(EObjectiveState::Failed);
+		SetIsActive(false);
 	}
 }
 

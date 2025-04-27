@@ -6,20 +6,21 @@
 #include "GameFramework/Actor.h"
 #include "ObjectiveManager.generated.h"
 
+class AObjectiveBase;
+
 UCLASS()
 class COOLGANG_API AObjectiveManager : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AObjectiveManager();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	void ActivateRandomObjective();
 	void RegisterCompletedObjective();
 
 private:
@@ -30,7 +31,10 @@ private:
 	int CompletedObjectives = 0;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<AActor*> ObjectivesInLevel;
+	TArray<AObjectiveBase*> ObjectivesInLevel;
+
+	UPROPERTY()
+	AObjectiveBase* LastActivatedObjective;
 
 	UPROPERTY(EditInstanceOnly)
 	AActor* Portal;

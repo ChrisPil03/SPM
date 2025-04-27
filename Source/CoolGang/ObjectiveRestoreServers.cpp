@@ -49,11 +49,21 @@ void AObjectiveRestoreServers::Tick(float DeltaTime)
 	}
 }
 
+void AObjectiveRestoreServers::SetIsActive(const bool bNewState)
+{
+	UE_LOG(LogTemp, Warning, TEXT("SetIsActive Restore servers"));
+	Super::SetIsActive(bNewState);
+
+	if (bNewState)
+	{
+		SelectServersToRestore();
+		PrepareServersToRestore();
+	}
+}
+
 void AObjectiveRestoreServers::InitializeServerHall()
 {
 	FindAllServers();
-	SelectServersToRestore();
-	PrepareServersToRestore();
 	BindControlPanel();
 	InitializeTimer();
 	BindPlayerLocationDetection();
@@ -63,6 +73,7 @@ void AObjectiveRestoreServers::SelectServersToRestore()
 {
 	if (NumberOfServers < NumberOfServersToRestore)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Selected Servers to Restore: %d, %d"), NumberOfServersToRestore, NumberOfServers);
 		return;
 	}
 
@@ -93,6 +104,7 @@ void AObjectiveRestoreServers::PrepareServersToRestore()
 		Server->SetInteractFunction(RestoredDelegate);
 		Server->SetHeatUpFunction(HeatUpDelegate);
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Prepared Servers to Restore"));
 }
 
 void AObjectiveRestoreServers::FindAllServers()
@@ -181,6 +193,10 @@ void AObjectiveRestoreServers::RegisterServerRestored(AInteractableObject* Inter
 
 void AObjectiveRestoreServers::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
 {
+	if (!GetIsActive())
+	{
+		return;
+	}
 	if (bCanOverheat)
 	{
 		InitiateCoolingCycle();

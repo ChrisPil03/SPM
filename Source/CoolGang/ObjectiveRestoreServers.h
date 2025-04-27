@@ -46,6 +46,8 @@ public:
 	float GetHeatProgress() const { return CurrentHeatBuildup / 100; }
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	float GetCoolingProgress() const { return CoolingProgress; }
+
+	virtual void SetIsActive(const bool bNewState) override;
 	
 private:
 	void InitializeServerHall();
