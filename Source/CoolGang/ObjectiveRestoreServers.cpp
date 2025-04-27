@@ -2,32 +2,36 @@
 #include "ObjectiveRestoreServers.h"
 #include "ObjectiveServer.h"
 #include "PlayerLocationDetection.h"
-#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AObjectiveRestoreServers::AObjectiveRestoreServers() :
+	PlayerLocationDetection(nullptr),
+	RestoredServers(0),
 	NumberOfServers(0),
 	NumberOfServersToRestore(3),
-	ServerHallStatus(EServerHallStatus::Operating),
 	bCanOverheat(true),
+	ServerHallStatus(EServerHallStatus::Operating),
 	MaxHeatBuildup(100.f),
 	CurrentHeatBuildup(0.f),
 	CoolingTime(3.f),
-	CoolingProgress(0.f)
+	CoolingProgress(0.f),
+	OverheatSystemIntegrityDamage(50.f)
 {
 	ServersToRestore.Reserve(NumberOfServersToRestore);
-	
 	SetIsTimeBased(false);
+}
 
-	// BoxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Trigger"));
-	// RootComponent = BoxTrigger;
+void AObjectiveRestoreServers::BeginPlay()
+{
+	Super::BeginPlay();
+	InitializeServerHall();
 }
 
 void AObjectiveRestoreServers::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetIsComplete())
+	if (GetIsComplete() || GetIsFailed())
 	{
 		return;
 	}
@@ -35,16 +39,14 @@ void AObjectiveRestoreServers::Tick(float DeltaTime)
 	{
 		IncreaseObjectiveProgress(DeltaTime);
 	}
+	if (GetIsOverheated())
+	{
+		WeakenSystemIntegrity(OverheatSystemIntegrityDamage * DeltaTime);
+	}
 	if (GetIsCooling())
 	{
 		CoolDown(DeltaTime);
 	}
-}
-
-void AObjectiveRestoreServers::BeginPlay()
-{
-	Super::BeginPlay();
-	InitializeServerHall();
 }
 
 void AObjectiveRestoreServers::InitializeServerHall()
@@ -92,12 +94,6 @@ void AObjectiveRestoreServers::PrepareServersToRestore()
 		Server->SetHeatUpFunction(HeatUpDelegate);
 	}
 }
-
-// void AObjectiveRestoreServers::SetupTriggerEvents()
-// {
-// 	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxBeginOverlap);
-// 	BoxTrigger->OnComponentEndOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxEndOverlap);
-// }
 
 void AObjectiveRestoreServers::FindAllServers()
 {
@@ -225,29 +221,6 @@ void AObjectiveRestoreServers::IncreaseObjectiveProgress(float const DeltaTime)
 	ObjectiveProgress /= NumberOfServersToRestore;
 	SetObjectiveProgress(ObjectiveProgress);
 }
-
-// void AObjectiveRestoreServers::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-// 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-// {
-// 	if (!OtherActor || OtherActor == this)
-// 	{
-// 		return;
-// 	}
-//
-// 	if (GetIsNotStarted())
-// 	{
-// 		StartObjective();
-// 	}
-// }
-//
-// void AObjectiveRestoreServers::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-// 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-// {
-// 	if (!OtherActor || OtherActor == this)
-// 	{
-// 		return;
-// 	}
-// }
 
 // ________________________________________________________________
 // ____________________ Overheat / Cooling ________________________

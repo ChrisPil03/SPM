@@ -11,7 +11,6 @@ public:
 	static constexpr float ZeroCompletion = 0.f;
 	
 	FProgressTimer(const float InDuration);
-	~FProgressTimer() {}
 	
 	void IncreaseProgress(const float DeltaTime);
 	void DecreaseProgress(const float DeltaTime);

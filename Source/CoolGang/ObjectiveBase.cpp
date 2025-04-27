@@ -2,26 +2,28 @@
 
 #include "ObjectiveBase.h"
 #include "ObjectiveManager.h"
+#include "SystemIntegrity.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
-AObjectiveBase::AObjectiveBase()
+AObjectiveBase::AObjectiveBase() :
+	bIsActive(false),
+	ObjectiveState(EObjectiveState::NotStarted),
+	ObjectiveManager(nullptr),
+	ObjectiveDescription("Missing Description"),
+	ObjectiveTime(30.f),
+	bIsTimeBased(false),
+	Progress(0.f),
+	SystemIntegrity(nullptr),
+	BaseIntegrityDamage(100.f)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	ObjectiveState = EObjectiveState::NotStarted;
-	ObjectiveManager = nullptr;
-	ObjectiveDescription = "Missing Description";
-	ObjectiveTime = 30.f;
-	bIsTimeBased = false;
 }
 
-// Called when the game starts or when spawned
 void AObjectiveBase::BeginPlay()
 {
 	Super::BeginPlay();
 	FindObjectiveManager();
+	FindSystemIntegrity();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
 }
 
@@ -34,11 +36,18 @@ float AObjectiveBase::GetObjectiveProgress() const
 	return ProgressTimer->GetProgress();
 }
 
-// Called every frame
 void AObjectiveBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
+	if (GetIsFailed())
+	{
+		WeakenSystemIntegrity(BaseIntegrityDamage * DeltaTime);
+	}
+	if (!bIsActive)
+	{
+		return;
+	}
 	if (bIsTimeBased && GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaTime);
@@ -80,6 +89,14 @@ void AObjectiveBase::CompleteObjective()
 	ObjectiveManager->RegisterCompletedObjective();
 }
 
+void AObjectiveBase::FailObjective()
+{
+	if (!GetIsFailed())
+	{
+		SetObjectiveState(EObjectiveState::Failed);
+	}
+}
+
 void AObjectiveBase::IncreaseObjectiveProgress(float const DeltaTime)
 {
 	if (bIsTimeBased && ProgressTimer)
@@ -108,14 +125,12 @@ void AObjectiveBase::SetObjectiveProgress(const float NewProgress)
 	}
 }
 
-void AObjectiveBase::SetObjectiveManager(AObjectiveManager* NewManager)
+void AObjectiveBase::WeakenSystemIntegrity(const float Damage)
 {
-	if (!NewManager)
+	if (SystemIntegrity)
 	{
-		UE_LOG(LogTemp, Error, TEXT("ObjectiveBase: NewManager is nullptr"));
-		return;
+		SystemIntegrity->WeakenIntegrity(Damage);
 	}
-	ObjectiveManager = NewManager;
 }
 
 void AObjectiveBase::FindObjectiveManager()
@@ -125,7 +140,24 @@ void AObjectiveBase::FindObjectiveManager()
 
 	if (ObjectiveManagerActors.Num() > 0)
 	{
-		SetObjectiveManager(ObjectiveManager = Cast<AObjectiveManager>(ObjectiveManagerActors[0]));
+		ObjectiveManager = Cast<AObjectiveManager>(ObjectiveManagerActors[0]);
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: ObjectiveManager not found"));
+	}
+}
+
+void AObjectiveBase::FindSystemIntegrity()
+{
+	TArray<AActor*> SystemIntegrityActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASystemIntegrity::StaticClass(), SystemIntegrityActors);
+
+	if (SystemIntegrityActors.Num() > 0)
+	{
+		SystemIntegrity = Cast<ASystemIntegrity>(SystemIntegrityActors[0]);
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: SystemIntegrity not found"));
 	}
 }
 

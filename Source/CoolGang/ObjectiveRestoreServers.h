@@ -51,7 +51,6 @@ private:
 	void InitializeServerHall();
 	void SelectServersToRestore();
 	void PrepareServersToRestore();
-	//void SetupTriggerEvents();
 	void FindAllServers();
 	void BindControlPanel();
 	void BindPlayerLocationDetection();
@@ -69,21 +68,6 @@ private:
 	void InitiateCoolingCycle();
 	void CoolDown(float DeltaTime);
 	void ResumeOperating();
-
-	// UFUNCTION()
-	// void OnBoxBeginOverlap(
-	// 	UPrimitiveComponent* OverlappedComponent,
-	// 	AActor* OtherActor,
-	// 	UPrimitiveComponent* OtherComp,
-	// 	int32 OtherBodyIndex,
-	// 	bool bFromSweep,
-	// 	const FHitResult& SweepResult);
-	// UFUNCTION()
-	// void OnBoxEndOverlap(
-	// 	UPrimitiveComponent* OverlappedComponent,
-	// 	AActor* OtherActor,
-	// 	UPrimitiveComponent* OtherComp,
-	// 	int32 OtherBodyIndex);
 	
 	UFUNCTION()
 	void RegisterServerRestored(AInteractableObject* InteractableObject);
@@ -105,9 +89,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	int32 RestoredServers;
-
-	// UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
-	// UBoxComponent* BoxTrigger;
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	int NumberOfServers;
@@ -138,6 +119,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Overheat")
 	float CoolingProgress;
+
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	float OverheatSystemIntegrityDamage;
 
 	TUniquePtr<FProgressTimer> CoolingTimer;
 };

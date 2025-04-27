@@ -20,12 +20,11 @@ public:
 	void StrengthenIntegrity(const float Integrity);
 
 private:
-	UFUNCTION()
 	void SystemShutdown();
 
 	UPROPERTY(EditAnywhere, Category = "Integrity")
 	float MaxIntegrity;
 
-	UPROPERTY(EditAnywhere, Category = "Integrity")
+	UPROPERTY(VisibleAnywhere, Category = "Integrity")
 	float CurrentIntegrity;
 };
