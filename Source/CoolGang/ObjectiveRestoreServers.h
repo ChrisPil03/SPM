@@ -55,11 +55,12 @@ private:
 	void PrepareServersToRestore();
 	void FindAllServers();
 	void BindControlPanel();
-	void BindPlayerLocationDetection();
 	void ActivateControlPanel(const bool NewState);
 	bool ValidServerToRestore(const AObjectiveServer* Server) const;
 	bool GetIsServersRestored() const { return RestoredServers == NumberOfServersToRestore; }
+	void ResetServersToRestore();
 
+	void BindPlayerLocationDetection();
 	void OnEnterRoom(APlayerLocationDetection* Room);
 	void OnExitRoom(APlayerLocationDetection* Room);
 

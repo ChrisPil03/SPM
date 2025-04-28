@@ -22,6 +22,7 @@ protected:
 public:
 	void ActivateRandomObjective();
 	void RegisterCompletedObjective();
+	void ResetAllObjectives();
 
 private:
 	bool GetIsObjectivesCompleted() const;

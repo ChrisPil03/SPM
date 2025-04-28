@@ -138,6 +138,17 @@ void AObjectiveRestoreServers::BindControlPanel()
 	}
 }
 
+void AObjectiveRestoreServers::ResetServersToRestore()
+{
+	for (AObjectiveServer* Server : ServersToRestore)
+	{
+		Server->ResetServer();
+	}
+	ServersToRestore.Empty();
+	ServersToRestore.Reserve(NumberOfServersToRestore);
+	RestoredServers = 0;
+}
+
 void AObjectiveRestoreServers::BindPlayerLocationDetection()
 {
 	if (PlayerLocationDetection)
@@ -206,13 +217,12 @@ void AObjectiveRestoreServers::RegisterControlPanelInteraction(AInteractableObje
 void AObjectiveRestoreServers::ResetObjective()
 {
 	Super::ResetObjective();
-	ServersToRestore.Empty();
-	ServersToRestore.Reserve(NumberOfServersToRestore);
-	SelectServersToRestore();
-	PrepareServersToRestore();
 	SetServerHallStatus(EServerHallStatus::Operating);
 	ResetHeatBuildup();
 	ActivateControlPanel(true);
+	CoolingProgress = 0;
+	CoolingTimer->Reset();
+	ResetServersToRestore();
 }
 
 void AObjectiveRestoreServers::CompleteObjective()

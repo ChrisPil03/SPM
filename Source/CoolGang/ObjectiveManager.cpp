@@ -57,6 +57,7 @@ void AObjectiveManager::ActivateRandomObjective()
 	int32 RandomIndex = FMath::RandRange(0, AvailableObjectives.Num() - 1);
 	if (AObjectiveBase* SelectedObjective = AvailableObjectives[RandomIndex])
 	{
+		SelectedObjective->ResetObjective();
 		SelectedObjective->SetIsActive(true);
 		LastActivatedObjective = SelectedObjective;
 	}
@@ -73,6 +74,14 @@ void AObjectiveManager::RegisterCompletedObjective()
 	// {
 	// 	ObjectivesCompleted();
 	// }
+}
+
+void AObjectiveManager::ResetAllObjectives()
+{
+	for (AObjectiveBase* Objective : ObjectivesInLevel)
+	{
+		Objective->ResetObjective();
+	}
 }
 
 void AObjectiveManager::ObjectivesCompleted()

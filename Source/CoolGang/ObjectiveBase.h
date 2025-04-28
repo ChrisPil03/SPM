@@ -32,7 +32,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void StartObjective();
-	virtual void ResetObjective();
 	virtual void CompleteObjective();
 	virtual void FailObjective();
 	virtual void IncreaseObjectiveProgress(float const DeltaTime);
@@ -47,7 +46,8 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void ResetObjective();
+	
 	void SetObjectiveState(EObjectiveState const NewObjectiveState) { ObjectiveState = NewObjectiveState; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Objective States")

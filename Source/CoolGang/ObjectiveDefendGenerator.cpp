@@ -39,6 +39,7 @@ void AObjectiveDefendGenerator::ResetObjective()
 {
 	Super::ResetObjective();
 	HealthComponent->ResetHealthToMax();
+	ControlPanel->SetCanInteractWith(true);
 }
 
 void AObjectiveDefendGenerator::BindControlPanel()

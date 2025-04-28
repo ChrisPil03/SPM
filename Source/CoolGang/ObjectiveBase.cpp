@@ -67,9 +67,10 @@ void AObjectiveBase::StartObjective()
 void AObjectiveBase::ResetObjective()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
-	
-	ResetProgress();
+
+	SetIsActive(false);
 	SetObjectiveState(EObjectiveState::NotStarted);
+	ResetProgress();
 	StopDisplayObjectiveDescription();
 }
 
