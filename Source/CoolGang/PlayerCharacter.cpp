@@ -61,13 +61,27 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
+	
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Pistol);
 	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
-
-	// EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
 	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
+	
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Shotgun);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
+	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
 
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Rifle);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
+	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
 
 }
 
@@ -158,9 +172,27 @@ void APlayerCharacter::Dash()
 	DashComponent->Dash();
 }
 
-void APlayerCharacter::SetEquippedGun(TSubclassOf<AGunBase> Gun)
+
+inline void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 {
-	//EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
+	if (EquippedGun)
+	{
+		EquippedGun->SetActorHiddenInGame(true);
+	}
+
+	EquippedGun = NewWeapon;
+
+	if (EquippedGun)
+	{
+		EquippedGun->SetActorHiddenInGame(false);
+	}
+}
+
+
+void APlayerCharacter::ChangeEquippedGun(int32 WeaponSlot)
+{
+	EquipWeapon(Guns[WeaponSlot]);
+	
 }
 
 bool APlayerCharacter::IsInRange(FHitResult &HitResult) const
