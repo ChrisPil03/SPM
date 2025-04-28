@@ -42,12 +42,12 @@ void UDashComponent::Dash()
 	FVector Location;
 	FRotator Rotation;
 	OwnerCharacter->GetController()->GetPlayerViewPoint(Location, Rotation);
-	
+	StartLocation = OwnerCharacter->GetActorLocation();
 	
 	Rotation.Pitch = 0.f; // Ignore vertical aim
-	FVector DashDirection = OwnerCharacter->GetLastMovementInputVector();
+	DashDirection = OwnerCharacter->GetLastMovementInputVector();
 	FVector DashVelocity = DashDirection;
-
+	
 	if (DashDirection == FVector::ZeroVector)
 	{
 		DashVelocity = Rotation.Vector();
@@ -68,32 +68,37 @@ void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	
 	if (bIsDashing)
 	{
-		CheckToReset();
+		if (CheckToReset())
+		{
+			Reset();
+		}
 	}
 	if (!bIsDashing && bShouldDecelerate)
 	{
 		FVector CurrentVelocity = OwnerCharacter->GetVelocity();
-		FVector NewVelocity = FMath::VInterpTo(CurrentVelocity, FVector::ZeroVector, DeltaTime, DecelerationSpeed);
+		CurrentVelocity.Z = 0.0f;
+		FVector TargetVelocity = OwnerCharacter->GetActorForwardVector() * OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
+		FVector NewVelocity = FMath::VInterpTo(CurrentVelocity, TargetVelocity, DeltaTime, DecelerationSpeed);
+		NewVelocity.Z = OwnerCharacter->GetVelocity().Z;
 		OwnerCharacter->GetCharacterMovement()->Velocity = NewVelocity;
 
-		if (NewVelocity.SizeSquared() < 10.f)
+		if ((NewVelocity - TargetVelocity).SizeSquared() < 10.f)
 		{
 			bShouldDecelerate = false; // Stop decelerating
 		}
 	}
 }
 
-void UDashComponent::CheckToReset()
+bool UDashComponent::CheckToReset()
 {
 	if (!OwnerCharacter || !bIsDashing)
-		return;
+		return false;
 
-	
-
-	if (!GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
+	if (GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
 	{
-		Reset();
+		return true;
 	}
+	return false;
 }
 
 void UDashComponent::Reset()

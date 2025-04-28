@@ -16,6 +16,7 @@ UHealthComponent::UHealthComponent()
 void UHealthComponent::ResetHealthToMax()
 {
 	Health = MaxHealth;
+	
 }
 
 
@@ -52,9 +53,12 @@ void UHealthComponent::DamageTaken(AActor* DamagedActor, float Damage, const UDa
 	}
 	Health -= Damage;
 
-	if (DeathDelegate.IsBound())
+	if (Health <= 0)
 	{
-		DeathDelegate.Execute();
+		if (DeathDelegate.IsBound())
+		{
+			DeathDelegate.Execute();
+		}
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
 }

@@ -56,4 +56,3 @@ void APlayerLocationDetection::OnEndOverlap(UPrimitiveComponent* OverlappedCompo
 		}
 	}
 }
-

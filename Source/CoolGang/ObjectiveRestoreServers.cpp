@@ -2,43 +2,23 @@
 #include "ObjectiveRestoreServers.h"
 #include "ObjectiveServer.h"
 #include "PlayerLocationDetection.h"
-#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AObjectiveRestoreServers::AObjectiveRestoreServers() :
+	PlayerLocationDetection(nullptr),
+	RestoredServers(0),
 	NumberOfServers(0),
 	NumberOfServersToRestore(3),
-	ServerHallStatus(EServerHallStatus::Operating),
 	bCanOverheat(true),
+	ServerHallStatus(EServerHallStatus::Operating),
 	MaxHeatBuildup(100.f),
 	CurrentHeatBuildup(0.f),
 	CoolingTime(3.f),
-	CoolingProgress(0.f)
+	CoolingProgress(0.f),
+	OverheatSystemIntegrityDamage(50.f)
 {
 	ServersToRestore.Reserve(NumberOfServersToRestore);
-	
 	SetIsTimeBased(false);
-
-	// BoxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Trigger"));
-	// RootComponent = BoxTrigger;
-}
-
-void AObjectiveRestoreServers::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (GetIsComplete())
-	{
-		return;
-	}
-	if (GetIsOperating())
-	{
-		IncreaseObjectiveProgress(DeltaTime);
-	}
-	if (GetIsCooling())
-	{
-		CoolDown(DeltaTime);
-	}
 }
 
 void AObjectiveRestoreServers::BeginPlay()
@@ -47,11 +27,43 @@ void AObjectiveRestoreServers::BeginPlay()
 	InitializeServerHall();
 }
 
+void AObjectiveRestoreServers::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (GetIsComplete() || GetIsFailed())
+	{
+		return;
+	}
+	if (GetIsOperating())
+	{
+		IncreaseObjectiveProgress(DeltaTime);
+	}
+	if (GetIsOverheated())
+	{
+		WeakenSystemIntegrity(OverheatSystemIntegrityDamage * DeltaTime);
+	}
+	if (GetIsCooling())
+	{
+		CoolDown(DeltaTime);
+	}
+}
+
+void AObjectiveRestoreServers::SetIsActive(const bool bNewState)
+{
+	UE_LOG(LogTemp, Warning, TEXT("SetIsActive Restore servers"));
+	Super::SetIsActive(bNewState);
+
+	if (bNewState)
+	{
+		SelectServersToRestore();
+		PrepareServersToRestore();
+	}
+}
+
 void AObjectiveRestoreServers::InitializeServerHall()
 {
 	FindAllServers();
-	SelectServersToRestore();
-	PrepareServersToRestore();
 	BindControlPanel();
 	InitializeTimer();
 	BindPlayerLocationDetection();
@@ -61,6 +73,7 @@ void AObjectiveRestoreServers::SelectServersToRestore()
 {
 	if (NumberOfServers < NumberOfServersToRestore)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Selected Servers to Restore: %d, %d"), NumberOfServersToRestore, NumberOfServers);
 		return;
 	}
 
@@ -91,13 +104,8 @@ void AObjectiveRestoreServers::PrepareServersToRestore()
 		Server->SetInteractFunction(RestoredDelegate);
 		Server->SetHeatUpFunction(HeatUpDelegate);
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Prepared Servers to Restore"));
 }
-
-// void AObjectiveRestoreServers::SetupTriggerEvents()
-// {
-// 	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxBeginOverlap);
-// 	BoxTrigger->OnComponentEndOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxEndOverlap);
-// }
 
 void AObjectiveRestoreServers::FindAllServers()
 {
@@ -130,17 +138,24 @@ void AObjectiveRestoreServers::BindControlPanel()
 	}
 }
 
+void AObjectiveRestoreServers::ResetServersToRestore()
+{
+	for (AObjectiveServer* Server : ServersToRestore)
+	{
+		Server->ResetServer();
+	}
+	ServersToRestore.Empty();
+	ServersToRestore.Reserve(NumberOfServersToRestore);
+	RestoredServers = 0;
+}
+
 void AObjectiveRestoreServers::BindPlayerLocationDetection()
 {
 	if (PlayerLocationDetection)
 	{
-		FOnTriggerEnterDelegate EnterDelegate;
-		EnterDelegate.AddUObject(this, &AObjectiveRestoreServers::OnEnterRoom);
-		PlayerLocationDetection->SetOnTriggerEnter(EnterDelegate);
-
-		FOnTriggerExitDelegate ExitDelegate;
-		ExitDelegate.AddUObject(this, &AObjectiveRestoreServers::OnExitRoom);
-		PlayerLocationDetection->SetOnTriggerExit(ExitDelegate);
+		UE_LOG(LogTemp, Warning, TEXT("Player location detection binded"));
+		PlayerLocationDetection->AddOnTriggerEnterFunction(this, &AObjectiveRestoreServers::OnEnterRoom);
+		PlayerLocationDetection->AddOnTriggerExitFunction(this, &AObjectiveRestoreServers::OnExitRoom);
 	}
 }
 
@@ -185,6 +200,10 @@ void AObjectiveRestoreServers::RegisterServerRestored(AInteractableObject* Inter
 
 void AObjectiveRestoreServers::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
 {
+	if (!GetIsActive())
+	{
+		return;
+	}
 	if (bCanOverheat)
 	{
 		InitiateCoolingCycle();
@@ -194,13 +213,12 @@ void AObjectiveRestoreServers::RegisterControlPanelInteraction(AInteractableObje
 void AObjectiveRestoreServers::ResetObjective()
 {
 	Super::ResetObjective();
-	ServersToRestore.Empty();
-	ServersToRestore.Reserve(NumberOfServersToRestore);
-	SelectServersToRestore();
-	PrepareServersToRestore();
 	SetServerHallStatus(EServerHallStatus::Operating);
 	ResetHeatBuildup();
 	ActivateControlPanel(true);
+	CoolingProgress = 0;
+	CoolingTimer->Reset();
+	ResetServersToRestore();
 }
 
 void AObjectiveRestoreServers::CompleteObjective()
@@ -225,29 +243,6 @@ void AObjectiveRestoreServers::IncreaseObjectiveProgress(float const DeltaTime)
 	ObjectiveProgress /= NumberOfServersToRestore;
 	SetObjectiveProgress(ObjectiveProgress);
 }
-
-// void AObjectiveRestoreServers::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-// 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-// {
-// 	if (!OtherActor || OtherActor == this)
-// 	{
-// 		return;
-// 	}
-//
-// 	if (GetIsNotStarted())
-// 	{
-// 		StartObjective();
-// 	}
-// }
-//
-// void AObjectiveRestoreServers::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-// 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-// {
-// 	if (!OtherActor || OtherActor == this)
-// 	{
-// 		return;
-// 	}
-// }
 
 // ________________________________________________________________
 // ____________________ Overheat / Cooling ________________________

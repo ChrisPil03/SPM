@@ -61,11 +61,28 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
+	
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Pistol);
 	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
-
-	// EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
+	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
+	
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Shotgun);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
+	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
+
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Rifle);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
+	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
+
 }
 
 // Called every frame
@@ -112,16 +129,28 @@ void APlayerCharacter::Interact()
 
 void APlayerCharacter::PullTrigger()
 {
+	if (!EquippedGun)
+	{
+		return;
+	}
 	EquippedGun->StartFire();
 }
 
 void APlayerCharacter::ReleasedTrigger()
 {
+	if (!EquippedGun)
+	{
+		return;
+	}
 	EquippedGun->StopFire();
 }
 
 void APlayerCharacter::ReloadCurrentGun()
 {
+	if (!EquippedGun)
+	{
+		return;
+	}
 	EquippedGun->Reload();
 }
 
@@ -141,6 +170,29 @@ void APlayerCharacter::Dash()
 	Direction = Direction.GetSafeNormal();
 
 	DashComponent->Dash();
+}
+
+
+inline void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
+{
+	if (EquippedGun)
+	{
+		EquippedGun->SetActorHiddenInGame(true);
+	}
+
+	EquippedGun = NewWeapon;
+
+	if (EquippedGun)
+	{
+		EquippedGun->SetActorHiddenInGame(false);
+	}
+}
+
+
+void APlayerCharacter::ChangeEquippedGun(int32 WeaponSlot)
+{
+	EquipWeapon(Guns[WeaponSlot]);
+	
 }
 
 bool APlayerCharacter::IsInRange(FHitResult &HitResult) const

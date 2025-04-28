@@ -4,7 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayAbilitySpec.h"
 #include "GunBase.generated.h"
+
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	Shotgun UMETA(DisplayName = "Shotgun"),
+	Rifle UMETA(DisplayName = "Rifle"),
+	Pistol UMETA(DisplayName = "Pistol"),
+	// Add other weapon types as needed
+};
 
 
 UCLASS()
@@ -23,9 +33,6 @@ protected:
 	// maybe need to change later
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
-
-	//can change for other system if needed
-	
 
 	///   Sound   ///
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
@@ -53,12 +60,11 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
-
-	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
-	TSubclassOf<class UGameplayEffect> GE_OnHit;
 	
-
 	/////////////////  Gun property  //////////////////////////
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float Pellets{7};
+	
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float Damage{10};
 
@@ -75,7 +81,7 @@ protected:
 	int MagazineSize {30};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat ")
-	int AmmoInMag {30};
+	int AmmoCount {30};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float MinRecoil {0.5f};
@@ -89,50 +95,24 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float RecoilExponent {2.0f};
 	
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
 
 	
-	bool GunTrace(FHitResult& Hit, FVector& ShotDirection);
 	AController* GetOwnerController() const;
 
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ReloadTimerHandle;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun | Stat")
 	float TimeBetweenShots;
 	bool bCanFire = true;
 	bool bIsRecoiling  = false;
 	bool bIsReloading  = false;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	virtual void StartFire();
-	virtual void StopFire();
-	virtual void Fire();
-
-	UFUNCTION(BlueprintCallable)
-	virtual void Reload();
-	void StartRecoil();
-	
-	bool CanFire() const;
-	bool bIsFiring = false;
-
-	UFUNCTION(BlueprintCallable)
-	int GetMagazineSize(){return MagazineSize;};
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void SetAmmoInMagText(int Ammo);
-
-	UFUNCTION(BlueprintCallable)
-	int GetAmmoInMag(){return AmmoInMag;}
-	
-	UFUNCTION(BlueprintCallable)
-	bool GetIsAutomatic(){return bIsAutomatic;}
-	
-private:
 	void BlinkDebug(FHitResult& h);
+	void InitWeaponStats();
+	void InitAbilitySystemComponent();
 	FTimerHandle BlinkTimerHandle;
 
 	float ElapsedTime =  0.0f;
@@ -142,7 +122,71 @@ private:
 	float TargetPitch = 0.0f;
 	
 	UPROPERTY()
-	class UPistolAttributeSet* PistolAttributeSet; 
+	const class UWeaponAttributeSet* WeaponAttributeSet;
+
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	class UAbilitySystemComponent *AbilitySystemComponent;
+
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_InitWeaponStats;
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UGameplayAbility> FireAbilityClass;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UGameplayAbility> ReloadAbilityClass;
+
+	UPROPERTY()
+	FGameplayAbilitySpecHandle FireHandle;
+
+	UPROPERTY()
+	FGameplayAbilitySpecHandle ReloadHandle;
+	
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartFire();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopFire();
+	
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void Fire();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void Reload();
+	void StartRecoil();
+	
+	bool CanFire() const;
+	bool bIsFiring = false;
+
+	UFUNCTION(BlueprintCallable)
+	int GetMagazineSize(){return MagazineSize;};
+
+	UFUNCTION(BlueprintCallable)
+	bool IsAutomatic(){return bIsAutomatic;};
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetAmmoCountText(float Ammo);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetMaxAmmoText(float Ammo);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	EWeaponType WeaponType;
+
+	EWeaponType GetWeaponType() const { return WeaponType; }
+	
+	class UAbilitySystemComponent* GetAbilitySystemComponent() const
+	{
+		return AbilitySystemComponent;
+	}
+	
+	void Initialize();
+	
 };
 
 

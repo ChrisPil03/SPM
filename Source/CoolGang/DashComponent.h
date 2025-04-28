@@ -49,9 +49,10 @@ private:
 	bool bIsDashing;
 	bool bShouldDecelerate;
 	FVector StartLocation;
+	FVector DashDirection;
 	float OriginalGroundFriction;
 	
-	void CheckToReset();
+	bool CheckToReset();
 
 	void Reset();
 };

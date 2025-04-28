@@ -23,7 +23,22 @@ void AObjectiveDefendGenerator::BeginPlay()
 
 void AObjectiveDefendGenerator::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
 {
+	if (!GetIsActive())
+	{
+		return;
+	}
 	StartObjective();
+	InitiateQuarantine();
+}
+
+void AObjectiveDefendGenerator::InitiateQuarantine()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Quarantine initiated"));
+}
+
+bool AObjectiveDefendGenerator::CanNotTakeDamage()
+{
+	return !GetIsActive() || GetIsComplete() || GetIsFailed();
 }
 
 void AObjectiveDefendGenerator::CompleteObjective()
@@ -35,6 +50,19 @@ void AObjectiveDefendGenerator::ResetObjective()
 {
 	Super::ResetObjective();
 	HealthComponent->ResetHealthToMax();
+	ControlPanel->SetCanInteractWith(true);
+}
+
+float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
+	AController* EventInstigator, AActor* DamageCauser)
+{
+	if (CanNotTakeDamage())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Cannot take damage"));
+		return 0;
+	}
+	DamageAmount = FMath::Min(DamageAmount, HealthComponent->GetCurrentHealth());
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void AObjectiveDefendGenerator::BindControlPanel()
@@ -50,7 +78,7 @@ void AObjectiveDefendGenerator::BindControlPanel()
 void AObjectiveDefendGenerator::BindDeathFunction()
 {
 	FDeathDelegate Delegate;
-	Delegate.BindUObject(this, &AObjectiveDefendGenerator::ResetObjective);
+	Delegate.BindUObject(this, &Super::FailObjective);
 	HealthComponent->SetDeathFunction(Delegate);
 }
 

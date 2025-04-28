@@ -22,8 +22,17 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	void SetOnTriggerEnter(const FOnTriggerEnterDelegate& NewDelegate) { OnTriggerEnter = NewDelegate; }
-	void SetOnTriggerExit(const FOnTriggerEnterDelegate& NewDelegate) { OnTriggerExit = NewDelegate; }
+	template <typename T>
+	void AddOnTriggerEnterFunction(T* Object, void (T::*Func)(APlayerLocationDetection*))
+	{
+		OnTriggerEnter.AddUObject(Object, Func);
+	}
+	
+	template <typename T>
+	void AddOnTriggerExitFunction(T* Object, void (T::*Func)(APlayerLocationDetection*))
+	{
+		OnTriggerExit.AddUObject(Object, Func);
+	}
 
 	UFUNCTION()
 	void OnBeginOverlap(

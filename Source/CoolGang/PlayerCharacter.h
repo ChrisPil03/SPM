@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "HealthComponent.h"
-
 #include "PlayerCharacter.generated.h"
 
 class AGunBase;
@@ -50,7 +49,12 @@ public:
 	void Dash();
 
 	UFUNCTION(BlueprintCallable)
+	void ChangeEquippedGun(int32 WeaponSlot);
+
+	UFUNCTION(BlueprintCallable)
 	AGunBase* GetEquippedGun() const{ return EquippedGun;};
+	void EquipWeapon(AGunBase* NewWeapon);
+	
 
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
@@ -64,7 +68,13 @@ private:
 	bool bDead;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
-	TSubclassOf<AGunBase> GunClass;
+	TSubclassOf<AGunBase> Pistol;
+
+	UPROPERTY(EditAnywhere, Category=Gameplay)
+	TSubclassOf<AGunBase> Rifle;
+
+	UPROPERTY(EditAnywhere, Category=Gameplay)
+	TSubclassOf<AGunBase> Shotgun;
 
 	UPROPERTY()
 	AGunBase* EquippedGun;
@@ -88,4 +98,9 @@ private:
 
 	UPROPERTY()
 	class UPlayerAttributeSet* PlayerAttributeSet;
+
+	UPROPERTY()
+	TArray<AGunBase*> Guns;
+
+
 };

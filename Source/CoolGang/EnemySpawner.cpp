@@ -3,8 +3,10 @@
 
 #include "EnemySpawner.h"
 #include "TimerManager.h"
-#include "EnemySpawnManager.h" 
+#include "EnemySpawnManager.h"
+#include "AbilitySystemComponent.h"
 #include "EnemyAI.h"
+#include "EnemyAttributeSet.h"
 
 AEnemySpawner::AEnemySpawner()
 {
@@ -35,6 +37,24 @@ AEnemyAI* AEnemySpawner::SpawnEnemy() const
 	{
 		DeadEnemies[0]->SetActorLocationAndRotation(Location, Rotation);
 		DeadEnemies[0]->GetHealthComponent()->ResetHealthToMax();
+		AEnemyAI* DeadEnemy = Cast<AEnemyAI>(DeadEnemies[0]);
+		if (DeadEnemy)
+		{
+			UAbilitySystemComponent* ASC = DeadEnemy->AbilitySystemComponent;
+			if (ASC)
+			{
+				const UEnemyAttributeSet* AttributeSet = ASC->GetSet<UEnemyAttributeSet>();
+				if (AttributeSet)
+				{
+					float EnemyMaxHealth = AttributeSet->GetMaxHealth();
+
+					// Now set health
+					UEnemyAttributeSet* MutableAttributeSet = const_cast<UEnemyAttributeSet*>(AttributeSet);
+					MutableAttributeSet->SetHealth(EnemyMaxHealth);
+				}
+			}
+		}
+		
 		return DeadEnemies[0];
 	}
 	return GetWorld()->SpawnActor<AEnemyAI>(EnemyClass, Location, Rotation);
