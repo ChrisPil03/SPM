@@ -4,6 +4,7 @@
 #include "ObjectiveBase.h"
 #include "ObjectiveRestoreServers.generated.h"
 
+class APlayerLocationDetection;
 class UBoxComponent;
 class AInteractableObject;
 class AObjectiveServer;
@@ -50,12 +51,16 @@ private:
 	void InitializeServerHall();
 	void SelectServersToRestore();
 	void PrepareServersToRestore();
-	void SetupTriggerEvents();
+	//void SetupTriggerEvents();
 	void FindAllServers();
 	void BindControlPanel();
+	void BindPlayerLocationDetection();
 	void ActivateControlPanel(const bool NewState);
 	bool ValidServerToRestore(const AObjectiveServer* Server) const;
 	bool GetIsServersRestored() const { return RestoredServers == NumberOfServersToRestore; }
+
+	void OnEnterRoom(APlayerLocationDetection* Room);
+	void OnExitRoom(APlayerLocationDetection* Room);
 
 	void InitializeTimer();
 	void ResetCoolingTimerProgress() const;
@@ -65,20 +70,20 @@ private:
 	void CoolDown(float DeltaTime);
 	void ResumeOperating();
 
-	UFUNCTION()
-	void OnBoxBeginOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);
-	UFUNCTION()
-	void OnBoxEndOverlap(
-		UPrimitiveComponent* OverlappedComponent,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex);
+	// UFUNCTION()
+	// void OnBoxBeginOverlap(
+	// 	UPrimitiveComponent* OverlappedComponent,
+	// 	AActor* OtherActor,
+	// 	UPrimitiveComponent* OtherComp,
+	// 	int32 OtherBodyIndex,
+	// 	bool bFromSweep,
+	// 	const FHitResult& SweepResult);
+	// UFUNCTION()
+	// void OnBoxEndOverlap(
+	// 	UPrimitiveComponent* OverlappedComponent,
+	// 	AActor* OtherActor,
+	// 	UPrimitiveComponent* OtherComp,
+	// 	int32 OtherBodyIndex);
 	
 	UFUNCTION()
 	void RegisterServerRestored(AInteractableObject* InteractableObject);
@@ -88,6 +93,9 @@ private:
 
 	UFUNCTION()
 	void AddHeatBuildup(float Heat);
+
+	UPROPERTY(EditInstanceOnly)
+	APlayerLocationDetection* PlayerLocationDetection;
 	
 	UPROPERTY()
 	TArray<AObjectiveServer*> AllServers;
@@ -98,8 +106,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	int32 RestoredServers;
 
-	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
-	UBoxComponent* BoxTrigger;
+	// UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	// UBoxComponent* BoxTrigger;
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	int NumberOfServers;

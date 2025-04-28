@@ -18,13 +18,8 @@ class COOLGANG_API ACyberWarriorGameModeBase : public AGameModeBase
 
 public:
 	virtual void PlayerKilled(APlayerCharacter* PlayerKilled);
-private:
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
-	int EnemiesKilled = 0;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	float GameTimer = 0;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	bool bIsObjectiveCompleted = false; 
+protected:
+	virtual void BeginPlay() override;
+	
 };

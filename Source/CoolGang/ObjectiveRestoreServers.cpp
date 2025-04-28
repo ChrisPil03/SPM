@@ -1,6 +1,7 @@
 
 #include "ObjectiveRestoreServers.h"
 #include "ObjectiveServer.h"
+#include "PlayerLocationDetection.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -18,8 +19,8 @@ AObjectiveRestoreServers::AObjectiveRestoreServers() :
 	
 	SetIsTimeBased(false);
 
-	BoxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Trigger"));
-	RootComponent = BoxTrigger;
+	// BoxTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Trigger"));
+	// RootComponent = BoxTrigger;
 }
 
 void AObjectiveRestoreServers::Tick(float DeltaTime)
@@ -48,12 +49,12 @@ void AObjectiveRestoreServers::BeginPlay()
 
 void AObjectiveRestoreServers::InitializeServerHall()
 {
-	SetupTriggerEvents();
 	FindAllServers();
 	SelectServersToRestore();
 	PrepareServersToRestore();
 	BindControlPanel();
 	InitializeTimer();
+	BindPlayerLocationDetection();
 }
 
 void AObjectiveRestoreServers::SelectServersToRestore()
@@ -92,11 +93,11 @@ void AObjectiveRestoreServers::PrepareServersToRestore()
 	}
 }
 
-void AObjectiveRestoreServers::SetupTriggerEvents()
-{
-	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxBeginOverlap);
-	BoxTrigger->OnComponentEndOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxEndOverlap);
-}
+// void AObjectiveRestoreServers::SetupTriggerEvents()
+// {
+// 	BoxTrigger->OnComponentBeginOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxBeginOverlap);
+// 	BoxTrigger->OnComponentEndOverlap.AddDynamic(this, &AObjectiveRestoreServers::OnBoxEndOverlap);
+// }
 
 void AObjectiveRestoreServers::FindAllServers()
 {
@@ -127,6 +128,31 @@ void AObjectiveRestoreServers::BindControlPanel()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ObjectiveRestoreServers: ControlPanel is missing"));
 	}
+}
+
+void AObjectiveRestoreServers::BindPlayerLocationDetection()
+{
+	if (PlayerLocationDetection)
+	{
+		FOnTriggerEnterDelegate EnterDelegate;
+		EnterDelegate.AddUObject(this, &AObjectiveRestoreServers::OnEnterRoom);
+		PlayerLocationDetection->SetOnTriggerEnter(EnterDelegate);
+
+		FOnTriggerExitDelegate ExitDelegate;
+		ExitDelegate.AddUObject(this, &AObjectiveRestoreServers::OnExitRoom);
+		PlayerLocationDetection->SetOnTriggerExit(ExitDelegate);
+	}
+}
+
+void AObjectiveRestoreServers::OnEnterRoom(APlayerLocationDetection* Room)
+{
+	UE_LOG(LogTemp, Display, TEXT("Entered server room"));
+	StartObjective();
+}
+
+void AObjectiveRestoreServers::OnExitRoom(APlayerLocationDetection* Room)
+{
+	UE_LOG(LogTemp, Display, TEXT("Exited server room PlayerLocationDetection"));
 }
 
 void AObjectiveRestoreServers::ActivateControlPanel(const bool NewState)
@@ -200,30 +226,28 @@ void AObjectiveRestoreServers::IncreaseObjectiveProgress(float const DeltaTime)
 	SetObjectiveProgress(ObjectiveProgress);
 }
 
-void AObjectiveRestoreServers::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (!OtherActor || OtherActor == this)
-	{
-		return;
-	}
-
-	if (GetIsNotStarted())
-	{
-		StartObjective();
-	}
-}
-
-void AObjectiveRestoreServers::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (!OtherActor || OtherActor == this)
-	{
-		return;
-	}
-	
-	UE_LOG(LogTemp, Display, TEXT("Exited server room"));
-}
+// void AObjectiveRestoreServers::OnBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+// 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+// {
+// 	if (!OtherActor || OtherActor == this)
+// 	{
+// 		return;
+// 	}
+//
+// 	if (GetIsNotStarted())
+// 	{
+// 		StartObjective();
+// 	}
+// }
+//
+// void AObjectiveRestoreServers::OnBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+// 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+// {
+// 	if (!OtherActor || OtherActor == this)
+// 	{
+// 		return;
+// 	}
+// }
 
 // ________________________________________________________________
 // ____________________ Overheat / Cooling ________________________

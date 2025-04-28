@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EnemySpawnManager.h"
 #include "GameFramework/Actor.h"
 #include "EnemySpawner.generated.h"
 
 class AEnemyAI;
 class AEnemySpawnManager;
+class APlayerLocationDetection;
 
 UCLASS()
 class COOLGANG_API AEnemySpawner : public AActor
@@ -29,6 +29,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 private:
+	
+	UPROPERTY(EditInstanceOnly)
+	APlayerLocationDetection* SpawnArea;
+	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	TSubclassOf<AEnemyAI> EnemyClass;
 
