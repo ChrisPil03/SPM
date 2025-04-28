@@ -153,13 +153,9 @@ void AObjectiveRestoreServers::BindPlayerLocationDetection()
 {
 	if (PlayerLocationDetection)
 	{
-		FOnTriggerEnterDelegate EnterDelegate;
-		EnterDelegate.AddUObject(this, &AObjectiveRestoreServers::OnEnterRoom);
-		PlayerLocationDetection->SetOnTriggerEnter(EnterDelegate);
-
-		FOnTriggerExitDelegate ExitDelegate;
-		ExitDelegate.AddUObject(this, &AObjectiveRestoreServers::OnExitRoom);
-		PlayerLocationDetection->SetOnTriggerExit(ExitDelegate);
+		UE_LOG(LogTemp, Warning, TEXT("Player location detection binded"));
+		PlayerLocationDetection->AddOnTriggerEnterFunction(this, &AObjectiveRestoreServers::OnEnterRoom);
+		PlayerLocationDetection->AddOnTriggerExitFunction(this, &AObjectiveRestoreServers::OnExitRoom);
 	}
 }
 

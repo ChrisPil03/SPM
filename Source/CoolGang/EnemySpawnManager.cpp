@@ -129,17 +129,10 @@ void AEnemySpawnManager::BindPlayerLocationDetection()
 	{
 		if (APlayerLocationDetection* PlayerLocationDetection = Cast<APlayerLocationDetection>(FoundActor))
 		{
-		
-			FOnTriggerEnterDelegate EnterDelegate;
-			EnterDelegate.AddUObject(this, &AEnemySpawnManager::OnEnterTriggerBox);
-			PlayerLocationDetection->SetOnTriggerEnter(EnterDelegate);
-
-			FOnTriggerExitDelegate ExitDelegate;
-			ExitDelegate.AddUObject(this, &AEnemySpawnManager::OnExitTriggerBox);
-			PlayerLocationDetection->SetOnTriggerExit(ExitDelegate);
+			PlayerLocationDetection->AddOnTriggerEnterFunction(this, &AEnemySpawnManager::OnEnterTriggerBox);
+			PlayerLocationDetection->AddOnTriggerExitFunction(this, &AEnemySpawnManager::OnExitTriggerBox);
 		}
 	}
-	
 }
 
 void AEnemySpawnManager::OnEnterTriggerBox(APlayerLocationDetection* SpawnBox)

@@ -60,6 +60,8 @@ void AObjectiveManager::ActivateRandomObjective()
 		SelectedObjective->ResetObjective();
 		SelectedObjective->SetIsActive(true);
 		LastActivatedObjective = SelectedObjective;
+
+		UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
 	}
 }
 
