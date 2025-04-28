@@ -97,6 +97,7 @@ void AObjectiveServer::CompleteRestoration()
 	{
 		PerformDelegate.Broadcast(this);
 	}
+	ResetMaterial();
 }
 
 void AObjectiveServer::PauseRestoration()
@@ -119,6 +120,15 @@ void AObjectiveServer::ResumeRestoration()
 	}
 }
 
+void AObjectiveServer::ResetServer()
+{
+	Super::Reset();
+	SetServerState(EServerState::Idle);
+	ProgressTimer->Reset();
+	RestoreProgress = 0;
+	ResetMaterial();
+}
+
 void AObjectiveServer::SetDebugMaterial() const 
 {
 	if (RedMaterial)
@@ -127,5 +137,16 @@ void AObjectiveServer::SetDebugMaterial() const
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Red meterial not set"));
+	}
+}
+
+void AObjectiveServer::ResetMaterial()
+{
+	if (StandardMaterial)
+	{
+		GetMesh()->SetMaterial(0, StandardMaterial);
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Standard meterial not set"));
 	}
 }

@@ -57,11 +57,16 @@ public:
 	UFUNCTION()
 	void ResumeRestoration();
 
+	void ResetServer();
+
 private:
 	//Currently for debugging
 	void SetDebugMaterial() const;
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* RedMaterial;
+	void ResetMaterial();
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	UMaterialInterface* StandardMaterial;
 	
 	void StartRestoration();
 	void IncreaseRestorationProgress(float DeltaTime);
