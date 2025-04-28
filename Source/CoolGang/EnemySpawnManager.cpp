@@ -47,6 +47,8 @@ void AEnemySpawnManager::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SpawnInterval = BaselineSpawnInterval;
+	
 	BindPlayerLocationDetection();
 }
 
@@ -58,13 +60,15 @@ void AEnemySpawnManager::Tick(float DeltaTime)
 	if (SpawnInterval <= 0.f)
 	{
 		SpawnEnemy();
-		SpawnInterval = BaselineSpawnInterval;
+		SpawnInterval = UpdatedSpawnInterval;
 	}
 	SpawnInterval -= DeltaTime;
 	
 	if (SpawnIntervalIncreaseProgress <= 0.f)
 	{
-		BaselineSpawnInterval = CalculateSpawnTimer(SpawnIntervalIncreaseCount++, BaselineSpawnInterval, MinimumSpawnInterval, SpawnIntervalScale);
+		double OldSpawnInterval = UpdatedSpawnInterval;
+		UpdatedSpawnInterval = CalculateSpawnTimer(SpawnIntervalIncreaseCount++, BaselineSpawnInterval, MinimumSpawnInterval, SpawnIntervalScale, MaxSpawnIntervalIncreaseCount, SpawnAccelerationRate);
+		UE_LOG(LogTemp, Warning, TEXT("Diff: %f"), OldSpawnInterval-UpdatedSpawnInterval);
 		SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
 	}
 	SpawnIntervalIncreaseProgress -= DeltaTime;
@@ -78,10 +82,20 @@ void AEnemySpawnManager::RegisterSpawner(APlayerLocationDetection* SpawnLocation
 }
 
 
-float AEnemySpawnManager::CalculateSpawnTimer(int cycleIndex, float T0, float Tmin, float k)
+float AEnemySpawnManager::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
 {
-	float t = T0 - k * std::logf(cycleIndex + 1);
-	return std::max(Tmin, t);
+	// Normalize cycle progress between 0..1
+	float tNorm = float(cycleIndex) / float(maxCycles);
+
+	// Compute the “ease-in” curve via power
+	float deltaNorm = pow(tNorm, exponent);
+
+	// Scale and invert to get your timer
+	float t = baselineInterval
+			- intervalScale * deltaNorm;
+
+	// Clamp to your minimum
+	return std::max(minimumInterval, t);
 }
 
 void AEnemySpawnManager::SpawnEnemy()
