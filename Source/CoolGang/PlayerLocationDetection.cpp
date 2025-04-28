@@ -36,7 +36,7 @@ void APlayerLocationDetection::OnBeginOverlap(UPrimitiveComponent* OverlappedCom
 	{
 		if (OnTriggerEnter.IsBound())
 		{
-			OnTriggerEnter.Broadcast();
+			OnTriggerEnter.Broadcast(this);
 		}
 	}
 }
@@ -52,8 +52,7 @@ void APlayerLocationDetection::OnEndOverlap(UPrimitiveComponent* OverlappedCompo
 	{
 		if (OnTriggerExit.IsBound())
 		{
-			OnTriggerExit.Broadcast();
+			OnTriggerExit.Broadcast(this);
 		}
 	}
 }
-

@@ -37,6 +37,10 @@ void AObjectiveCapture::Tick(float DeltaTime)
 
 void AObjectiveCapture::Interact(AActor* Interactor)
 {
+	if (!GetIsActive())
+	{
+		return;
+	}
 	if (GetIsNotStarted())
 	{
 		StartObjective();

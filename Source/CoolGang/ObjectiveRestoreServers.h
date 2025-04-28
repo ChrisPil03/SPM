@@ -46,21 +46,23 @@ public:
 	float GetHeatProgress() const { return CurrentHeatBuildup / 100; }
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	float GetCoolingProgress() const { return CoolingProgress; }
+
+	virtual void SetIsActive(const bool bNewState) override;
 	
 private:
 	void InitializeServerHall();
 	void SelectServersToRestore();
 	void PrepareServersToRestore();
-	//void SetupTriggerEvents();
 	void FindAllServers();
 	void BindControlPanel();
-	void BindPlayerLocationDetection();
 	void ActivateControlPanel(const bool NewState);
 	bool ValidServerToRestore(const AObjectiveServer* Server) const;
 	bool GetIsServersRestored() const { return RestoredServers == NumberOfServersToRestore; }
+	void ResetServersToRestore();
 
-	void OnEnterRoom();
-	void OnExitRoom();
+	void BindPlayerLocationDetection();
+	void OnEnterRoom(APlayerLocationDetection* Room);
+	void OnExitRoom(APlayerLocationDetection* Room);
 
 	void InitializeTimer();
 	void ResetCoolingTimerProgress() const;
@@ -69,21 +71,6 @@ private:
 	void InitiateCoolingCycle();
 	void CoolDown(float DeltaTime);
 	void ResumeOperating();
-
-	// UFUNCTION()
-	// void OnBoxBeginOverlap(
-	// 	UPrimitiveComponent* OverlappedComponent,
-	// 	AActor* OtherActor,
-	// 	UPrimitiveComponent* OtherComp,
-	// 	int32 OtherBodyIndex,
-	// 	bool bFromSweep,
-	// 	const FHitResult& SweepResult);
-	// UFUNCTION()
-	// void OnBoxEndOverlap(
-	// 	UPrimitiveComponent* OverlappedComponent,
-	// 	AActor* OtherActor,
-	// 	UPrimitiveComponent* OtherComp,
-	// 	int32 OtherBodyIndex);
 	
 	UFUNCTION()
 	void RegisterServerRestored(AInteractableObject* InteractableObject);
@@ -105,9 +92,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	int32 RestoredServers;
-
-	// UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
-	// UBoxComponent* BoxTrigger;
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	int NumberOfServers;
@@ -138,6 +122,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Overheat")
 	float CoolingProgress;
+
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	float OverheatSystemIntegrityDamage;
 
 	TUniquePtr<FProgressTimer> CoolingTimer;
 };

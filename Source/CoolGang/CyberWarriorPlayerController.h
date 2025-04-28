@@ -30,6 +30,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> WinScreenClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> OutOfTimeScreenClass;
+
 	
 	UPROPERTY(EditAnywhere)
 	float RestartDelay = 5;
