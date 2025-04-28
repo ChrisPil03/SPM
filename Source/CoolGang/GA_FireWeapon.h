@@ -30,14 +30,17 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
 	bool SingleTrace(FHitResult& Hit);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
+	bool MultiTrace(TArray<FHitResult>& Hits);
 	
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnRangedWeaponTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetData);
+	void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetData);
 
 	UFUNCTION(BlueprintCallable)
 	void Fire();
 private:
-	
+	bool GetTraceStartLocationAndRotation(FVector& OutStartPoint, FRotator& OutRotation) const;
 	
 };
 

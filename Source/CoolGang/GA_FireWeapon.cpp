@@ -36,27 +36,33 @@ void UGA_FireWeapon::Fire()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Shoot") );
 	
-	FHitResult HitResult;
-	SingleTrace(HitResult);
-	if (HitResult.GetActor() == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No hit") );
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.GetActor()->GetActorNameOrLabel());
-	}
+	//FHitResult HitResult;
+	//SingleTrace(HitResult);
+
+	TArray<FHitResult> HitResults;
+	MultiTrace(HitResults);
+	// if (HitResult.GetActor() == nullptr)
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("No hit") );
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.GetActor()->GetActorNameOrLabel());
+	// }
 	FGameplayAbilityTargetDataHandle TargetData;
-	FGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FGameplayAbilityTargetData_SingleTargetHit();
-	NewTargetData->HitResult = HitResult;
+	for (int32 i = 0; i < HitResults.Num(); i++)
+	{
+		FGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FGameplayAbilityTargetData_SingleTargetHit();
+		NewTargetData->HitResult = HitResults[i];
+		TargetData.Add(NewTargetData);
+	}
 	
-	TargetData.Add(NewTargetData);
-	OnRangedWeaponTargetDataReady(TargetData);
+	OnTargetDataReady(TargetData);
 }
 
-bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
+
+bool UGA_FireWeapon::GetTraceStartLocationAndRotation(FVector& OutStartPoint, FRotator& OutRotation) const
 {
-	
 	APawn* OwningPawn = Cast<APawn>(GetOwningActorFromActorInfo()); 
 	if (OwningPawn == nullptr)
 	{
@@ -69,22 +75,69 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 		UE_LOG(LogTemp, Warning, TEXT("OwnerController is nullptr") );
 		return false;
 	}
+	OwnerController->GetPlayerViewPoint(OutStartPoint, OutRotation);
+	return true;
+}
+
+bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
+{
 	FVector StartPoint;
 	FRotator Rotation;
-	
-	OwnerController->GetPlayerViewPoint(StartPoint, Rotation);
+	GetTraceStartLocationAndRotation(StartPoint, Rotation);
 	const FVector BulletDirection = Rotation.Vector();
 	
-	FVector EndPoint = StartPoint + Rotation.Vector() * 20000;
+	FVector EndPoint = StartPoint + (BulletDirection * 20000000);  // range 
 	
-	//DrawDebugLine(GetWorld(), StartPoint, EndPoint, FColor::Red, false, 0.5f);
+	
 	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(OwningPawn);
+	Params.AddIgnoredActor(GetOwningActorFromActorInfo());
+
+	if ( GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, Params))
+	{
+		DrawDebugSphere(GetWorld(), Hit.Location,  2.0f, 12,FColor::Red, true);
+		return true;
+	}
 	
-	return GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, Params);
+		return false;
+	
 
 	
+}
 
+bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
+{
+	bool bHasTarget = false;
+	FVector StartPoint;
+	FRotator Rotation;
+	GetTraceStartLocationAndRotation(StartPoint, Rotation);
+	const FVector BulletDirection = Rotation.Vector();
+	const UAbilitySystemComponent* ASC = GetActorInfo().AbilitySystemComponent.Get();
+	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
 	
+	float NumPellets = Attributes->GetPellets();
+	const float ConeHalfAngleDegrees = 5.0f;
+
+	for (int32 i = 0; i < NumPellets; ++i)
+	{
+		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
+		FVector EndPoint = StartPoint + (ShootDirection * 10000.0f); // Trace distance
+
+		FHitResult Hit;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()); // Ignore self
+
+		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, QueryParams);
+
+		if (bHit)
+		{
+			HitResults.Add(Hit);
+			DrawDebugSphere(GetWorld(), Hit.Location,  2.0f, 12,FColor::Red, true);
+			// Optional: Log or do effects here
+			UE_LOG(LogTemp, Log, TEXT("Hit actor: %s"), *Hit.GetActor()->GetName());
+			bHasTarget = true;
+		}
+	}
+
+	return bHasTarget;
 }
 

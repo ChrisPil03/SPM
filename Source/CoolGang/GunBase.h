@@ -54,6 +54,9 @@ protected:
 	
 	/////////////////  Gun property  //////////////////////////
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	float Pellets{7};
+	
+	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float Damage{10};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")

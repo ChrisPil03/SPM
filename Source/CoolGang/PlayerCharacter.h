@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "HealthComponent.h"
-
 #include "PlayerCharacter.generated.h"
 
 class AGunBase;
@@ -48,6 +47,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void Dash();
+
+	UFUNCTION(BlueprintCallable)
+	void SetEquippedGun(TSubclassOf<AGunBase> GunClass);
 
 	UFUNCTION(BlueprintCallable)
 	AGunBase* GetEquippedGun() const{ return EquippedGun;};

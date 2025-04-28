@@ -39,6 +39,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData MagazineSize;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, MagazineSize)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData Pellets;
+	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, Pellets)
 	
 	
 	

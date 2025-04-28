@@ -67,6 +67,8 @@ void APlayerCharacter::BeginPlay()
 	// EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
 	EquippedGun->Initialize();
+
+
 }
 
 // Called every frame
@@ -113,16 +115,28 @@ void APlayerCharacter::Interact()
 
 void APlayerCharacter::PullTrigger()
 {
+	if (!EquippedGun)
+	{
+		return;
+	}
 	EquippedGun->StartFire();
 }
 
 void APlayerCharacter::ReleasedTrigger()
 {
+	if (!EquippedGun)
+	{
+		return;
+	}
 	EquippedGun->StopFire();
 }
 
 void APlayerCharacter::ReloadCurrentGun()
 {
+	if (!EquippedGun)
+	{
+		return;
+	}
 	EquippedGun->Reload();
 }
 
@@ -142,6 +156,11 @@ void APlayerCharacter::Dash()
 	Direction = Direction.GetSafeNormal();
 
 	DashComponent->Dash();
+}
+
+void APlayerCharacter::SetEquippedGun(TSubclassOf<AGunBase> Gun)
+{
+	//EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
 }
 
 bool APlayerCharacter::IsInRange(FHitResult &HitResult) const
