@@ -7,12 +7,15 @@
 #include "InteractableObject.h"
 #include "ObjectiveServer.generated.h"
 
+DECLARE_DELEGATE_OneParam(FServerHeatUpDelegate, float)
+
 UENUM(BlueprintType)
 enum class EServerState : uint8
 {
 	NeedRestoring,
 	Restoring,
 	Restored,
+	Paused,
 	Idle
 };
 
@@ -23,7 +26,6 @@ class COOLGANG_API AObjectiveServer : public AInteractableObject
 
 public:
 	AObjectiveServer();
-	virtual ~AObjectiveServer() override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -33,19 +35,42 @@ public:
 	virtual void Interact(AActor* Interactor) override;
 
 	void SetServerState(const EServerState NewState);
+	
+	UFUNCTION(BlueprintCallable, Category = "Server States")
 	bool GetNeedsRestoring() const { return ServerState == EServerState::NeedRestoring; }
+	UFUNCTION(BlueprintCallable, Category = "Server States")
 	bool GetIsRestoring() const { return ServerState == EServerState::Restoring; }
+	UFUNCTION(BlueprintCallable, Category = "Server States")
 	bool GetIsRestored() const { return ServerState == EServerState::Restored; }
+	UFUNCTION(BlueprintCallable, Category = "Server States")
+	bool GetIsPaused() const { return ServerState == EServerState::Paused; }
+	UFUNCTION(BlueprintCallable, Category = "Server States")
 	bool GetIsIdle() const { return ServerState == EServerState::Idle; }
+
+	UFUNCTION(BlueprintCallable, Category = "Progress")
+	float GetProgress() const { return ProgressTimer->GetProgress(); }
+	
+	void PauseRestoration();
+
+	void SetHeatUpFunction(const FServerHeatUpDelegate& NewDelegate) { HeatUpDelegate = NewDelegate; }
+	
+	UFUNCTION()
+	void ResumeRestoration();
+
+	void ResetServer();
 
 private:
 	//Currently for debugging
 	void SetDebugMaterial() const;
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* RedMaterial;
+	void ResetMaterial();
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	UMaterialInterface* StandardMaterial;
 	
 	void StartRestoration();
 	void IncreaseRestorationProgress(float DeltaTime);
+	void GenerateHeat(float DeltaTime);
 
 	UFUNCTION()
 	void CompleteRestoration();
@@ -59,7 +84,12 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Server")
 	EServerState ServerState;
 	
-	FProgressTimer* Timer;
+	TUniquePtr<FProgressTimer> ProgressTimer;
 
 	bool bInstantRestoration;
+
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	float HeatGeneration;
+
+	FServerHeatUpDelegate HeatUpDelegate;
 };

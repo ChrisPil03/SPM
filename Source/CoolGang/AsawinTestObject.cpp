@@ -27,6 +27,13 @@ void AAsawinTestObject::Tick(float DeltaTime)
 
 void AAsawinTestObject::Interact(AActor* Interactor)
 {
+	if (GiveGun.IsBound())
+	{
+		GiveGun.Execute();
+	}
+	
+	
 	UE_LOG(LogTemp, Warning, TEXT("Interact with %s"), *this->GetName());
+	
 }
 

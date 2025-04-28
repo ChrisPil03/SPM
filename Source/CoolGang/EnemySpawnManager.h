@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "EnemySpawnManager.generated.h"
 
+class APlayerLocationDetection;
 class AEnemySpawner;
 class AEnemyAI;
 
@@ -29,29 +30,56 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	FTimerHandle PeriodicSpawnTimerHandle;
-	FTimerHandle SpawnRateIncreaseHandle;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	void RegisterSpawner(APlayerLocationDetection*, AEnemySpawner*);
 private:
+	
+	TMap<APlayerLocationDetection*, TArray<AEnemySpawner*>> SpawnersByLocation;
+	
+	void BindPlayerLocationDetection();
+	void OnEnterTriggerBox(APlayerLocationDetection* SpawnBox);
+	void OnExitTriggerBox(APlayerLocationDetection* SpawnBox);
+	
+	static float CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent);
 
-	void SetSpawnTimer();
+	void SpawnEnemy();
 
-	void SpawnEnemies();
+	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
+	TArray<AEnemySpawner*> CurrentEnemySpawners;
+
+	TArray<AEnemySpawner*> CopyCurrentEnemySpawners;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	TSubclassOf<AEnemySpawner> EnemySpawnerClass;
+	double BaselineSpawnInterval;
+
+	UPROPERTY(VisibleAnywhere)
+	double UpdatedSpawnInterval;
+	
+	UPROPERTY(VisibleAnywhere)
+	double SpawnInterval;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	double MinimumSpawnInterval;
+
+	UPROPERTY(VisibleAnywhere)
+	int32 SpawnIntervalIncreaseCount;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	int32 MaxSpawnIntervalIncreaseCount;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	double SpawnIntervalScale;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	double SpawnAccelerationRate;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	TArray<AEnemySpawner*> EnemySpawners;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	double SpawnRate;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	double SpawnRateIncreaseTimer;
+	double SpawnIntervalIncreaseTimer;
+	
+	UPROPERTY(VisibleAnywhere)
+	double SpawnIntervalIncreaseProgress;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	int MaximumEnemies;

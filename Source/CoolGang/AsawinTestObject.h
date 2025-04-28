@@ -7,6 +7,7 @@
 #include "InteractInterface.h"
 #include "AsawinTestObject.generated.h"
 
+DECLARE_DELEGATE(FGiveGun)
 UCLASS()
 class COOLGANG_API AAsawinTestObject : public AActor, public IInteractInterface
 {
@@ -24,6 +25,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void Interact(AActor* Interactor);
-
+	void SetDelegate(const FGiveGun& Delegate) { GiveGun = Delegate;}
+	UPROPERTY(EditAnywhere, Category=Gameplay)
+	TSubclassOf<class AGunBase> GunClass;
+private:
+	FGiveGun GiveGun;
 };
 

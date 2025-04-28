@@ -28,12 +28,13 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Interact(AActor* Interactor) override;
-	virtual void ResetInteractable() { bCanInteractWith = false; }
+	virtual void ResetInteractable() { bCanInteractWith = true; }
 	bool GetCanInteractWith() const { return bCanInteractWith; }
 	void SetCanInteractWith(bool const bState) { bCanInteractWith = bState; }
 	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
 
 private:
+	UPROPERTY(VisibleAnywhere)
 	bool bCanInteractWith;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))

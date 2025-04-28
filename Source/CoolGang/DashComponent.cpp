@@ -42,12 +42,17 @@ void UDashComponent::Dash()
 	FVector Location;
 	FRotator Rotation;
 	OwnerCharacter->GetController()->GetPlayerViewPoint(Location, Rotation);
-	
+	StartLocation = OwnerCharacter->GetActorLocation();
 	
 	Rotation.Pitch = 0.f; // Ignore vertical aim
-	FVector DashDirection = Rotation.Vector();
-	FVector DashVelocity = DashDirection * DashForce;
-	DashVelocity.Z = 0.f;
+	DashDirection = OwnerCharacter->GetLastMovementInputVector();
+	FVector DashVelocity = DashDirection;
+	
+	if (DashDirection == FVector::ZeroVector)
+	{
+		DashVelocity = Rotation.Vector();
+	}
+	DashVelocity *= DashForce;
 	OwnerCharacter->GetCharacterMovement()->GroundFriction = 0;
 	bIsDashing = true;
 	OwnerCharacter->LaunchCharacter(DashVelocity, false, false);
@@ -63,22 +68,37 @@ void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	
 	if (bIsDashing)
 	{
-		CheckToReset();
+		if (CheckToReset())
+		{
+			Reset();
+		}
 	}
-	
+	if (!bIsDashing && bShouldDecelerate)
+	{
+		FVector CurrentVelocity = OwnerCharacter->GetVelocity();
+		CurrentVelocity.Z = 0.0f;
+		FVector TargetVelocity = OwnerCharacter->GetActorForwardVector() * OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
+		FVector NewVelocity = FMath::VInterpTo(CurrentVelocity, TargetVelocity, DeltaTime, DecelerationSpeed);
+		NewVelocity.Z = OwnerCharacter->GetVelocity().Z;
+		OwnerCharacter->GetCharacterMovement()->Velocity = NewVelocity;
+
+		if ((NewVelocity - TargetVelocity).SizeSquared() < 10.f)
+		{
+			bShouldDecelerate = false; // Stop decelerating
+		}
+	}
 }
 
-void UDashComponent::CheckToReset()
+bool UDashComponent::CheckToReset()
 {
 	if (!OwnerCharacter || !bIsDashing)
-		return;
+		return false;
 
-	
-
-	if (!GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
+	if (GetWorld()->GetTimerManager().IsTimerActive(DashTimer))
 	{
-		Reset();
+		return true;
 	}
+	return false;
 }
 
 void UDashComponent::Reset()
@@ -88,7 +108,7 @@ void UDashComponent::Reset()
 	OwnerCharacter->GetCharacterMovement()->GroundFriction = OriginalGroundFriction;
 	
 	// Stop movement by resetting velocity
-	OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
+	bShouldDecelerate = true;
 	
 	UE_LOG(LogTemp, Warning, TEXT("Reset dash"));
 	

@@ -28,17 +28,8 @@ void AObjectiveCapture::BeginPlay()
 void AObjectiveCapture::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (GetIsComplete())
-	{
-		return;
-	}
 	
-	if (GetIsInProgress())
-	{
-		IncreaseObjectiveProgress(DeltaTime);
-	}
-	else if (GetIsAborting())
+	if (GetIsAborting())
 	{
 		DecreaseObjectiveProgress(DeltaTime);
 	}
@@ -46,6 +37,10 @@ void AObjectiveCapture::Tick(float DeltaTime)
 
 void AObjectiveCapture::Interact(AActor* Interactor)
 {
+	if (!GetIsActive())
+	{
+		return;
+	}
 	if (GetIsNotStarted())
 	{
 		StartObjective();

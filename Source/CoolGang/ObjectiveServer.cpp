@@ -4,19 +4,11 @@ AObjectiveServer::AObjectiveServer() :
 	RestoreTime(0.f),
 	RestoreProgress(FProgressTimer::ZeroCompletion),
 	ServerState(EServerState::Idle),
-	Timer(nullptr),
-	bInstantRestoration(true)
+	ProgressTimer(nullptr),
+	bInstantRestoration(true),
+	HeatGeneration(3)
 {
 	PrimaryActorTick.bCanEverTick = true;
-}
-
-AObjectiveServer::~AObjectiveServer()
-{
-	if (Timer)
-	{
-		delete Timer;
-		Timer = nullptr;
-	}
 }
 
 void AObjectiveServer::BeginPlay()
@@ -26,19 +18,20 @@ void AObjectiveServer::BeginPlay()
 	if (RestoreTime > 0.f)
 	{
 		bInstantRestoration = false;
-		Timer = new FProgressTimer(RestoreTime);
-		if (!Timer)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ObjectiveServer: Timer is nullptr"));
-		}
 	}
+	ProgressTimer = MakeUnique<FProgressTimer>(RestoreTime);
 }
 
 void AObjectiveServer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (GetIsRestoring() && Timer)
+	if (GetIsPaused())
+	{
+		return;
+	}
+
+	if (GetIsRestoring())
 	{
 		IncreaseRestorationProgress(DeltaTime);
 	}
@@ -46,8 +39,6 @@ void AObjectiveServer::Tick(float DeltaTime)
 
 void AObjectiveServer::Interact(AActor* Interactor)
 {
-	//Super::Interact(Interactor);
-
 	if (GetNeedsRestoring())
 	{
 		StartRestoration();
@@ -78,17 +69,21 @@ void AObjectiveServer::StartRestoration()
 
 void AObjectiveServer::IncreaseRestorationProgress(float DeltaTime)
 {
-	if (Timer)
-	{
-		Timer->IncreaseProgress(DeltaTime);
-		RestoreProgress = Timer->GetProgress();
-
-		UE_LOG(LogTemp, Warning, TEXT("Progress: %f"), RestoreProgress);
+	ProgressTimer->IncreaseProgress(DeltaTime);
+	RestoreProgress = ProgressTimer->GetProgress();
+	GenerateHeat(DeltaTime);
 		
-		if (RestoreProgress == FProgressTimer::FullCompletion)
-		{
-			CompleteRestoration();
-		}
+	if (RestoreProgress == FProgressTimer::FullCompletion)
+	{
+		CompleteRestoration();
+	}
+}
+
+void AObjectiveServer::GenerateHeat(float DeltaTime)
+{
+	if (HeatUpDelegate.IsBound())
+	{
+		HeatUpDelegate.Execute(HeatGeneration * DeltaTime);
 	}
 }
 
@@ -102,6 +97,36 @@ void AObjectiveServer::CompleteRestoration()
 	{
 		PerformDelegate.Broadcast(this);
 	}
+	ResetMaterial();
+}
+
+void AObjectiveServer::PauseRestoration()
+{
+	if (!GetIsPaused())
+	{
+		SetServerState(EServerState::Paused);
+		ProgressTimer->SetIsPaused(true);
+		UE_LOG(LogTemp, Warning, TEXT("Pause Restoration"));
+	}
+}
+
+void AObjectiveServer::ResumeRestoration()
+{
+	if (!GetIsRestoring())
+	{
+		SetServerState(EServerState::Restoring);
+		ProgressTimer->SetIsPaused(false);
+		UE_LOG(LogTemp, Warning, TEXT("Resume Restoration"));
+	}
+}
+
+void AObjectiveServer::ResetServer()
+{
+	Super::Reset();
+	SetServerState(EServerState::Idle);
+	ProgressTimer->Reset();
+	RestoreProgress = 0;
+	ResetMaterial();
 }
 
 void AObjectiveServer::SetDebugMaterial() const 
@@ -112,5 +137,16 @@ void AObjectiveServer::SetDebugMaterial() const
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Red meterial not set"));
+	}
+}
+
+void AObjectiveServer::ResetMaterial()
+{
+	if (StandardMaterial)
+	{
+		GetMesh()->SetMaterial(0, StandardMaterial);
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Standard meterial not set"));
 	}
 }

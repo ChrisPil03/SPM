@@ -6,3 +6,8 @@
 void ACyberWarriorGameModeBase::PlayerKilled(APlayerCharacter* PlayerKilled)
 {
 }
+
+void ACyberWarriorGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+}

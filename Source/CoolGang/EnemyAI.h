@@ -33,8 +33,11 @@ public:
 
 	UHealthComponent *GetHealthComponent() const;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	class UEnemyAttributeSet *EnemyAttributeSet;
+	UPROPERTY()
+	const class UEnemyAttributeSet *EnemyAttributeSet;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UAbilitySystemComponent *AbilitySystemComponent;
 
 	void Die();
 
@@ -54,14 +57,16 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	AEnemySpawnManager *EnemySpawnManager;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	UAbilitySystemComponent *AbilitySystemComponent;
+	
 
 	UPROPERTY(EditAnywhere)
 	float AttackDamage;
 
 	UPROPERTY(EditAnywhere)
 	float Health;
+
+	UPROPERTY(EditAnywhere)
+	float MaxHealth;
 
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
