@@ -3,6 +3,7 @@
 
 #include "GA_FireWeapon.h"
 #include "AbilitySystemComponent.h"
+#include "GunBase.h"
 #include "WeaponAttributeSet.h"
 
 #include "PlayerCharacter.h"
@@ -34,21 +35,57 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 
 void UGA_FireWeapon::Fire()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
+
+	// Assuming we have a reference to the Weapon
+	APlayerCharacter* OwningPlayerCharacter = Cast<APlayerCharacter>(GetOwningActorFromActorInfo());
+	AGunBase*  EquippedWeapon = OwningPlayerCharacter->GetEquippedGun();
+	if (EquippedWeapon)
+	{
+		// Get the weapon type (could be shotgun, pistol, rifle, etc.)
+		EWeaponType WeaponType = EquippedWeapon->GetWeaponType();
+
+		// Determine the ammo type and execute the appropriate firing logic
+		switch (WeaponType)
+		{
+		case EWeaponType::Shotgun:
+			PelletsFire();
+			break;
+		case EWeaponType::Rifle:
+			SingleBulletFire();
+			break;
+		case EWeaponType::Pistol:
+			SingleBulletFire();
+			break;
+		default:
+			UE_LOG(LogTemp, Warning, TEXT("Unknown Weapon Type!"));
+			break;
+		}
+	}
+}
+
+void UGA_FireWeapon::SingleBulletFire()
+{
 	UE_LOG(LogTemp, Warning, TEXT("Shoot") );
 	
-	//FHitResult HitResult;
-	//SingleTrace(HitResult);
+	FHitResult HitResult;
+	SingleTrace(HitResult);
+	
+	FGameplayAbilityTargetDataHandle TargetData;
+	FGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FGameplayAbilityTargetData_SingleTargetHit();
+	NewTargetData->HitResult = HitResult;
+	TargetData.Add(NewTargetData);
+	
+	OnTargetDataReady(TargetData);
+}
+
+void UGA_FireWeapon::PelletsFire()
+{
+
 
 	TArray<FHitResult> HitResults;
 	MultiTrace(HitResults);
-	// if (HitResult.GetActor() == nullptr)
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("No hit") );
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *HitResult.GetActor()->GetActorNameOrLabel());
-	// }
+	
 	FGameplayAbilityTargetDataHandle TargetData;
 	for (int32 i = 0; i < HitResults.Num(); i++)
 	{

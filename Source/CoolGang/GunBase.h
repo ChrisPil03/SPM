@@ -7,6 +7,15 @@
 #include "GameplayAbilitySpec.h"
 #include "GunBase.generated.h"
 
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	Shotgun UMETA(DisplayName = "Shotgun"),
+	Rifle UMETA(DisplayName = "Rifle"),
+	Pistol UMETA(DisplayName = "Pistol"),
+	// Add other weapon types as needed
+};
+
 
 UCLASS()
 class COOLGANG_API AGunBase : public AActor
@@ -163,6 +172,11 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetAmmoCountText(float Ammo);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	EWeaponType WeaponType;
+
+	EWeaponType GetWeaponType() const { return WeaponType; }
+	
 	class UAbilitySystemComponent* GetAbilitySystemComponent() const
 	{
 		return AbilitySystemComponent;
