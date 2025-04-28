@@ -22,12 +22,20 @@ protected:
 
 public:	
 	virtual void ResetObjective() override;
+	virtual float TakeDamage(
+		float DamageAmount,
+		FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
 
 private:
 	void BindControlPanel();
 	void BindDeathFunction();
 	void BindCompletionFunction();
 	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
+
+	void InitiateQuarantine();
+	bool CanNotTakeDamage();
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* MeshComponent;

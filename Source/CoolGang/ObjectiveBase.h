@@ -33,7 +33,6 @@ protected:
 
 	virtual void StartObjective();
 	virtual void CompleteObjective();
-	virtual void FailObjective();
 	virtual void IncreaseObjectiveProgress(float const DeltaTime);
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
 	virtual void WeakenSystemIntegrity(const float Damage);
@@ -47,6 +46,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void ResetObjective();
+	virtual void FailObjective();
 	
 	void SetObjectiveState(EObjectiveState const NewObjectiveState) { ObjectiveState = NewObjectiveState; }
 	

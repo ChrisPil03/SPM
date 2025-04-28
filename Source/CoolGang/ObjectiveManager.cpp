@@ -94,8 +94,6 @@ void AObjectiveManager::ObjectivesCompleted()
 	}
 	Portal->SetActorScale3D(FVector::One());
 	ExtractionZone->SetActorEnableCollision(true);
-	
-	// TODO: Start count down timer
 }
 
 bool AObjectiveManager::GetIsObjectivesCompleted() const

@@ -95,6 +95,7 @@ void AObjectiveBase::FailObjective()
 {
 	if (!GetIsFailed())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Objective failed"));
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
 	}
