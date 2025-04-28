@@ -42,7 +42,7 @@ private:
 	void OnEnterTriggerBox(APlayerLocationDetection* SpawnBox);
 	void OnExitTriggerBox(APlayerLocationDetection* SpawnBox);
 	
-	static float CalculateSpawnTimer(int cycleIndex, float T0, float Tmin, float k);
+	static float CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent);
 
 	void SpawnEnemy();
 
@@ -53,6 +53,9 @@ private:
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	double BaselineSpawnInterval;
+
+	UPROPERTY(VisibleAnywhere)
+	double UpdatedSpawnInterval;
 	
 	UPROPERTY(VisibleAnywhere)
 	double SpawnInterval;
@@ -61,10 +64,16 @@ private:
 	double MinimumSpawnInterval;
 
 	UPROPERTY(VisibleAnywhere)
-	double SpawnIntervalIncreaseCount;
+	int32 SpawnIntervalIncreaseCount;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	int32 MaxSpawnIntervalIncreaseCount;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	double SpawnIntervalScale;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	double SpawnAccelerationRate;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	double SpawnIntervalIncreaseTimer;
