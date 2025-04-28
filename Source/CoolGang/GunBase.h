@@ -172,6 +172,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetAmmoCountText(float Ammo);
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetMaxAmmoText(float Ammo);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	EWeaponType WeaponType;
 

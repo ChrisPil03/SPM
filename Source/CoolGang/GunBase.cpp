@@ -33,6 +33,7 @@ void AGunBase::BeginPlay()
 	TimeBetweenShots = 60.0f / FireRate;
 	AmmoCount = MagazineSize;
 	
+	
 }
 
 // Called every frame
