@@ -16,6 +16,7 @@ UHealthComponent::UHealthComponent()
 void UHealthComponent::ResetHealthToMax()
 {
 	Health = MaxHealth;
+	
 }
 
 
