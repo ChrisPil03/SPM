@@ -5,7 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "ObjectiveManager.h"
+#include "ObjectiveManagerSubsystem.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -46,7 +46,8 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 	if (NextObjectiveTimer <= 0)
 	{
 		NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
-		// ObjectiveManager.ActivateRandomObjective(ObjectiveMalfunctionTimer);
+		UE_LOG(LogTemp, Warning, TEXT("Activating random objective"))
+		GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(40, 0.1, 100);
 	
 	}
 }

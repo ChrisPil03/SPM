@@ -1,36 +1,31 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "ObjectiveManager.h"
+#include "ObjectiveManagerSubsystem.h"
 
 #include "ObjectiveBase.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
-AObjectiveManager::AObjectiveManager()
+UObjectiveManagerSubsystem::UObjectiveManagerSubsystem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
 	ObjectivesInLevel.Empty();
-	LastActivatedObjective = nullptr,
-	Portal = nullptr;
-	ExtractionZone = nullptr;
+	LastActivatedObjective = nullptr;
 }
 
 // Called when the game starts or when spawned
-void AObjectiveManager::BeginPlay()
+void UObjectiveManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	Super::BeginPlay();
-	FindObjectivesInLevel();
-
-	if (!Portal || !ExtractionZone)
-	{
-		return;
-	}
-	Portal->SetActorScale3D(FVector::ZeroVector);
-	ExtractionZone->SetActorEnableCollision(false);
+	Super::Initialize(Collection);
+	FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UObjectiveManagerSubsystem::OnWorldInitialized);
+	
 }
 
-void AObjectiveManager::ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage)
+void UObjectiveManagerSubsystem::OnWorldInitialized(const UWorld::FActorsInitializedParams& Params)
+{
+	FindObjectivesInLevel();
+}
+void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage)
 {
 	if (ObjectivesInLevel.IsEmpty())
 	{
@@ -66,7 +61,7 @@ void AObjectiveManager::ActivateRandomObjective(float MalfunctionTimer, float Ma
 	}
 }
 
-void AObjectiveManager::RegisterCompletedObjective(AObjectiveBase* CompletedObjective)
+void UObjectiveManagerSubsystem::RegisterCompletedObjective(AObjectiveBase* CompletedObjective)
 {
 	CompletedObjective->StopMalfunctioning();
 	CompletedObjective->SetIsActive(false);
@@ -80,7 +75,7 @@ void AObjectiveManager::RegisterCompletedObjective(AObjectiveBase* CompletedObje
 	// }
 }
 
-void AObjectiveManager::ResetAllObjectives()
+void UObjectiveManagerSubsystem::ResetAllObjectives()
 {
 	for (AObjectiveBase* Objective : ObjectivesInLevel)
 	{
@@ -88,24 +83,17 @@ void AObjectiveManager::ResetAllObjectives()
 	}
 }
 
-void AObjectiveManager::ObjectivesCompleted()
+void UObjectiveManagerSubsystem::ObjectivesCompleted()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objectives Completed!"));
-
-	if (!Portal || !ExtractionZone)
-	{
-		return;
-	}
-	Portal->SetActorScale3D(FVector::One());
-	ExtractionZone->SetActorEnableCollision(true);
 }
 
-bool AObjectiveManager::GetIsObjectivesCompleted() const
+bool UObjectiveManagerSubsystem::GetIsObjectivesCompleted() const
 {
 	return CompletedObjectives == ObjectivesInLevel.Num();
 }
 
-void AObjectiveManager::FindObjectivesInLevel()
+void UObjectiveManagerSubsystem::FindObjectivesInLevel()
 {
 	TArray<AActor*> FoundObjectives;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AObjectiveBase::StaticClass(), FoundObjectives);

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ObjectiveBase.h"
-#include "ObjectiveManager.h"
+#include "ObjectiveManagerSubsystem.h"
 #include "SystemIntegrity.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -30,6 +30,7 @@ void AObjectiveBase::BeginPlay()
 
 void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Starting Malfunction Timer"));
 	MalfunctionTimerDelegate.BindUFunction(this, FName("StartMalfunctioning"), MalfunctionDamageInterval, MalfunctionDamage);
 	GetWorldTimerManager().SetTimer(MalfunctionTimerHandle, MalfunctionTimerDelegate, MalfunctionTimer, false);
 
@@ -37,12 +38,14 @@ void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const f
 
 void AObjectiveBase::StopMalfunctioning()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Objective complete, stopping malfunction"));
 	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
 	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
 }
 
-void AObjectiveBase::StartMalfunctioning(float MalfunctionDamageInterval, float MalfunctionDamage)
+void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Starting to malfunction"));
 	MalfunctionIntervalDelegate.BindUFunction(this, FName("WeakenSystemIntegrity"), MalfunctionDamage);
 	GetWorldTimerManager().SetTimer(MalfunctionIntervalHandle, MalfunctionIntervalDelegate, MalfunctionDamageInterval, true);
 }
@@ -158,16 +161,7 @@ void AObjectiveBase::WeakenSystemIntegrity(const float Damage)
 
 void AObjectiveBase::FindObjectiveManager()
 {
-	TArray<AActor*> ObjectiveManagerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AObjectiveManager::StaticClass(), ObjectiveManagerActors);
-
-	if (ObjectiveManagerActors.Num() > 0)
-	{
-		ObjectiveManager = Cast<AObjectiveManager>(ObjectiveManagerActors[0]);
-	}else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: ObjectiveManager not found"));
-	}
+	ObjectiveManager = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>();
 }
 
 void AObjectiveBase::FindSystemIntegrity()

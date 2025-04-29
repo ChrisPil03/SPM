@@ -8,7 +8,7 @@
 #include "ObjectiveBase.generated.h"
 
 class ASystemIntegrity;
-class AObjectiveManager;
+class UObjectiveManagerSubsystem;
 
 UENUM(BlueprintType)
 enum class EObjectiveState : uint8
@@ -35,6 +35,8 @@ protected:
 	virtual void CompleteObjective();
 	virtual void IncreaseObjectiveProgress(float const DeltaTime);
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
+
+	UFUNCTION()
 	virtual void WeakenSystemIntegrity(const float Damage);
 
 	void SetObjectiveProgress(const float NewProgress);
@@ -95,8 +97,9 @@ private:
 
 	FTimerHandle MalfunctionIntervalHandle;
 	FTimerDelegate MalfunctionIntervalDelegate;
-	
-	void StartMalfunctioning(float MalfunctionDamageInterval, float MalfunctionDamage);
+
+	UFUNCTION()
+	virtual void StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage);
 	
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	bool bIsActive;
@@ -105,7 +108,7 @@ private:
 	EObjectiveState ObjectiveState;
 
 	UPROPERTY()
-	AObjectiveManager* ObjectiveManager;
+	UObjectiveManagerSubsystem* ObjectiveManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Objective")
 	FString ObjectiveDescription;
