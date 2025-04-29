@@ -110,10 +110,10 @@ protected:
 	bool bIsRecoiling  = false;
 	bool bIsReloading  = false;
 
-	void BlinkDebug(FHitResult& h);
+
 	void InitWeaponStats();
-	void InitAbilitySystemComponent();
-	FTimerHandle BlinkTimerHandle;
+	void GiveAbilities();
+	
 
 	float ElapsedTime =  0.0f;
 	 

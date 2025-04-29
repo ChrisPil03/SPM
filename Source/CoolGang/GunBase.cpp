@@ -46,7 +46,7 @@ void AGunBase::Tick(float DeltaTime)
 
 void AGunBase::Initialize()
 {
-	InitAbilitySystemComponent();
+	GiveAbilities();
 	InitWeaponStats();
 }
 
@@ -80,7 +80,7 @@ void AGunBase::InitWeaponStats()
 	}
 }
 
-void AGunBase::InitAbilitySystemComponent()
+void AGunBase::GiveAbilities()
 {
 	if (GetOwner() == nullptr)
 	{
@@ -105,12 +105,10 @@ void AGunBase::StartRecoil()
 	}
 }
 
-
 bool AGunBase::CanFire() const
 {
 	return bCanFire && AmmoCount > 0;
 }
-
 
 AController* AGunBase::GetOwnerController() const
 {
@@ -121,34 +119,6 @@ AController* AGunBase::GetOwnerController() const
 	}
 	return OwnerPawn->GetController();
 
-	
 }
 
-void AGunBase::BlinkDebug(FHitResult& HitResult)
-{
-	if (UStaticMeshComponent* MeshComponent = HitResult.GetActor()->FindComponentByClass<UStaticMeshComponent>())
-	{
-		// Save original material
-		UMaterialInterface* OrginalMaterialInterface = MeshComponent->GetMaterial(0);
-		FString AssetPath = OrginalMaterialInterface->GetPathName();
-		
-		// Load red material
-		
-		UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Assets/Materials/M_Debug.M_Debug"));
-		if (RedMaterial)
-		{
-			MeshComponent->SetMaterial(0, RedMaterial);
-
-			// Start a timer to revert the material after 0.2 seconds
-			
-			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, AssetPath, MeshComponent]()
-			{
-				UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, *AssetPath );
-				MeshComponent->SetMaterial(0, Material);
-			});
-	
-			GetOwner()->GetWorld()->GetTimerManager().SetTimer(BlinkTimerHandle, TimerDelegate, 0.1, false);
-		}
-	}
-}
 

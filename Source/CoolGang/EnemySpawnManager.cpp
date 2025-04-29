@@ -68,7 +68,7 @@ void AEnemySpawnManager::Tick(float DeltaTime)
 	{
 		double OldSpawnInterval = UpdatedSpawnInterval;
 		UpdatedSpawnInterval = CalculateSpawnTimer(SpawnIntervalIncreaseCount++, BaselineSpawnInterval, MinimumSpawnInterval, SpawnIntervalScale, MaxSpawnIntervalIncreaseCount, SpawnAccelerationRate);
-		UE_LOG(LogTemp, Warning, TEXT("Diff: %f"), OldSpawnInterval-UpdatedSpawnInterval);
+		//UE_LOG(LogTemp, Warning, TEXT("Diff: %f"), OldSpawnInterval-UpdatedSpawnInterval);
 		SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
 	}
 	SpawnIntervalIncreaseProgress -= DeltaTime;
