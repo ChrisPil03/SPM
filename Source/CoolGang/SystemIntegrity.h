@@ -22,6 +22,8 @@ public:
 private:
 	void SystemShutdown();
 
+	bool bIsDestroyed;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Integrity", meta = (AllowPrivateAccess))
 	float MaxIntegrity;
 

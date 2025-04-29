@@ -20,14 +20,14 @@ public:
 	virtual void PlayerKilled(APlayerCharacter* PlayerKilled) override;
 	
 	float GetTimeUntilNextObjective() const;
-	
+
+	void EndGame();
+
 protected:
 	
 	 virtual void BeginPlay() override;
 	
 private:
-	void EndGame() const;
-
 	static float ComputeTimer(int cycleIndex, float T0 = 180.0f, float Tmin = 50.0f, float k  = 20.0f);
 	
 	
@@ -41,7 +41,7 @@ private:
 	float TimeScalingValue = 30.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float NextObjectiveTimer = 50.f;
+	float NextObjectiveTimer = 5.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	float ObjectiveMalfunctionTimer = 30.f;
