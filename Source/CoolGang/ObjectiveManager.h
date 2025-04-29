@@ -20,8 +20,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void ActivateRandomObjective();
-	void RegisterCompletedObjective();
+	void ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage);
+	void RegisterCompletedObjective(AObjectiveBase* CompletedObjective);
 	void ResetAllObjectives();
 
 private:

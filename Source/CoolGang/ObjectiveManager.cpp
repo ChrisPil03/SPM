@@ -30,7 +30,7 @@ void AObjectiveManager::BeginPlay()
 	ExtractionZone->SetActorEnableCollision(false);
 }
 
-void AObjectiveManager::ActivateRandomObjective()
+void AObjectiveManager::ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage)
 {
 	if (ObjectivesInLevel.IsEmpty())
 	{
@@ -59,15 +59,17 @@ void AObjectiveManager::ActivateRandomObjective()
 	{
 		SelectedObjective->ResetObjective();
 		SelectedObjective->SetIsActive(true);
+		SelectedObjective->StartMalfunctionTimer(MalfunctionTimer, MalfunctionInterval, MalfunctionDamage);
 		LastActivatedObjective = SelectedObjective;
 
 		UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
 	}
 }
 
-void AObjectiveManager::RegisterCompletedObjective()
+void AObjectiveManager::RegisterCompletedObjective(AObjectiveBase* CompletedObjective)
 {
-	ActivateRandomObjective();
+	CompletedObjective->StopMalfunctioning();
+	CompletedObjective->SetIsActive(false);
 	CompletedObjectives++;
 
 	UE_LOG(LogTemp, Warning, TEXT("Completed Objectives: %d"), CompletedObjectives);

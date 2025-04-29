@@ -5,6 +5,7 @@
 #include "SystemIntegrity.h"
 #include "Kismet/GameplayStatics.h"
 
+
 AObjectiveBase::AObjectiveBase() :
 	bIsActive(false),
 	ObjectiveState(EObjectiveState::NotStarted),
@@ -25,6 +26,25 @@ void AObjectiveBase::BeginPlay()
 	FindObjectiveManager();
 	FindSystemIntegrity();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
+}
+
+void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
+{
+	MalfunctionTimerDelegate.BindUFunction(this, FName("StartMalfunctioning"), MalfunctionDamageInterval, MalfunctionDamage);
+	GetWorldTimerManager().SetTimer(MalfunctionTimerHandle, MalfunctionTimerDelegate, MalfunctionTimer, false);
+
+}
+
+void AObjectiveBase::StopMalfunctioning()
+{
+	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
+	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
+}
+
+void AObjectiveBase::StartMalfunctioning(float MalfunctionDamageInterval, float MalfunctionDamage)
+{
+	MalfunctionIntervalDelegate.BindUFunction(this, FName("WeakenSystemIntegrity"), MalfunctionDamage);
+	GetWorldTimerManager().SetTimer(MalfunctionIntervalHandle, MalfunctionIntervalDelegate, MalfunctionDamageInterval, true);
 }
 
 float AObjectiveBase::GetObjectiveProgress() const
@@ -87,8 +107,7 @@ void AObjectiveBase::CompleteObjective()
 		UE_LOG(LogTemp, Error, TEXT("ObjectiveBase: ObjectiveManager is nullptr"));
 		return;
 	}
-	ObjectiveManager->RegisterCompletedObjective();
-	SetIsActive(false);
+	ObjectiveManager->RegisterCompletedObjective(this);
 }
 
 void AObjectiveBase::FailObjective()
@@ -164,4 +183,6 @@ void AObjectiveBase::FindSystemIntegrity()
 		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: SystemIntegrity not found"));
 	}
 }
+
+
 

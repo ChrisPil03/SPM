@@ -67,6 +67,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Active")
 	virtual void SetIsActive(const bool bNewState) { bIsActive = bNewState; }
 
+	UFUNCTION(BlueprintCallable, Category = "Active")
+	virtual void StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage);
+	
+	UFUNCTION(BlueprintCallable, Category = "Active")
+	virtual void StopMalfunctioning();
+	
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	virtual float GetObjectiveProgress() const;
 	
@@ -84,6 +90,14 @@ private:
 	void FindObjectiveManager();
 	void FindSystemIntegrity();
 
+	FTimerHandle MalfunctionTimerHandle;
+	FTimerDelegate MalfunctionTimerDelegate;
+
+	FTimerHandle MalfunctionIntervalHandle;
+	FTimerDelegate MalfunctionIntervalDelegate;
+	
+	void StartMalfunctioning(float MalfunctionDamageInterval, float MalfunctionDamage);
+	
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	bool bIsActive;
 	

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
+#include "ObjectiveManager.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -45,7 +46,7 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 	if (NextObjectiveTimer <= 0)
 	{
 		NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
-		//ActivateRandomObjective();
+		// ObjectiveManager.ActivateRandomObjective(ObjectiveMalfunctionTimer);
 	
 	}
 }

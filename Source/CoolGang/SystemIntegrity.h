@@ -22,9 +22,9 @@ public:
 private:
 	void SystemShutdown();
 
-	UPROPERTY(EditAnywhere, Category = "Integrity")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Integrity", meta = (AllowPrivateAccess))
 	float MaxIntegrity;
 
-	UPROPERTY(VisibleAnywhere, Category = "Integrity")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Integrity", meta = (AllowPrivateAccess))
 	float CurrentIntegrity;
 };
