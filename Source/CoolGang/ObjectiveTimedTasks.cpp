@@ -19,6 +19,21 @@ void AObjectiveTimedTasks::BeginPlay()
 		Delegate.AddUObject(this, &AObjectiveTimedTasks::RegisterInteraction);
 		Interactable->SetInteractFunction(Delegate);
 	}
+
+	for (AInteractableObject* Object : AllInteractableObjects)
+	{
+		Object->SetCanInteractWith(false);
+	}
+}
+
+void AObjectiveTimedTasks::StartObjective()
+{
+	Super::StartObjective();
+
+	for (AInteractableObject* Object : AllInteractableObjects)
+	{
+		Object->SetCanInteractWith(true);
+	}
 }
 
 void AObjectiveTimedTasks::ResetObjective()

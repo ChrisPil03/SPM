@@ -39,9 +39,13 @@ void AObjectiveServer::Tick(float DeltaTime)
 
 void AObjectiveServer::Interact(AActor* Interactor)
 {
-	if (GetNeedsRestoring())
+	if (GetCanInteractWith())
 	{
-		StartRestoration();
+		if (GetNeedsRestoring())
+		{
+			StartRestoration();
+		}
+		SetCanInteractWith(false);
 	}
 }
 
