@@ -19,21 +19,7 @@ void AObjectiveTimedTasks::BeginPlay()
 		Delegate.AddUObject(this, &AObjectiveTimedTasks::RegisterInteraction);
 		Interactable->SetInteractFunction(Delegate);
 	}
-
-	for (AInteractableObject* Object : AllInteractableObjects)
-	{
-		Object->SetCanInteractWith(false);
-	}
-}
-
-void AObjectiveTimedTasks::StartObjective()
-{
-	Super::StartObjective();
-
-	for (AInteractableObject* Object : AllInteractableObjects)
-	{
-		Object->SetCanInteractWith(true);
-	}
+	SetInteractablesInteractable(false);
 }
 
 void AObjectiveTimedTasks::ResetObjective()
@@ -57,6 +43,12 @@ void AObjectiveTimedTasks::IncreaseObjectiveProgress(float const DeltaTime)
 	}
 }
 
+void AObjectiveTimedTasks::SetIsActive(const bool bNewState)
+{
+	Super::SetIsActive(bNewState);
+	SetInteractablesInteractable(bNewState);
+}
+
 void AObjectiveTimedTasks::RegisterInteraction(AInteractableObject* InteractableObject)
 {
 	if (GetIsNotStarted())
@@ -69,5 +61,13 @@ void AObjectiveTimedTasks::RegisterInteraction(AInteractableObject* Interactable
 	if (InteractedTasks == AllInteractableObjects.Num())
 	{
 		CompleteObjective();
+	}
+}
+
+void AObjectiveTimedTasks::SetInteractablesInteractable(const bool bNewState)
+{
+	for (AInteractableObject* Object : AllInteractableObjects)
+	{
+		Object->SetCanInteractWith(bNewState);
 	}
 }
