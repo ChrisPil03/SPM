@@ -24,9 +24,6 @@ AEnemyAI::AEnemyAI()
 	PrimaryActorTick.bCanEverTick = true;
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-
-	
-	
 }
 
 void AEnemyAI::BeginPlay()
@@ -34,7 +31,6 @@ void AEnemyAI::BeginPlay()
 	Super::BeginPlay();
 
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
-
 	
 	if (AbilitySystemComponent)
 	{
@@ -64,8 +60,6 @@ void AEnemyAI::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Enemy AbilitySystemComponent is null in BeginPlay!"));
 	}
 }
-	
-
 
 void AEnemyAI::Attack()
 {
@@ -109,8 +103,7 @@ void AEnemyAI::Tick(float DeltaTime)
 	{
 		return;
 	}
-	//|| EnemyAttributeSet->GetHealth() <= 0
-
+	
 	if ((HealthComponent->GetCurrentHealth() <= 0 ) && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
 		Die();
