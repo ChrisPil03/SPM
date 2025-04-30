@@ -4,30 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ObjectiveManager.generated.h"
+#include "ObjectiveManagerSubsystem.generated.h"
 
 class AObjectiveBase;
 
 UCLASS()
-class COOLGANG_API AObjectiveManager : public AActor
+class COOLGANG_API UObjectiveManagerSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 	
 public:	
-	AObjectiveManager();
+	UObjectiveManagerSubsystem();
 
-protected:
-	virtual void BeginPlay() override;
-
-public:
-	void ActivateRandomObjective();
-	void RegisterCompletedObjective();
+	void ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage);
+	void RegisterCompletedObjective(AObjectiveBase* CompletedObjective);
 	void ResetAllObjectives();
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 private:
 	bool GetIsObjectivesCompleted() const;
 	void FindObjectivesInLevel();
-	
+
+	void OnWorldInitialized(const UWorld::FActorsInitializedParams& Params);
 	UPROPERTY(VisibleAnywhere)
 	int CompletedObjectives = 0;
 
@@ -36,12 +34,6 @@ private:
 
 	UPROPERTY()
 	AObjectiveBase* LastActivatedObjective;
-
-	UPROPERTY(EditInstanceOnly)
-	AActor* Portal;
-
-	UPROPERTY(EditInstanceOnly)
-	AActor* ExtractionZone;
 
 	void ObjectivesCompleted();
 };

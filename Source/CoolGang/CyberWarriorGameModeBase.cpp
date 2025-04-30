@@ -7,7 +7,13 @@ void ACyberWarriorGameModeBase::PlayerKilled(APlayerCharacter* PlayerKilled)
 {
 }
 
+bool ACyberWarriorGameModeBase::GameIsOver() const
+{
+	return bGameHasEnded;
+}
+
 void ACyberWarriorGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+	bGameHasEnded = false;
 }

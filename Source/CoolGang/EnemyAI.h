@@ -7,7 +7,7 @@
 #include "PlayerCharacter.h"
 #include "EnemyAI.generated.h"
 
-class AEnemySpawnManager;
+class UEnemySpawnManagerSubsystem;
 class UCapsuleComponent;
 class UStaticMeshComponent;
 
@@ -43,22 +43,14 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent *BaseMesh;
-
-	UPROPERTY(EditAnywhere)
 	float AttackRange;
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthComponent *HealthComponent;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AEnemySpawnManager> EnemySpawnManagerClass;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	AEnemySpawnManager *EnemySpawnManager;
-
+	UPROPERTY()
+	UEnemySpawnManagerSubsystem* EnemySpawnManager;
 	
-
 	UPROPERTY(EditAnywhere)
 	float AttackDamage;
 
