@@ -11,6 +11,9 @@
 #include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
 #include "WeaponAttributeSet.h"
+#include "UObject/ConstructorHelpers.h"
+#include "NiagaraComponent.h"
+
 
 // Sets default values
 AGunBase::AGunBase()

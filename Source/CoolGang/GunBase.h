@@ -51,8 +51,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactEffect;
 
+	
+
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
-	class UNiagaraSystem* MuzzleFlash;
+	class UNiagaraSystem* MuzzleFlashEffect;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	USceneComponent* MuzzlePosition;
@@ -186,7 +188,6 @@ public:
 	}
 	
 	void Initialize();
-	
 };
 
 
