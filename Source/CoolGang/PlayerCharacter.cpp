@@ -176,7 +176,7 @@ void APlayerCharacter::Dash()
 }
 
 
-inline void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
+void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 {
 	if (EquippedGun)
 	{
