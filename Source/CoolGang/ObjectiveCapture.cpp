@@ -11,6 +11,7 @@ AObjectiveCapture::AObjectiveCapture()
 	PlayerInZone = nullptr;
 	SetIsTimeBased(true);
 	bCanInteractWith = false;
+	DestroyZoneDelay = 1;
 	
 	SphereTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Trigger Component"));
 	SphereTrigger->InitSphereRadius(CaptureRadius);
@@ -59,6 +60,13 @@ void AObjectiveCapture::StartObjective()
 {
 	Super::StartObjective();
 	SpawnCaptureZone();
+}
+
+void AObjectiveCapture::CompleteObjective()
+{
+	Super::CompleteObjective();
+	GetWorld()->GetTimerManager().SetTimer(
+		DelayTimerHandle, this, &AObjectiveCapture::DestroyCaptureZone, DestroyZoneDelay, false);
 }
 
 void AObjectiveCapture::ResetObjective()
