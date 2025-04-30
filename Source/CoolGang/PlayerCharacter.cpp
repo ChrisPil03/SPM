@@ -12,6 +12,7 @@
 #include "GameFramework/GameMode.h"
 #include "CyberWarriorGameModeBase.h"
 #include "AbilitySystemComponent.h"
+#include "DiveGameMode.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -45,11 +46,11 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	{
 		Die();
 	}
-
+	
+	
 	if (IsDead())
 	{
-		ACyberWarriorGameModeBase *GameMode = GetWorld()->GetAuthGameMode<ACyberWarriorGameModeBase>();
-
+		ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
 		if (GameMode != nullptr)
 		{
 			GameMode->PlayerKilled(this);
@@ -65,22 +66,38 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
+	
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Pistol);
 	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
-
-	// EquippedGun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
 	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
+	
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Shotgun);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
+	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
 
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Rifle);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
+	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
 
+	EquippedGun->SetActorHiddenInGame(false);
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (HealthComponent->GetCurrentHealth() <= 0)
+	ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
+	
+	if (HealthComponent->GetCurrentHealth() <= 0 || GameMode->GameIsOver())
 	{
 		Die();
 	}
@@ -162,9 +179,27 @@ void APlayerCharacter::Dash()
 	DashComponent->Dash();
 }
 
-void APlayerCharacter::SetEquippedGun(TSubclassOf<AGunBase> Gun)
+
+inline void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 {
-	//EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
+	if (EquippedGun)
+	{
+		EquippedGun->SetActorHiddenInGame(true);
+	}
+
+	EquippedGun = NewWeapon;
+
+	if (EquippedGun)
+	{
+		EquippedGun->SetActorHiddenInGame(false);
+	}
+}
+
+
+void APlayerCharacter::ChangeEquippedGun(int32 WeaponSlot)
+{
+	EquipWeapon(Guns[WeaponSlot]);
+	
 }
 
 bool APlayerCharacter::IsInRange(FHitResult &HitResult) const

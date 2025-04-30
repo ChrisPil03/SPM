@@ -7,7 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
-#include "EnemySpawnManager.h"
+#include "EnemySpawnManagerSubsystem.h"
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
@@ -22,9 +22,6 @@ AEnemyAI::AEnemyAI()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
-
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 
@@ -36,26 +33,7 @@ void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
 
-
-	if (EnemySpawnManagerClass) // Ensure the class variable is set
-	{
-		AEnemySpawnManager* FoundManager = Cast<AEnemySpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), EnemySpawnManagerClass));
-
-		if (IsValid(FoundManager)) // Use IsValid() to check for null and pending kill
-		{
-			EnemySpawnManager = FoundManager; // Assign if found
-			UE_LOG(LogTemp, Display, TEXT("AI %s found EnemySpawnManager: %s"), *GetName(), *EnemySpawnManager->GetName());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("AI %s could NOT find any actor of class %s!"), *GetName(), *EnemySpawnManagerClass->GetName());
-			// EnemySpawnManager remains null or whatever its default was
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("AI %s has EnemySpawnManagerClass unset! Cannot search."), *GetName());
-	}
+	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
 	
 	if (AbilitySystemComponent)
@@ -135,10 +113,7 @@ void AEnemyAI::Tick(float DeltaTime)
 
 	if ((HealthComponent->GetCurrentHealth() <= 0 ) && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
-		
 		Die();
-
-		
 	}
 }
 

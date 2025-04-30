@@ -8,7 +8,7 @@
 #include "ObjectiveBase.generated.h"
 
 class ASystemIntegrity;
-class AObjectiveManager;
+class UObjectiveManagerSubsystem;
 
 UENUM(BlueprintType)
 enum class EObjectiveState : uint8
@@ -35,6 +35,8 @@ protected:
 	virtual void CompleteObjective();
 	virtual void IncreaseObjectiveProgress(float const DeltaTime);
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
+
+	UFUNCTION()
 	virtual void WeakenSystemIntegrity(const float Damage);
 
 	void SetObjectiveProgress(const float NewProgress);
@@ -67,6 +69,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Active")
 	virtual void SetIsActive(const bool bNewState) { bIsActive = bNewState; }
 
+	UFUNCTION(BlueprintCallable, Category = "Active")
+	virtual void StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage);
+	
+	UFUNCTION(BlueprintCallable, Category = "Active")
+	virtual void StopMalfunctioning();
+	
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	virtual float GetObjectiveProgress() const;
 	
@@ -84,6 +92,15 @@ private:
 	void FindObjectiveManager();
 	void FindSystemIntegrity();
 
+	FTimerHandle MalfunctionTimerHandle;
+	FTimerDelegate MalfunctionTimerDelegate;
+
+	FTimerHandle MalfunctionIntervalHandle;
+	FTimerDelegate MalfunctionIntervalDelegate;
+
+	UFUNCTION()
+	virtual void StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage);
+	
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	bool bIsActive;
 	
@@ -91,7 +108,7 @@ private:
 	EObjectiveState ObjectiveState;
 
 	UPROPERTY()
-	AObjectiveManager* ObjectiveManager;
+	UObjectiveManagerSubsystem* ObjectiveManager;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Objective")
 	FString ObjectiveDescription;
