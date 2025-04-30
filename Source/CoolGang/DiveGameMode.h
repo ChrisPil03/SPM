@@ -6,9 +6,8 @@
 #include "CyberWarriorGameModeBase.h"
 #include "DiveGameMode.generated.h"
 
-/**
- * 
- */
+class ASystemIntegrity;
+
 UCLASS()
 class COOLGANG_API ADiveGameMode : public ACyberWarriorGameModeBase
 {
@@ -19,32 +18,30 @@ public:
 	
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void PlayerKilled(APlayerCharacter* PlayerKilled) override;
-
-	
 	
 	float GetTimeUntilNextObjective() const;
-	
+
+	void EndGame();
+
 protected:
 	
 	 virtual void BeginPlay() override;
 	
 private:
-	void EndGame() const;
-
 	static float ComputeTimer(int cycleIndex, float T0 = 180.0f, float Tmin = 50.0f, float k  = 20.0f);
 	
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float BaselineObjectiveTimer = 100.f;
+	float BaselineObjectiveTimer = 50.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float MinimumObjectiveTimer = 30.f;
+	float MinimumObjectiveTimer = 5.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	float TimeScalingValue = 30.f;
-
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float NextObjectiveTimer = 30.f;
+	float NextObjectiveTimer = 5.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	float ObjectiveMalfunctionTimer = 30.f;

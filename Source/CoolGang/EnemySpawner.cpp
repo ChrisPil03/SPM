@@ -3,7 +3,7 @@
 
 #include "EnemySpawner.h"
 #include "TimerManager.h"
-#include "EnemySpawnManager.h"
+#include "EnemySpawnManagerSubsystem.h"
 #include "AbilitySystemComponent.h"
 #include "EnemyAI.h"
 #include "EnemyAttributeSet.h"
@@ -16,7 +16,7 @@ AEnemySpawner::AEnemySpawner()
 void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 	EnemySpawnManager->RegisterSpawner(SpawnArea, this);
 }
 

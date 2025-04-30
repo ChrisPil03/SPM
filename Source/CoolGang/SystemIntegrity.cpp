@@ -1,5 +1,8 @@
 #include "SystemIntegrity.h"
 
+#include "DiveGameMode.h"
+#include "Kismet/GameplayStatics.h"
+
 ASystemIntegrity::ASystemIntegrity() :
 	MaxIntegrity(100000.f), CurrentIntegrity(MaxIntegrity)
 {
@@ -9,6 +12,7 @@ ASystemIntegrity::ASystemIntegrity() :
 void ASystemIntegrity::BeginPlay()
 {
 	Super::BeginPlay();
+	bIsDestroyed = false;
 }
 
 void ASystemIntegrity::WeakenIntegrity(const float Damage)
@@ -19,7 +23,7 @@ void ASystemIntegrity::WeakenIntegrity(const float Damage)
 	}
 	CurrentIntegrity -= Damage;
 
-	if (CurrentIntegrity <= 0)
+	if (CurrentIntegrity <= 0 && !bIsDestroyed)
 	{
 		SystemShutdown();
 	}
@@ -42,6 +46,7 @@ void ASystemIntegrity::StrengthenIntegrity(const float Integrity)
 
 void ASystemIntegrity::SystemShutdown()
 {
-	UE_LOG(LogTemp, Warning, TEXT("System shutdown"));
+	bIsDestroyed = true;
+	Cast<ADiveGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->EndGame();
 }
 

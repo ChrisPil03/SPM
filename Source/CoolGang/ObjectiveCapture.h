@@ -21,6 +21,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void StartObjective() override;
+	virtual void CompleteObjective() override;
 	virtual void ResetObjective() override;
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
 	virtual void DecreaseObjectiveProgress(float const DeltaTime) override;
@@ -29,6 +30,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void Interact(AActor* Interactor) override;
+	virtual void SetIsActive(const bool bNewState) override;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SpawnCaptureZone();
@@ -40,6 +42,9 @@ public:
 	void DestroyCaptureZone();
 	
 private:
+	void ShowInteractableOutline(const bool bNewState);
+	void SetCanInteractWith(const bool bNewState);
+	
 	UFUNCTION()
 	void OnSphereBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
@@ -69,4 +74,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	APlayerCharacter* PlayerInZone;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bCanInteractWith;
+
+	UPROPERTY(EditAnywhere, Category = "CaptureZone")
+	int32 DestroyZoneDelay;
+	
+	FTimerHandle DelayTimerHandle;
 };

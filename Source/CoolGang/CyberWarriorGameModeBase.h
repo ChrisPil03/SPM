@@ -19,7 +19,10 @@ class COOLGANG_API ACyberWarriorGameModeBase : public AGameModeBase
 public:
 	virtual void PlayerKilled(APlayerCharacter* PlayerKilled);
 
+	virtual bool GameIsOver() const;
+	
 protected:
 	virtual void BeginPlay() override;
+	bool bGameHasEnded;
 	
 };

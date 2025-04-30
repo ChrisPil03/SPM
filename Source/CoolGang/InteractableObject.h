@@ -30,10 +30,18 @@ public:
 	virtual void Interact(AActor* Interactor) override;
 	virtual void ResetInteractable() { bCanInteractWith = true; }
 	bool GetCanInteractWith() const { return bCanInteractWith; }
-	void SetCanInteractWith(bool const bState) { bCanInteractWith = bState; }
+	void SetCanInteractWith(bool const bNewState);
 	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
 
+	template <typename T>
+	void SetOnInteractFunction(T* Object, void (T::*Func)(AInteractableObject*))
+	{
+		PerformDelegate.AddUObject(this, Func);
+	}
+
 private:
+	void ShowInteractableOutline(const bool bNewState);
+	
 	UPROPERTY(VisibleAnywhere)
 	bool bCanInteractWith;
 
