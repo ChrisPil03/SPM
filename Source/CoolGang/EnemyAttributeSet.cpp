@@ -37,12 +37,11 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 			if (CurrentHealth > 0.0f)
 			{
 				UE_LOG(LogTemp, Error, TEXT("Enemy health being subtract by %f"), Magnitude);
-				//float NewHealth = FMath::Clamp(CurrentHealth - Magnitude, 0.0f, GetMaxHealth());
-				//SetHealth(NewHealth);
+				float NewHealth = FMath::Clamp(CurrentHealth - Magnitude, 0.0f, GetMaxHealth());
+				SetHealth(NewHealth);
 				UE_LOG(LogTemp, Error, TEXT("Enemy health After being subtracted: %f"), GetHealth());
 			}
 		}
-		
 		
 		if (CurrentHealth <= 0.0f)
 		{
