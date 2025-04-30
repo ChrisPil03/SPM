@@ -51,8 +51,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactEffect;
 
+	
+
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
-	class UNiagaraSystem* MuzzleFlash;
+	class UNiagaraSystem* MuzzleFlashEffect;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	USceneComponent* MuzzlePosition;
@@ -110,10 +112,10 @@ protected:
 	bool bIsRecoiling  = false;
 	bool bIsReloading  = false;
 
-	void BlinkDebug(FHitResult& h);
+
 	void InitWeaponStats();
-	void InitAbilitySystemComponent();
-	FTimerHandle BlinkTimerHandle;
+	void GiveAbilities();
+	
 
 	float ElapsedTime =  0.0f;
 	 
@@ -186,7 +188,6 @@ public:
 	}
 	
 	void Initialize();
-	
 };
 
 

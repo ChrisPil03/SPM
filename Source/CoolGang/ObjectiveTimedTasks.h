@@ -22,9 +22,12 @@ protected:
 	virtual void ResetObjective() override;
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
 
+public:
+	virtual void SetIsActive(const bool bNewState) override;
 private:
 	UFUNCTION()
 	void RegisterInteraction(AInteractableObject* InteractableObject);
+	void SetInteractablesInteractable(const bool bNewState);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess="true"), Category="Objective")
 	TArray<AInteractableObject*> AllInteractableObjects;

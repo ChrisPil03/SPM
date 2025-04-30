@@ -24,11 +24,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintImplementableEvent)
 	void Interact(AActor* Interactor);
-	void SetDelegate(const FGiveGun& Delegate) { GiveGun = Delegate;}
-	UPROPERTY(EditAnywhere, Category=Gameplay)
-	TSubclassOf<class AGunBase> GunClass;
-private:
-	FGiveGun GiveGun;
+
 };
 
