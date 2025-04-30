@@ -6,7 +6,7 @@ AInteractableObject::AInteractableObject()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	bCanInteractWith = true;
+	bCanInteractWith = false;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -35,6 +35,18 @@ void AInteractableObject::Interact(AActor* Interactor)
 			return;
 		}
 		PerformDelegate.Broadcast(this);
-		bCanInteractWith = false;
+		SetCanInteractWith(false);
 	}
+}
+
+void AInteractableObject::SetCanInteractWith(bool const bNewState)
+{
+	bCanInteractWith = bNewState;
+	ShowInteractableOutline(bNewState);
+}
+
+void AInteractableObject::ShowInteractableOutline(const bool bNewState)
+{
+	Mesh->bRenderCustomDepth = bNewState;
+	Mesh->MarkRenderStateDirty();
 }

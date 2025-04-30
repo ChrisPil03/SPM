@@ -10,6 +10,7 @@ AObjectiveCapture::AObjectiveCapture()
 	PlayerTag = "Player";
 	PlayerInZone = nullptr;
 	SetIsTimeBased(true);
+	bCanInteractWith = false;
 	
 	SphereTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Trigger Component"));
 	SphereTrigger->InitSphereRadius(CaptureRadius);
@@ -37,7 +38,7 @@ void AObjectiveCapture::Tick(float DeltaTime)
 
 void AObjectiveCapture::Interact(AActor* Interactor)
 {
-	if (!GetIsActive())
+	if (!bCanInteractWith || !GetIsActive())
 	{
 		return;
 	}
@@ -45,6 +46,13 @@ void AObjectiveCapture::Interact(AActor* Interactor)
 	{
 		StartObjective();
 	}
+	SetCanInteractWith(false);
+}
+
+void AObjectiveCapture::SetIsActive(const bool bNewState)
+{
+	Super::SetIsActive(bNewState);
+	ShowInteractableOutline(bNewState);
 }
 
 void AObjectiveCapture::StartObjective()
@@ -57,6 +65,7 @@ void AObjectiveCapture::ResetObjective()
 {
 	Super::ResetObjective();
 	DestroyCaptureZone();
+	SetCanInteractWith(true);
 }
 
 void AObjectiveCapture::IncreaseObjectiveProgress(float const DeltaTime)
@@ -79,6 +88,18 @@ void AObjectiveCapture::DecreaseObjectiveProgress(float const DeltaTime)
 	{
 		ResetObjective();
 	}
+}
+
+void AObjectiveCapture::ShowInteractableOutline(const bool bNewState)
+{
+	BaseMesh->bRenderCustomDepth = bNewState;
+	BaseMesh->MarkRenderStateDirty();
+}
+
+void AObjectiveCapture::SetCanInteractWith(const bool bNewState)
+{
+	bCanInteractWith = bNewState;
+	ShowInteractableOutline(bNewState);
 }
 
 void AObjectiveCapture::OnSphereBeginOverlap(

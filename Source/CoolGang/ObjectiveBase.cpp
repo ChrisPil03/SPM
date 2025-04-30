@@ -23,6 +23,7 @@ AObjectiveBase::AObjectiveBase() :
 void AObjectiveBase::BeginPlay()
 {
 	Super::BeginPlay();
+	SetIsActive(false);
 	FindObjectiveManager();
 	FindSystemIntegrity();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
