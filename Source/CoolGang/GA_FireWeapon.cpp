@@ -133,6 +133,7 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 	if ( GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, QueryParams))
 	{
 		DrawDebugSphere(GetWorld(), Hit.Location, 2.0f, 12,FColor::Red, false, 2.0f);
+		
 		//BlinkDebug(Hit);
 		return true;
 	}
