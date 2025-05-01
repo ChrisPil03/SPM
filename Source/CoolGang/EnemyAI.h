@@ -33,7 +33,7 @@ public:
 
 	UHealthComponent *GetHealthComponent() const;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = "Stats")
 	const class UEnemyAttributeSet *EnemyAttributeSet;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))

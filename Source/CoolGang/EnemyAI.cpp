@@ -91,8 +91,9 @@ void AEnemyAI::Attack()
 	{
 		UE_LOG(LogTemp, Error, TEXT("EnemyAttributeSet is null !"));
 	}
-	UE_LOG(LogEngine, Warning, TEXT("Dealing Damage to: %s"), *CurrentTarget.GetObject()->GetName())
-	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()),  EnemyAttributeSet->GetDamage(), MyOwnerInstigator, this, DamageTypeClass);
+	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
+	UE_LOG(LogEngine, Warning, TEXT("Dealing Damage to: %s, %f"), *CurrentTarget.GetObject()->GetName(), Damage)
+	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
 }
 
 
