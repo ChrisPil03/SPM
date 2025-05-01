@@ -60,9 +60,10 @@ private:
 	bool GetIsServersRestored() const { return RestoredServers == NumberOfServersToRestore; }
 	void ResetServersToRestore();
 
-	void BindPlayerLocationDetection();
-	void OnEnterRoom(APlayerLocationDetection* Room);
-	void OnExitRoom(APlayerLocationDetection* Room);
+	void OnInteract(AInteractableObject* InteractableObject);
+	//void BindPlayerLocationDetection();
+	// void OnEnterRoom(APlayerLocationDetection* Room);
+	// void OnExitRoom(APlayerLocationDetection* Room);
 
 	void InitializeTimer();
 	void ResetCoolingTimerProgress() const;
@@ -74,15 +75,13 @@ private:
 	
 	UFUNCTION()
 	void RegisterServerRestored(AInteractableObject* InteractableObject);
+	void RegisterServerInteraction(AInteractableObject* InteractableObject);
 
 	UFUNCTION()
 	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
 
 	UFUNCTION()
 	void AddHeatBuildup(float Heat);
-
-	UPROPERTY(EditInstanceOnly)
-	APlayerLocationDetection* PlayerLocationDetection;
 	
 	UPROPERTY()
 	TArray<AObjectiveServer*> AllServers;

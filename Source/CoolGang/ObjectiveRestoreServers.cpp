@@ -5,7 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 
 AObjectiveRestoreServers::AObjectiveRestoreServers() :
-	PlayerLocationDetection(nullptr),
 	RestoredServers(0),
 	NumberOfServers(0),
 	NumberOfServersToRestore(3),
@@ -67,7 +66,7 @@ void AObjectiveRestoreServers::InitializeServerHall()
 	FindAllServers();
 	BindControlPanel();
 	InitializeTimer();
-	BindPlayerLocationDetection();
+	//BindPlayerLocationDetection();
 }
 
 void AObjectiveRestoreServers::SelectServersToRestore()
@@ -93,8 +92,10 @@ void AObjectiveRestoreServers::PrepareServersToRestore()
 		return;
 	}
 	
-	FPerformDelegate RestoredDelegate;
-	RestoredDelegate.AddUObject(this, &AObjectiveRestoreServers::RegisterServerRestored);
+	// FPerformDelegate RestoredDelegate;
+	// RestoredDelegate.AddUObject(this, &AObjectiveRestoreServers::RegisterServerRestored);
+	FPerformDelegate InteractDelegate;
+	InteractDelegate.AddUObject(this, &AObjectiveRestoreServers::OnInteract);
 	FServerHeatUpDelegate HeatUpDelegate;
 	HeatUpDelegate.BindUObject(this, &AObjectiveRestoreServers::AddHeatBuildup);
 	
@@ -102,8 +103,9 @@ void AObjectiveRestoreServers::PrepareServersToRestore()
 	{
 		Server->SetCanInteractWith(true);
 		Server->SetServerState(EServerState::NeedRestoring);
-		Server->SetInteractFunction(RestoredDelegate);
+		Server->SetInteractFunction(InteractDelegate);
 		Server->SetHeatUpFunction(HeatUpDelegate);
+		Server->SetCompleteObjectiveFunction(this, &AObjectiveRestoreServers::RegisterServerRestored);
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Prepared Servers to Restore"));
 }
@@ -150,26 +152,31 @@ void AObjectiveRestoreServers::ResetServersToRestore()
 	RestoredServers = 0;
 }
 
-void AObjectiveRestoreServers::BindPlayerLocationDetection()
+void AObjectiveRestoreServers::OnInteract(AInteractableObject* InteractableObject)
 {
-	if (PlayerLocationDetection)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player location detection binded"));
-		PlayerLocationDetection->AddOnTriggerEnterFunction(this, &AObjectiveRestoreServers::OnEnterRoom);
-		PlayerLocationDetection->AddOnTriggerExitFunction(this, &AObjectiveRestoreServers::OnExitRoom);
-	}
-}
-
-void AObjectiveRestoreServers::OnEnterRoom(APlayerLocationDetection* Room)
-{
-	UE_LOG(LogTemp, Display, TEXT("Entered server room"));
 	StartObjective();
 }
 
-void AObjectiveRestoreServers::OnExitRoom(APlayerLocationDetection* Room)
-{
-	UE_LOG(LogTemp, Display, TEXT("Exited server room PlayerLocationDetection"));
-}
+// void AObjectiveRestoreServers::BindPlayerLocationDetection()
+// {
+// 	if (PlayerLocationDetection)
+// 	{
+// 		UE_LOG(LogTemp, Warning, TEXT("Player location detection binded"));
+// 		PlayerLocationDetection->AddOnTriggerEnterFunction(this, &AObjectiveRestoreServers::OnEnterRoom);
+// 		PlayerLocationDetection->AddOnTriggerExitFunction(this, &AObjectiveRestoreServers::OnExitRoom);
+// 	}
+// }
+
+// void AObjectiveRestoreServers::OnEnterRoom(APlayerLocationDetection* Room)
+// {
+// 	UE_LOG(LogTemp, Display, TEXT("Entered server room"));
+// 	StartObjective();
+// }
+//
+// void AObjectiveRestoreServers::OnExitRoom(APlayerLocationDetection* Room)
+// {
+// 	UE_LOG(LogTemp, Display, TEXT("Exited server room PlayerLocationDetection"));
+// }
 
 void AObjectiveRestoreServers::ActivateControlPanel(const bool NewState)
 {
@@ -196,6 +203,18 @@ void AObjectiveRestoreServers::RegisterServerRestored(AInteractableObject* Inter
 	if (GetIsServersRestored())
 	{
 		CompleteObjective();
+	}
+}
+
+void AObjectiveRestoreServers::RegisterServerInteraction(AInteractableObject* InteractableObject)
+{
+	if (!GetIsActive())
+	{
+		return;
+	}
+	if (GetIsNotStarted())
+	{
+		StartObjective();
 	}
 }
 

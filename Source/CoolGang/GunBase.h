@@ -76,13 +76,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float MaxRange {1000};
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat")
 	float ReloadTime {2};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	int MagazineSize {30};
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat ")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat ")
 	int AmmoCount {30};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
@@ -154,6 +154,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void StopFire();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopReload();
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Fire();

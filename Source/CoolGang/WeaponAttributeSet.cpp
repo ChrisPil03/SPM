@@ -13,7 +13,7 @@ void UWeaponAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 	{
 		// Get the new ammo value after the effect has been applied
 		float NewAmmo = GetAmmoCount();
-
+		
 		// Update the UI (call a function that will notify the player controller or HUD)
 		OnAmmoChanged.Broadcast(NewAmmo);
 	}

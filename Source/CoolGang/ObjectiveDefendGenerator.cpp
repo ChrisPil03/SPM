@@ -40,7 +40,7 @@ void AObjectiveDefendGenerator::InitiateQuarantine()
 
 bool AObjectiveDefendGenerator::CanNotTakeDamage()
 {
-	return !GetIsActive() || GetIsComplete() || GetIsFailed();
+	return !GetIsActive() || GetIsComplete() || GetIsFailed() || GetIsNotStarted();
 }
 
 void AObjectiveDefendGenerator::CompleteObjective()

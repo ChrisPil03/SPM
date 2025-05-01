@@ -43,6 +43,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData Pellets;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, Pellets)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData ReloadTime;
+	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, ReloadTime)
 	
 	
 	

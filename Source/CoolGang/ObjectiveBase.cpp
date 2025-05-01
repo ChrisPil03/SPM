@@ -98,6 +98,7 @@ void AObjectiveBase::Tick(float DeltaTime)
 	if (bIsTimeBased && GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaTime);
+		BroadcastObjectiveInProgress();
 	}
 }
 
@@ -202,3 +203,11 @@ void AObjectiveBase::FindSystemIntegrity()
 	}
 }
 
+void AObjectiveBase::BroadcastObjectiveInProgress()
+{
+	if (OnObjectiveInProgress.IsBound())
+	{
+		UE_LOG(LogEngine, Warning, TEXT("Broadcasting InProgress."));
+		OnObjectiveInProgress.Broadcast(this);
+	}
+}
