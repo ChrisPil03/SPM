@@ -91,7 +91,7 @@ void AGunBase::GiveAbilities()
 		UE_LOG(LogTemp, Warning, TEXT("GunOwner is nullptr"));
 		return;
 	}
-	AbilitySystemComponent->InitAbilityActorInfo(GetOwner(), this);
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 
 	if (AbilitySystemComponent && FireAbilityClass)
 	{

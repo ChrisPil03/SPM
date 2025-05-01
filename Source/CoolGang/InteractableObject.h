@@ -45,6 +45,6 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	bool bCanInteractWith;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
 };

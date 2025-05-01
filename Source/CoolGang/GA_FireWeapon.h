@@ -45,7 +45,6 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 	void PelletsFire();
 private:
 	bool GetTraceStartLocationAndRotation(FVector& OutStartPoint, FRotator& OutRotation) const;
-
 	//for debug
 	void BlinkDebug(FHitResult& h);
 	FTimerHandle BlinkTimerHandle;

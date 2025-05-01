@@ -40,7 +40,7 @@ void AObjectiveDefendGenerator::InitiateQuarantine()
 
 bool AObjectiveDefendGenerator::CanNotTakeDamage()
 {
-	return !GetIsActive() || GetIsComplete() || GetIsFailed();
+	return !GetIsActive() || GetIsComplete() || GetIsFailed() || GetIsNotStarted();
 }
 
 void AObjectiveDefendGenerator::CompleteObjective()
@@ -66,6 +66,15 @@ float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent con
 	UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
 	DamageAmount = FMath::Min(DamageAmount, HealthComponent->GetCurrentHealth());
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+float AObjectiveDefendGenerator::GetHealthPercentage() const
+{
+	if (!HealthComponent)
+	{
+		return 0;
+	}
+	return HealthComponent->GetCurrentHealth() / HealthComponent->GetMaxHealth();
 }
 
 void AObjectiveDefendGenerator::BindControlPanel()

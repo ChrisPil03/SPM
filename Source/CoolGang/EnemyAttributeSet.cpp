@@ -35,9 +35,9 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 		
 		if (AppliedEffect->GetName() == TEXT("Default__GE_Damage_C"))
 		{
-			if (Health.GetCurrentValue() <= MaxHealth.GetBaseValue() / 2)
+			if (Health.GetCurrentValue() <= MaxHealth.GetBaseValue() / 3)
 			{
-				//UE_LOG(LogTemp, Error, TEXT("Enemy health being subtract by %f"), Magnitude);
+				UE_LOG(LogTemp, Error, TEXT("Enemy health being subtract by %f"), Magnitude);
 				//float NewHealth = FMath::Clamp(CurrentHealth - Magnitude, 0.0f, GetMaxHealth());
 				//SetHealth(NewHealth);
 				//UE_LOG(LogTemp, Error, TEXT("Enemy health After being subtracted: %f"), GetHealth());
