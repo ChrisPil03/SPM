@@ -8,6 +8,8 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "EnemyAI.generated.h"
 
+class UNiagaraComponent;
+class UNiagaraSystem;
 class UEnemySpawnManagerSubsystem;
 class UCapsuleComponent;
 class UStaticMeshComponent;
@@ -67,7 +69,7 @@ private:
 
 	UPROPERTY(Transient)
 	UMaterialInstanceDynamic* FadeDMI;
-
+	
 	float DeathStartTime;
 	UPROPERTY(EditDefaultsOnly, Category="VFX")
 	float FadeDuration = 1.0f;

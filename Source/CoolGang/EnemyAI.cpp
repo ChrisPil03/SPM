@@ -44,6 +44,17 @@ void AEnemyAI::BeginPlay()
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		UMaterialInterface* BaseMat = MeshComp->GetMaterial(0);
+		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0, BaseMat);
+		
+		if (FadeDMI)
+		{
+			FadeDMI->SetScalarParameterValue(TEXT("RadialRadius"), 0.0f);
+		}
+	}
+		
 	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
 	for (AObjectiveBase* Objective : AllObjectives)
 	{
@@ -88,6 +99,11 @@ void AEnemyAI::BeginPlay()
 
 void AEnemyAI::Attack()
 {
+	if (CurrentTarget == nullptr)
+	{
+		return;
+	}
+	
 	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
 	if (EnemyAttributeSet != nullptr)
@@ -120,16 +136,22 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
+	
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
 	  DeathVFX,
 	  GetActorLocation(),
-	  GetActorRotation()
+	  GetActorRotation(),
+	  FVector(1.f,1.f,1.f),
+	  true,
+	  true,
+	  ENCPoolMethod::None,
+	  false
 	);
 	
 	if (NiComp)
 	{
-		NiComp->OnSystemFinished.AddDynamic(this, &AEnemyAI::OnFadeFinished);
+		NiComp->OnSystemFinished.AddDynamic(this, &AEnemyAI::OnDeathFXFinished);
 	}
 	
 	Controller->StopMovement();
@@ -176,7 +198,7 @@ void AEnemyAI::Tick(float DeltaTime)
 	}
 	float Elapsed = GetWorld()->GetTimeSeconds() - DeathStartTime;
 	float Alpha   = FMath::Clamp(Elapsed / FadeDuration, 0.f, 1.f);
-	FadeDMI->SetScalarParameterValue(TEXT("Opacity"), 1.f - Alpha);
+	FadeDMI->SetScalarParameterValue(TEXT("RadialRadius"), Alpha);
 
 	if (Alpha >= 1.f)
 	{
@@ -187,15 +209,29 @@ void AEnemyAI::Tick(float DeltaTime)
 
 void AEnemyAI::SetAlive()
 {
+	SetActorTickEnabled(true);
+	if (FadeDMI)
+	{
+		FadeDMI->SetScalarParameterValue(TEXT("RadialRadius"), 0.0f);
+	}
+	SetActorHiddenInGame(false);
 	AIController->RunBehaviorTree(BehaviorTree);
 	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
 	GetCapsuleComponent()->SetEnableGravity(true);
 	HealthComponent->ResetHealthToMax();
 }
 
-void AEnemyAI::OnFadeFinished(UNiagaraComponent* PooledNiagaraComp)
+void AEnemyAI::OnDeathFXFinished(UNiagaraComponent* PooledNiagaraComp)
 {
+	bDeathVFXComplete = true;
+	if (bFadeComplete)
+	{
+		ReleaseToPool();
+	}
+}
 
+void AEnemyAI::OnFadeFinished()
+{
 	if (bDeathVFXComplete)
 	{
 		ReleaseToPool();
@@ -205,10 +241,11 @@ void AEnemyAI::OnFadeFinished(UNiagaraComponent* PooledNiagaraComp)
 void AEnemyAI::ReleaseToPool()
 {
 		FVector Location = FVector(10000, 10000, 10000);
-    	
+		SetActorHiddenInGame(true);
     	SetActorLocation(Location);
     	bChangedToTargetPlayer = false;
     	EnemySpawnManager->MarkEnemyAsDead(this);
+		SetActorTickEnabled(false);
 }
 
 
