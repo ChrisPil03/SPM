@@ -24,6 +24,7 @@ protected:
 
 public:
 	virtual void SetIsActive(const bool bNewState) override;
+	virtual float GetObjectiveProgress() const override;
 private:
 	UFUNCTION()
 	void RegisterInteraction(AInteractableObject* InteractableObject);
