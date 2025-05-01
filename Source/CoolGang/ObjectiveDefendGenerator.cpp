@@ -68,6 +68,15 @@ float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent con
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
+float AObjectiveDefendGenerator::GetHealthPercentage() const
+{
+	if (!HealthComponent)
+	{
+		return 0;
+	}
+	return HealthComponent->GetCurrentHealth() / HealthComponent->GetMaxHealth();
+}
+
 void AObjectiveDefendGenerator::BindControlPanel()
 {
 	if (ControlPanel)

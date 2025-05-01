@@ -74,15 +74,6 @@ void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, 
 	GetWorldTimerManager().SetTimer(MalfunctionIntervalHandle, MalfunctionIntervalDelegate, MalfunctionDamageInterval, true);
 }
 
-float AObjectiveBase::GetObjectiveProgress() const
-{
-	if (!ProgressTimer)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: Timer is nullptr, cannot get progress"));
-	}
-	return ProgressTimer->GetProgress();
-}
-
 void AObjectiveBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);

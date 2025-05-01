@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Attackable.h"
+#include "HealthComponent.h"
 #include "ObjectiveBase.h"
 #include "ObjectiveDefendGenerator.generated.h"
 
@@ -29,6 +30,8 @@ public:
 		FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
+	UFUNCTION(BlueprintCallable)
+	float GetHealthPercentage() const;
 
 private:
 	void BindControlPanel();
@@ -42,7 +45,7 @@ private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
 	
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* MeshComponent;
 	
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))

@@ -72,6 +72,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void ResetObjective();
 	virtual void FailObjective();
+
+	FString GetObjectiveName() const { return ObjectiveDescription; }
 	
 	void SetObjectiveState(EObjectiveState const NewObjectiveState) { ObjectiveState = NewObjectiveState; }
 	
@@ -99,7 +101,7 @@ public:
 	virtual void StopMalfunctioning();
 	
 	UFUNCTION(BlueprintCallable, Category = "Progress")
-	virtual float GetObjectiveProgress() const;
+	virtual float GetObjectiveProgress() const { return Progress; }
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void DisplayObjectiveDescription();

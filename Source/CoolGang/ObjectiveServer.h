@@ -69,7 +69,7 @@ public:
 private:
 	void SetDebugMaterial() const;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	UMaterialInterface* RestoringMaterial;
+	UMaterialInstanceDynamic* RestoringMaterial;
 	void ResetMaterial();
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* StandardMaterial;
