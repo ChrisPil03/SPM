@@ -158,7 +158,7 @@ void AObjectiveServer::ResetMaterial()
 	if (StandardMaterial)
 	{
 		GetMesh()->SetMaterial(0, StandardMaterial);
-	}else
+	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Standard meterial not set"));
 	}

@@ -67,6 +67,9 @@ private:
 	UPROPERTY(EditAnywhere, Category="VFX")
 	UNiagaraSystem* DeathVFX;
 
+	UPROPERTY(EditAnywhere, Category="VFX")
+	UMaterialInterface* FadeMaterial;
+	
 	UPROPERTY(Transient)
 	UMaterialInstanceDynamic* FadeDMI;
 	
@@ -74,7 +77,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="VFX")
 	float FadeDuration = 1.0f;
 
-	bool bFadeComplete = false;
+	bool bFadeComplete = true;
 
 	bool bDeathVFXComplete = false;
 

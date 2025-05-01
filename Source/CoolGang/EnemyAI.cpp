@@ -46,12 +46,11 @@ void AEnemyAI::BeginPlay()
 
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		UMaterialInterface* BaseMat = MeshComp->GetMaterial(0);
-		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0, BaseMat);
-		
+		MeshComp->SetMaterial(0, FadeMaterial);
+		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0, FadeMaterial);
 		if (FadeDMI)
 		{
-			FadeDMI->SetScalarParameterValue(TEXT("RadialRadius"), 0.0f);
+			FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), 0.0f);
 		}
 	}
 		
@@ -136,7 +135,6 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
-	
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
 	  DeathVFX,
@@ -187,18 +185,15 @@ void AEnemyAI::Tick(float DeltaTime)
 		return;
 	}
 	
-	if ((HealthComponent->GetCurrentHealth() <= 0 ) && EnemySpawnManager->GetAliveEnemies().Contains(this))
-	{
-		Die();
-	}
-
 	if (bFadeComplete)
 	{
 		return;
 	}
+	
 	float Elapsed = GetWorld()->GetTimeSeconds() - DeathStartTime;
 	float Alpha   = FMath::Clamp(Elapsed / FadeDuration, 0.f, 1.f);
-	FadeDMI->SetScalarParameterValue(TEXT("RadialRadius"), Alpha);
+
+	FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), Alpha);
 
 	if (Alpha >= 1.f)
 	{
@@ -212,7 +207,7 @@ void AEnemyAI::SetAlive()
 	SetActorTickEnabled(true);
 	if (FadeDMI)
 	{
-		FadeDMI->SetScalarParameterValue(TEXT("RadialRadius"), 0.0f);
+		FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), 0.0f);
 	}
 	SetActorHiddenInGame(false);
 	AIController->RunBehaviorTree(BehaviorTree);
@@ -223,6 +218,7 @@ void AEnemyAI::SetAlive()
 
 void AEnemyAI::OnDeathFXFinished(UNiagaraComponent* PooledNiagaraComp)
 {
+	UE_LOG(LogEngine, Warning, TEXT("OnDeathFXFinished"));
 	bDeathVFXComplete = true;
 	if (bFadeComplete)
 	{
