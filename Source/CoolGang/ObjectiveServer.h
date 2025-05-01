@@ -8,6 +8,7 @@
 #include "ObjectiveServer.generated.h"
 
 DECLARE_DELEGATE_OneParam(FServerHeatUpDelegate, float)
+DECLARE_DELEGATE_OneParam(FCompleteDelegate, AInteractableObject*)
 
 UENUM(BlueprintType)
 enum class EServerState : uint8
@@ -53,6 +54,12 @@ public:
 	void PauseRestoration();
 
 	void SetHeatUpFunction(const FServerHeatUpDelegate& NewDelegate) { HeatUpDelegate = NewDelegate; }
+
+	template <typename T>
+	void SetCompleteObjectiveFunction(T* Object, void (T::*Func)(AInteractableObject*))
+	{
+		CompleteDelegate.BindUObject(Object, Func);
+	}
 	
 	UFUNCTION()
 	void ResumeRestoration();
@@ -92,4 +99,5 @@ private:
 	float HeatGeneration;
 
 	FServerHeatUpDelegate HeatUpDelegate;
+	FCompleteDelegate CompleteDelegate;
 };
