@@ -59,7 +59,8 @@ AEnemyAI* AEnemySpawner::SpawnEnemy() const
 		
 		return DeadEnemies[0];
 	}
+	int32 RandomIndex = FMath::RandRange(0, EnemyClassArray.Num() - 1);
 
-	return GetWorld()->SpawnActor<AEnemyAI>(EnemyClass, Location, Rotation);
+	return GetWorld()->SpawnActor<AEnemyAI>(EnemyClassArray[RandomIndex], Location, Rotation);
 }
 

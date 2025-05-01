@@ -34,7 +34,7 @@ private:
 	APlayerLocationDetection* SpawnArea;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	TSubclassOf<AEnemyAI> EnemyClass;
+	TArray<TSubclassOf<AEnemyAI>> EnemyClassArray;
 	
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
 	
