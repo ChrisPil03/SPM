@@ -20,6 +20,9 @@ void AObjectiveTimedTasks::BeginPlay()
 		Interactable->SetInteractFunction(Delegate);
 	}
 	SetInteractablesInteractable(false);
+	FTimerCompletionDelegate Delegate;
+	Delegate.BindUObject(this, &AObjectiveBase::FailObjective);
+	GetProgressTimer().SetCompletionDelegate(Delegate);
 }
 
 void AObjectiveTimedTasks::ResetObjective()
@@ -36,17 +39,27 @@ void AObjectiveTimedTasks::ResetObjective()
 void AObjectiveTimedTasks::IncreaseObjectiveProgress(float const DeltaTime)
 {
 	Super::IncreaseObjectiveProgress(DeltaTime);
-
-	if (GetObjectiveProgress() == FProgressTimer::FullCompletion)
-	{
-		ResetObjective();
-	}
+	
+	// if (GetObjectiveProgress() == FProgressTimer::FullCompletion)
+	// {
+	// 	UE_LOG(LogTemp, Error, TEXT("Failed"));
+	// 	FailObjective();
+	// }
 }
 
 void AObjectiveTimedTasks::SetIsActive(const bool bNewState)
 {
 	Super::SetIsActive(bNewState);
 	SetInteractablesInteractable(bNewState);
+}
+
+float AObjectiveTimedTasks::GetObjectiveProgress() const
+{
+	if (AllInteractableObjects.Num() > 0)
+	{
+		return static_cast<float>(InteractedTasks) / AllInteractableObjects.Num();
+	}
+	return 0;
 }
 
 void AObjectiveTimedTasks::RegisterInteraction(AInteractableObject* InteractableObject)
