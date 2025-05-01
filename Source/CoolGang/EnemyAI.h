@@ -39,9 +39,18 @@ public:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent *AbilitySystemComponent;
 
+	UFUNCTION(BlueprintCallable)
+	TScriptInterface<IAttackable> GetTarget() const;
+	
 	void Die();
 
 private:
+	UFUNCTION()
+	void AttackObjective(AObjectiveBase* Objective);
+
+	UFUNCTION()
+	void AttackPlayer(AObjectiveBase*  Objective);
+	
 	UPROPERTY(EditAnywhere)
 	float AttackRange;
 
@@ -60,6 +69,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxHealth;
 
+	UPROPERTY(VisibleAnywhere)
+	TScriptInterface<IAttackable> CurrentTarget;
+	
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
 };

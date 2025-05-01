@@ -14,8 +14,13 @@
 #include "GameplayEffect.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
-
+#include "ObjectiveManagerSubsystem.h"
 #include "EnemyAttributeSet.h"
+#include "ObjectiveBase.h"
+#include "Attackable.h"
+#include "AI/NavigationSystemBase.h"
+#include "AI/NavigationSystemBase.h"
+
 
 // Sets default values
 AEnemyAI::AEnemyAI()
@@ -29,9 +34,21 @@ AEnemyAI::AEnemyAI()
 void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
-
+	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
-	
+
+	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
+	for (AObjectiveBase* Objective : AllObjectives)
+	{
+		UE_LOG(LogEngine, Warning, TEXT("Objective found: %s"), *Objective->GetName())
+		
+		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
+		{
+			UE_LOG(LogEngine, Warning, TEXT("Setting up callback functions"))
+			Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
+		}
+	}
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
@@ -73,8 +90,8 @@ void AEnemyAI::Attack()
 	{
 		UE_LOG(LogTemp, Error, TEXT("EnemyAttributeSet is null !"));
 	}
-	
-	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)),  EnemyAttributeSet->GetDamage(), MyOwnerInstigator, this, DamageTypeClass);
+	UE_LOG(LogEngine, Warning, TEXT("Dealing Damage to: %s"), *CurrentTarget.GetObject()->GetName())
+	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()),  EnemyAttributeSet->GetDamage(), MyOwnerInstigator, this, DamageTypeClass);
 }
 
 
@@ -88,12 +105,29 @@ UHealthComponent* AEnemyAI::GetHealthComponent() const
 	return HealthComponent;
 }
 
+TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
+{
+	return CurrentTarget;
+}
+
 void AEnemyAI::Die()
 {
 	FVector Location = FVector(10000, 10000, 10000);
 	
 	SetActorLocation(Location);
 	EnemySpawnManager->MarkEnemyAsDead(this);
+}
+
+void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
+{
+	UE_LOG(LogEngine, Warning, TEXT("Time to attack objective: %s"), *Objective->GetName())
+	CurrentTarget = Objective;
+}
+
+void AEnemyAI::AttackPlayer(AObjectiveBase* Objective)
+{
+	UE_LOG(LogEngine, Warning, TEXT("Time to attack the player"))
+	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 }
 
 void AEnemyAI::Tick(float DeltaTime)

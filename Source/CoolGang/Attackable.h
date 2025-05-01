@@ -7,7 +7,7 @@
 #include "Attackable.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, Blueprintable)
 class UAttackable : public UInterface
 {
 	GENERATED_BODY()
@@ -16,7 +16,7 @@ class UAttackable : public UInterface
 /**
  * 
  */
-class COOLGANG_API IAttackable
+class IAttackable
 {
 	GENERATED_BODY()
 
