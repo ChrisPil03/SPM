@@ -38,7 +38,7 @@ AEnemyAI* AEnemySpawner::SpawnEnemy() const
 	if (DeadEnemies.Num() > 0)
 	{
 		DeadEnemies[0]->SetActorLocationAndRotation(Location, Rotation);
-		DeadEnemies[0]->GetHealthComponent()->ResetHealthToMax();
+		DeadEnemies[0]->SetAlive();
 		AEnemyAI* DeadEnemy = Cast<AEnemyAI>(DeadEnemies[0]);
 		if (DeadEnemy)
 		{

@@ -18,8 +18,12 @@
 #include "EnemyAttributeSet.h"
 #include "ObjectiveBase.h"
 #include "Attackable.h"
-#include "AI/NavigationSystemBase.h"
-#include "AI/NavigationSystemBase.h"
+#include "BrainComponent.h"
+#include "EnemyAIController.h"
+#include "Components/CapsuleComponent.h"
+#include "EnemyAIController.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 
 // Sets default values
@@ -34,6 +38,9 @@ AEnemyAI::AEnemyAI()
 void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
+	CollisionType = GetCapsuleComponent()->GetCollisionEnabled();
+	AIController = Cast<AEnemyAIController>(Controller);
+	
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
@@ -113,11 +120,25 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
-	FVector Location = FVector(10000, 10000, 10000);
+	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+	  GetWorld(),
+	  DeathVFX,
+	  GetActorLocation(),
+	  GetActorRotation()
+	);
 	
-	SetActorLocation(Location);
-	bChangedToTargetPlayer = false;
-	EnemySpawnManager->MarkEnemyAsDead(this);
+	if (NiComp)
+	{
+		NiComp->OnSystemFinished.AddDynamic(this, &AEnemyAI::OnFadeFinished);
+	}
+	
+	Controller->StopMovement();
+	Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
+	GetCapsuleComponent()->SetEnableGravity(false);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	DeathStartTime = GetWorld()->GetTimeSeconds();
+	bFadeComplete = false;
 }
 
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
@@ -148,5 +169,46 @@ void AEnemyAI::Tick(float DeltaTime)
 	{
 		Die();
 	}
+
+	if (bFadeComplete)
+	{
+		return;
+	}
+	float Elapsed = GetWorld()->GetTimeSeconds() - DeathStartTime;
+	float Alpha   = FMath::Clamp(Elapsed / FadeDuration, 0.f, 1.f);
+	FadeDMI->SetScalarParameterValue(TEXT("Opacity"), 1.f - Alpha);
+
+	if (Alpha >= 1.f)
+	{
+		bFadeComplete = true;
+		OnFadeFinished();
+	}
 }
+
+void AEnemyAI::SetAlive()
+{
+	AIController->RunBehaviorTree(BehaviorTree);
+	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
+	GetCapsuleComponent()->SetEnableGravity(true);
+	HealthComponent->ResetHealthToMax();
+}
+
+void AEnemyAI::OnFadeFinished(UNiagaraComponent* PooledNiagaraComp)
+{
+
+	if (bDeathVFXComplete)
+	{
+		ReleaseToPool();
+	}
+}
+
+void AEnemyAI::ReleaseToPool()
+{
+		FVector Location = FVector(10000, 10000, 10000);
+    	
+    	SetActorLocation(Location);
+    	bChangedToTargetPlayer = false;
+    	EnemySpawnManager->MarkEnemyAsDead(this);
+}
+
 
