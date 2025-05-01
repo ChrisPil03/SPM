@@ -67,12 +67,11 @@ public:
 	void ResetServer();
 
 private:
-	//Currently for debugging
 	void SetDebugMaterial() const;
-	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
-	UMaterialInterface* RedMaterial;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UMaterialInterface* RestoringMaterial;
 	void ResetMaterial();
-	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* StandardMaterial;
 	
 	void StartRestoration();

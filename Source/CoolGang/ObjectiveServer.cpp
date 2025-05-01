@@ -144,9 +144,9 @@ void AObjectiveServer::ResetServer()
 
 void AObjectiveServer::SetDebugMaterial() const 
 {
-	if (RedMaterial)
+	if (RestoringMaterial)
 	{
-		GetMesh()->SetMaterial(0, RedMaterial);
+		GetMesh()->SetMaterial(0, RestoringMaterial);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Red meterial not set"));
