@@ -28,6 +28,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetCurrentHealth() const;
+	UFUNCTION(BlueprintCallable)
+	float GetMaxHealth() const { return MaxHealth; };
 
 	UFUNCTION()
 	void DamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* Instigator, AActor* DamageCauser);

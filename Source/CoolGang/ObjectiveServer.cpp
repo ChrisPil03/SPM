@@ -39,9 +39,18 @@ void AObjectiveServer::Tick(float DeltaTime)
 
 void AObjectiveServer::Interact(AActor* Interactor)
 {
-	if (GetNeedsRestoring())
+	if (GetCanInteractWith())
 	{
-		StartRestoration();
+		if (GetNeedsRestoring())
+		{
+			StartRestoration();
+		}
+		SetCanInteractWith(false);
+
+		if (PerformDelegate.IsBound())
+		{
+			PerformDelegate.Broadcast(this);
+		}
 	}
 }
 
@@ -93,9 +102,13 @@ void AObjectiveServer::CompleteRestoration()
 	SetServerState(EServerState::Restored);
 	RestoreProgress = FProgressTimer::FullCompletion;
 
-	if (PerformDelegate.IsBound())
+	// if (PerformDelegate.IsBound())
+	// {
+	// 	PerformDelegate.Broadcast(this);
+	// }
+	if (CompleteDelegate.IsBound())
 	{
-		PerformDelegate.Broadcast(this);
+		CompleteDelegate.Execute(this);
 	}
 	ResetMaterial();
 }
@@ -131,9 +144,9 @@ void AObjectiveServer::ResetServer()
 
 void AObjectiveServer::SetDebugMaterial() const 
 {
-	if (RedMaterial)
+	if (RestoringMaterial)
 	{
-		GetMesh()->SetMaterial(0, RedMaterial);
+		GetMesh()->SetMaterial(0, RestoringMaterial);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Red meterial not set"));

@@ -22,10 +22,9 @@ void UDashComponent::BeginPlay()
 	Super::BeginPlay();
 
 	OwnerCharacter = Cast<ACharacter>(GetOwner());
-	OriginalGroundFriction = OwnerCharacter->GetCharacterMovement()->GroundFriction;
+	CharacterMovement = OwnerCharacter->GetCharacterMovement();
+	OriginalGroundFriction = CharacterMovement->GroundFriction;
 }
-
-
 
 
 void UDashComponent::Dash()
@@ -53,8 +52,9 @@ void UDashComponent::Dash()
 		DashVelocity = Rotation.Vector();
 	}
 	DashVelocity *= DashForce;
-	OwnerCharacter->GetCharacterMovement()->GroundFriction = 0;
+	CharacterMovement->GroundFriction = 0;
 	bIsDashing = true;
+	CharacterMovement->StopMovementImmediately();
 	OwnerCharacter->LaunchCharacter(DashVelocity, false, false);
 	
 	GetWorld()->GetTimerManager().SetTimer(CooldownTimer, FTimerDelegate::CreateLambda([this](){}), Cooldown, false);
@@ -77,10 +77,10 @@ void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	{
 		FVector CurrentVelocity = OwnerCharacter->GetVelocity();
 		CurrentVelocity.Z = 0.0f;
-		FVector TargetVelocity = OwnerCharacter->GetActorForwardVector() * OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
+		FVector TargetVelocity = OwnerCharacter->GetActorForwardVector() * CharacterMovement->MaxWalkSpeed;
 		FVector NewVelocity = FMath::VInterpTo(CurrentVelocity, TargetVelocity, DeltaTime, DecelerationSpeed);
 		NewVelocity.Z = OwnerCharacter->GetVelocity().Z;
-		OwnerCharacter->GetCharacterMovement()->Velocity = NewVelocity;
+		CharacterMovement->Velocity = NewVelocity;
 
 		if ((NewVelocity - TargetVelocity).SizeSquared() < 10.f)
 		{
@@ -105,7 +105,7 @@ void UDashComponent::Reset()
 {
 	bIsDashing = false;
 	// Restore friction now
-	OwnerCharacter->GetCharacterMovement()->GroundFriction = OriginalGroundFriction;
+	CharacterMovement->GroundFriction = OriginalGroundFriction;
 	
 	// Stop movement by resetting velocity
 	bShouldDecelerate = true;

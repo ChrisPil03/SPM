@@ -73,6 +73,7 @@ void AGunBase::InitWeaponStats()
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MagazineSize"), MagazineSize);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), Damage);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.FireRate"), FireRate);
+		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.ReloadTime"), ReloadTime);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Pellets"), Pellets);
 		WeaponAttributeSet = AbilitySystemComponent->GetSet<UWeaponAttributeSet>();
 		AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
@@ -90,7 +91,7 @@ void AGunBase::GiveAbilities()
 		UE_LOG(LogTemp, Warning, TEXT("GunOwner is nullptr"));
 		return;
 	}
-	AbilitySystemComponent->InitAbilityActorInfo(GetOwner(), this);
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 
 	if (AbilitySystemComponent && FireAbilityClass)
 	{

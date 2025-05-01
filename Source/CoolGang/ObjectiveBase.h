@@ -20,6 +20,10 @@ enum class EObjectiveState : uint8
 	Failed
 };
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveActivated, AObjectiveBase*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveDeactivated, AObjectiveBase*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveInProgress, AObjectiveBase*);
+
 UCLASS(Abstract)
 class COOLGANG_API AObjectiveBase : public AActor
 {
@@ -45,7 +49,26 @@ protected:
 	ASystemIntegrity* GetSystemIntegrity() const { return SystemIntegrity; }
 	float GetBaseIntegrityDamage() const { return BaseIntegrityDamage; }
 
-public:	
+public:
+
+	template <typename T>
+	void AddOnObjectiveActivatedFunction(T* Object, void (T::*Func)(AObjectiveBase*))
+	{
+		OnObjectiveActivated.AddUObject(Object, Func);
+	}
+	
+	template <typename T>
+	void AddOnObjectiveDeactivatedFunction(T* Object, void (T::*Func)(AObjectiveBase*))
+	{
+		OnObjectiveDeactivated.AddUObject(Object, Func);
+	}
+
+	template <typename T>
+	void AddOnObjectiveInProgressFunction(T* Object, void (T::*Func)(AObjectiveBase*))
+	{
+		OnObjectiveInProgress.AddUObject(Object, Func);
+	}
+	
 	virtual void Tick(float DeltaTime) override;
 	virtual void ResetObjective();
 	virtual void FailObjective();
@@ -67,7 +90,7 @@ public:
 	bool GetIsActive() const { return bIsActive; }
 
 	UFUNCTION(BlueprintCallable, Category = "Active")
-	virtual void SetIsActive(const bool bNewState) { bIsActive = bNewState; }
+	virtual void SetIsActive(const bool bNewState);
 
 	UFUNCTION(BlueprintCallable, Category = "Active")
 	virtual void StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage);
@@ -91,13 +114,14 @@ private:
 	void ResetProgress() const { ProgressTimer->Reset(); }
 	void FindObjectiveManager();
 	void FindSystemIntegrity();
+	void BroadcastObjectiveInProgress();
 
 	FTimerHandle MalfunctionTimerHandle;
 	FTimerDelegate MalfunctionTimerDelegate;
 
 	FTimerHandle MalfunctionIntervalHandle;
 	FTimerDelegate MalfunctionIntervalDelegate;
-
+	
 	UFUNCTION()
 	virtual void StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage);
 	
@@ -128,4 +152,8 @@ private:
 	float BaseIntegrityDamage;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
+	
+	FOnObjectiveActivated OnObjectiveActivated;
+	FOnObjectiveDeactivated OnObjectiveDeactivated;
+	FOnObjectiveInProgress OnObjectiveInProgress;
 };

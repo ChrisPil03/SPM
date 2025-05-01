@@ -1,15 +1,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Attackable.h"
+#include "HealthComponent.h"
 #include "ObjectiveBase.h"
 #include "ObjectiveDefendGenerator.generated.h"
 
+class UCapsuleComponent;
 class AInteractableObject;
 class AObjectiveDefendGenerator;
 class UHealthComponent;
 
 UCLASS()
-class COOLGANG_API AObjectiveDefendGenerator : public AObjectiveBase
+class COOLGANG_API AObjectiveDefendGenerator : public AObjectiveBase, public IAttackable
 {
 	GENERATED_BODY()
 	
@@ -27,6 +30,8 @@ public:
 		FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
+	UFUNCTION(BlueprintCallable)
+	float GetHealthPercentage() const;
 
 private:
 	void BindControlPanel();
@@ -38,6 +43,9 @@ private:
 	bool CanNotTakeDamage();
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UCapsuleComponent* CapsuleComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* MeshComponent;
 	
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))

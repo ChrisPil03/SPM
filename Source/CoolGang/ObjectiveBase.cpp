@@ -23,9 +23,33 @@ AObjectiveBase::AObjectiveBase() :
 void AObjectiveBase::BeginPlay()
 {
 	Super::BeginPlay();
+	SetIsActive(false);
 	FindObjectiveManager();
 	FindSystemIntegrity();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
+}
+
+void AObjectiveBase::SetIsActive(const bool bNewState)
+{
+	UE_LOG(LogEngine, Warning, TEXT("State has changed to: %d"), bNewState)
+	bIsActive = bNewState;
+	if (bNewState)
+	{
+		if (OnObjectiveActivated.IsBound())
+		{
+			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
+			OnObjectiveActivated.Broadcast(this);
+		}
+	}
+	else
+	{
+		if (OnObjectiveDeactivated.IsBound())
+		{
+			UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
+			OnObjectiveDeactivated.Broadcast(this);
+		}
+	}
+	
 }
 
 void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
@@ -74,6 +98,7 @@ void AObjectiveBase::Tick(float DeltaTime)
 	if (bIsTimeBased && GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaTime);
+		BroadcastObjectiveInProgress();
 	}
 }
 
@@ -178,5 +203,11 @@ void AObjectiveBase::FindSystemIntegrity()
 	}
 }
 
-
-
+void AObjectiveBase::BroadcastObjectiveInProgress()
+{
+	if (OnObjectiveInProgress.IsBound())
+	{
+		UE_LOG(LogEngine, Warning, TEXT("Broadcasting InProgress."));
+		OnObjectiveInProgress.Broadcast(this);
+	}
+}

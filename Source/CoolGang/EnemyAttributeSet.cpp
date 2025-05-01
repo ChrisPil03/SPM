@@ -5,6 +5,7 @@
 #include "EnemyAI.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayEffectExtension.h"
+#include "ObjectiveBase.h"
 
 void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
@@ -34,12 +35,24 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 		
 		if (AppliedEffect->GetName() == TEXT("Default__GE_Damage_C"))
 		{
-			if (CurrentHealth > 0.0f)
+			if (Health.GetCurrentValue() <= MaxHealth.GetBaseValue() / 3)
 			{
 				UE_LOG(LogTemp, Error, TEXT("Enemy health being subtract by %f"), Magnitude);
 				//float NewHealth = FMath::Clamp(CurrentHealth - Magnitude, 0.0f, GetMaxHealth());
 				//SetHealth(NewHealth);
 				//UE_LOG(LogTemp, Error, TEXT("Enemy health After being subtracted: %f"), GetHealth());
+				
+				if (AEnemyAI* enemy = Cast<AEnemyAI>(GetOwningActor()))
+				{
+					TScriptInterface<IAttackable> TargetInterface = enemy->GetTarget();
+					if (UObject* TargetObject = TargetInterface.GetObject())
+					{
+						if (Cast<AObjectiveBase>(TargetObject))
+						{
+							enemy->AttackPlayer(nullptr);
+						}
+					}
+				}
 			}
 		}
 		

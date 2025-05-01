@@ -25,6 +25,7 @@ void UObjectiveManagerSubsystem::OnWorldInitialized(const UWorld::FActorsInitial
 {
 	FindObjectivesInLevel();
 }
+
 void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage)
 {
 	if (ObjectivesInLevel.IsEmpty())
@@ -81,6 +82,11 @@ void UObjectiveManagerSubsystem::ResetAllObjectives()
 	{
 		Objective->ResetObjective();
 	}
+}
+
+TArray<AObjectiveBase*> UObjectiveManagerSubsystem::GetAllObjectives() const
+{
+	return ObjectivesInLevel;
 }
 
 void UObjectiveManagerSubsystem::ObjectivesCompleted()

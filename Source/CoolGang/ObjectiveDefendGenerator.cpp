@@ -1,13 +1,15 @@
 #include "ObjectiveDefendGenerator.h"
 #include "HealthComponent.h"
 #include "InteractableObject.h"
+#include "Components/CapsuleComponent.h"
 
 AObjectiveDefendGenerator::AObjectiveDefendGenerator()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule Component"));
+	RootComponent = CapsuleComponent;
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	MeshComponent->SetupAttachment(RootComponent);
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
@@ -38,7 +40,7 @@ void AObjectiveDefendGenerator::InitiateQuarantine()
 
 bool AObjectiveDefendGenerator::CanNotTakeDamage()
 {
-	return !GetIsActive() || GetIsComplete() || GetIsFailed();
+	return !GetIsActive() || GetIsComplete() || GetIsFailed() || GetIsNotStarted();
 }
 
 void AObjectiveDefendGenerator::CompleteObjective()
@@ -58,11 +60,21 @@ float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent con
 {
 	if (CanNotTakeDamage())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Cannot take damage"));
+		UE_LOG(LogEngine, Warning, TEXT("Cannot take damage"));
 		return 0;
 	}
+	UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
 	DamageAmount = FMath::Min(DamageAmount, HealthComponent->GetCurrentHealth());
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+float AObjectiveDefendGenerator::GetHealthPercentage() const
+{
+	if (!HealthComponent)
+	{
+		return 0;
+	}
+	return HealthComponent->GetCurrentHealth() / HealthComponent->GetMaxHealth();
 }
 
 void AObjectiveDefendGenerator::BindControlPanel()
