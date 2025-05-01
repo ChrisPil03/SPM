@@ -64,21 +64,21 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Pistol);
-	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	EquippedGun->SetOwner(this);
 	EquippedGun->SetActorHiddenInGame(true);
 	EquippedGun->Initialize();
 	Guns.Add(EquippedGun);
 	
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Shotgun);
-	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	EquippedGun->SetOwner(this);
 	EquippedGun->SetActorHiddenInGame(true);
 	EquippedGun->Initialize();
 	Guns.Add(EquippedGun);
 
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Rifle);
-	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	EquippedGun->SetOwner(this);
 	EquippedGun->SetActorHiddenInGame(true);
 	EquippedGun->Initialize();
