@@ -154,6 +154,7 @@ void APlayerCharacter::ReloadCurrentGun()
 	{
 		return;
 	}
+	ReleasedTrigger();
 	EquippedGun->Reload();
 }
 
