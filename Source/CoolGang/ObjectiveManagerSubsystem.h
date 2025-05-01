@@ -19,6 +19,7 @@ public:
 	void ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage);
 	void RegisterCompletedObjective(AObjectiveBase* CompletedObjective);
 	void ResetAllObjectives();
+	TArray<AObjectiveBase*> GetAllObjectives() const;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 private:

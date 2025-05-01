@@ -29,6 +29,29 @@ void AObjectiveBase::BeginPlay()
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
 }
 
+void AObjectiveBase::SetIsActive(const bool bNewState)
+{
+	UE_LOG(LogEngine, Warning, TEXT("State has changed to: %d"), bNewState)
+	bIsActive = bNewState;
+	if (bNewState)
+	{
+		if (OnObjectiveActivated.IsBound())
+		{
+			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
+			OnObjectiveActivated.Broadcast(this);
+		}
+	}
+	else
+	{
+		if (OnObjectiveDeactivated.IsBound())
+		{
+			UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
+			OnObjectiveDeactivated.Broadcast(this);
+		}
+	}
+	
+}
+
 void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Starting Malfunction Timer"));
@@ -178,6 +201,4 @@ void AObjectiveBase::FindSystemIntegrity()
 		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: SystemIntegrity not found"));
 	}
 }
-
-
 

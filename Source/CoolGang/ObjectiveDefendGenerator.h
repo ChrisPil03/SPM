@@ -1,15 +1,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Attackable.h"
 #include "ObjectiveBase.h"
 #include "ObjectiveDefendGenerator.generated.h"
 
+class UCapsuleComponent;
 class AInteractableObject;
 class AObjectiveDefendGenerator;
 class UHealthComponent;
 
 UCLASS()
-class COOLGANG_API AObjectiveDefendGenerator : public AObjectiveBase
+class COOLGANG_API AObjectiveDefendGenerator : public AObjectiveBase, public IAttackable
 {
 	GENERATED_BODY()
 	
@@ -37,6 +39,9 @@ private:
 	void InitiateQuarantine();
 	bool CanNotTakeDamage();
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UCapsuleComponent* CapsuleComponent;
+	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* MeshComponent;
 	

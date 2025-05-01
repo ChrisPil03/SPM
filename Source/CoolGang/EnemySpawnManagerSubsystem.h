@@ -64,8 +64,6 @@ protected:
 
 
 private:
-    
-    
     void BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params);
     
     void OnEnterTriggerBox(APlayerLocationDetection* SpawnBox);
