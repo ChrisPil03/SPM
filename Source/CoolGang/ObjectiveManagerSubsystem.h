@@ -6,9 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "ObjectiveManagerSubsystem.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+	FCreateObjectiveListItem, FString, ObjectiveName, AObjectiveBase*, Objective);
+
 class AObjectiveBase;
 
-UCLASS()
+UCLASS(BlueprintType)
 class COOLGANG_API UObjectiveManagerSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
@@ -22,11 +25,16 @@ public:
 	TArray<AObjectiveBase*> GetAllObjectives() const;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FCreateObjectiveListItem CreateObjectiveListItemDelegate;
+
 private:
 	bool GetIsObjectivesCompleted() const;
 	void FindObjectivesInLevel();
-
 	void OnWorldInitialized(const UWorld::FActorsInitializedParams& Params);
+	void ObjectivesCompleted();
+	void CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective);
+	
 	UPROPERTY(VisibleAnywhere)
 	int CompletedObjectives = 0;
 
@@ -35,6 +43,4 @@ private:
 
 	UPROPERTY()
 	AObjectiveBase* LastActivatedObjective;
-
-	void ObjectivesCompleted();
 };
