@@ -38,7 +38,7 @@ void UGA_FireWeapon::Fire()
 	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
 
 	// Assuming we have a reference to the Weapon
-	APlayerCharacter* OwningPlayerCharacter = Cast<APlayerCharacter>(GetOwningActorFromActorInfo());
+	APlayerCharacter* OwningPlayerCharacter = Cast<APlayerCharacter>(GetOwningActorFromActorInfo()->GetOwner());
 	AGunBase*  EquippedWeapon = OwningPlayerCharacter->GetEquippedGun();
 	if (EquippedWeapon)
 	{
@@ -100,7 +100,7 @@ void UGA_FireWeapon::PelletsFire()
 
 bool UGA_FireWeapon::GetTraceStartLocationAndRotation(FVector& OutStartPoint, FRotator& OutRotation) const
 {
-	APawn* OwningPawn = Cast<APawn>(GetOwningActorFromActorInfo()); 
+	APawn* OwningPawn = Cast<APawn>(GetOwningActorFromActorInfo()->GetOwner()); 
 	if (OwningPawn == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("OwningPawn is nullptr") );
@@ -126,10 +126,11 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 	FVector EndPoint = StartPoint + (BulletDirection * 20000000);  // range 
 	
 	
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(GetOwningActorFromActorInfo());
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
+	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
 
-	if ( GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, Params))
+	if ( GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, QueryParams))
 	{
 		DrawDebugSphere(GetWorld(), Hit.Location, 2.0f, 12,FColor::Red, false, 2.0f);
 		//BlinkDebug(Hit);
@@ -160,7 +161,8 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 
 		FHitResult Hit;
 		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()); // Ignore self
+		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
+		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner()); // Ignore self
 
 		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, QueryParams);
 
