@@ -7,6 +7,8 @@
 #include "AbilitySystemComponent.h"
 #include "EnemyAI.h"
 #include "EnemyAttributeSet.h"
+#include "ObjectiveDefendGenerator.h"
+#include "ObjectiveManagerSubsystem.h"
 
 AEnemySpawner::AEnemySpawner()
 {
@@ -57,6 +59,7 @@ AEnemyAI* AEnemySpawner::SpawnEnemy() const
 		
 		return DeadEnemies[0];
 	}
+
 	return GetWorld()->SpawnActor<AEnemyAI>(EnemyClass, Location, Rotation);
 }
 

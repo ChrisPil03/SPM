@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DiveGameMode.h"
 #include <cmath>
 #include <algorithm>
@@ -8,8 +7,6 @@
 #include "ObjectiveManagerSubsystem.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
-
-
 
 void ADiveGameMode::BeginPlay()
 {
@@ -47,7 +44,7 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 	{
 		NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
 		UE_LOG(LogTemp, Warning, TEXT("Activating random objective"))
-		GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(1, 0.1, 10);
+		GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(10, 0.1, 10);
 	
 	}
 }

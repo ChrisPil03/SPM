@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Attackable.h"
 #include "GameFramework/Character.h"
 #include "HealthComponent.h"
 #include "PlayerCharacter.generated.h"
 
 class AGunBase;
 UCLASS()
-class COOLGANG_API APlayerCharacter : public ACharacter
+class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 {
 	GENERATED_BODY()
 

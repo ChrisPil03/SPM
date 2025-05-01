@@ -1,13 +1,15 @@
 #include "ObjectiveDefendGenerator.h"
 #include "HealthComponent.h"
 #include "InteractableObject.h"
+#include "Components/CapsuleComponent.h"
 
 AObjectiveDefendGenerator::AObjectiveDefendGenerator()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule Component"));
+	RootComponent = CapsuleComponent;
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	MeshComponent->SetupAttachment(RootComponent);
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
@@ -58,9 +60,10 @@ float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent con
 {
 	if (CanNotTakeDamage())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Cannot take damage"));
+		UE_LOG(LogEngine, Warning, TEXT("Cannot take damage"));
 		return 0;
 	}
+	UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
 	DamageAmount = FMath::Min(DamageAmount, HealthComponent->GetCurrentHealth());
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
