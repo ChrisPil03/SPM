@@ -22,6 +22,7 @@ enum class EObjectiveState : uint8
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveActivated, AObjectiveBase*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveDeactivated, AObjectiveBase*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveInProgress, AObjectiveBase*);
 
 UCLASS(Abstract)
 class COOLGANG_API AObjectiveBase : public AActor
@@ -60,6 +61,12 @@ public:
 	void AddOnObjectiveDeactivatedFunction(T* Object, void (T::*Func)(AObjectiveBase*))
 	{
 		OnObjectiveDeactivated.AddUObject(Object, Func);
+	}
+
+	template <typename T>
+	void AddOnObjectiveInProgressFunction(T* Object, void (T::*Func)(AObjectiveBase*))
+	{
+		OnObjectiveInProgress.AddUObject(Object, Func);
 	}
 	
 	virtual void Tick(float DeltaTime) override;
@@ -107,6 +114,7 @@ private:
 	void ResetProgress() const { ProgressTimer->Reset(); }
 	void FindObjectiveManager();
 	void FindSystemIntegrity();
+	void BroadcastObjectiveInProgress();
 
 	FTimerHandle MalfunctionTimerHandle;
 	FTimerDelegate MalfunctionTimerDelegate;
@@ -147,4 +155,5 @@ private:
 	
 	FOnObjectiveActivated OnObjectiveActivated;
 	FOnObjectiveDeactivated OnObjectiveDeactivated;
+	FOnObjectiveInProgress OnObjectiveInProgress;
 };
