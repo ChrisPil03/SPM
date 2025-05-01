@@ -3,6 +3,8 @@
 #include "ObjectiveManagerSubsystem.h"
 
 #include "ObjectiveBase.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -57,7 +59,8 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 		SelectedObjective->SetIsActive(true);
 		SelectedObjective->StartMalfunctionTimer(MalfunctionTimer, MalfunctionInterval, MalfunctionDamage);
 		LastActivatedObjective = SelectedObjective;
-
+		CreateObjectiveUIListItem(SelectedObjective->GetObjectiveName(), SelectedObjective);
+		
 		UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
 	}
 }
@@ -92,6 +95,14 @@ TArray<AObjectiveBase*> UObjectiveManagerSubsystem::GetAllObjectives() const
 void UObjectiveManagerSubsystem::ObjectivesCompleted()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objectives Completed!"));
+}
+
+void UObjectiveManagerSubsystem::CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective)
+{
+	if (CreateObjectiveListItemDelegate.IsBound())
+	{
+		CreateObjectiveListItemDelegate.Broadcast(ObjectiveName, Objective);
+	}
 }
 
 bool UObjectiveManagerSubsystem::GetIsObjectivesCompleted() const
