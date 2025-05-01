@@ -46,6 +46,11 @@ void AObjectiveServer::Interact(AActor* Interactor)
 			StartRestoration();
 		}
 		SetCanInteractWith(false);
+
+		if (PerformDelegate.IsBound())
+		{
+			PerformDelegate.Broadcast(this);
+		}
 	}
 }
 
@@ -97,9 +102,13 @@ void AObjectiveServer::CompleteRestoration()
 	SetServerState(EServerState::Restored);
 	RestoreProgress = FProgressTimer::FullCompletion;
 
-	if (PerformDelegate.IsBound())
+	// if (PerformDelegate.IsBound())
+	// {
+	// 	PerformDelegate.Broadcast(this);
+	// }
+	if (CompleteDelegate.IsBound())
 	{
-		PerformDelegate.Broadcast(this);
+		CompleteDelegate.Execute(this);
 	}
 	ResetMaterial();
 }
