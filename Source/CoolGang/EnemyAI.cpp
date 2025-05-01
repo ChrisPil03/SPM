@@ -45,7 +45,8 @@ void AEnemyAI::BeginPlay()
 		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
 		{
 			UE_LOG(LogEngine, Warning, TEXT("Setting up callback functions"))
-			Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+			//Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
@@ -115,13 +116,18 @@ void AEnemyAI::Die()
 	FVector Location = FVector(10000, 10000, 10000);
 	
 	SetActorLocation(Location);
+	bChangedToTargetPlayer = false;
 	EnemySpawnManager->MarkEnemyAsDead(this);
 }
 
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
-	UE_LOG(LogEngine, Warning, TEXT("Time to attack objective: %s"), *Objective->GetName())
-	CurrentTarget = Objective;
+	if (!bChangedToTargetPlayer && EnemySpawnManager->GetAliveEnemies().Contains(this))
+	{
+		UE_LOG(LogEngine, Warning, TEXT("Time to attack objective: %s"), *Objective->GetName())
+		CurrentTarget = Objective;
+		bChangedToTargetPlayer = true;
+	}
 }
 
 void AEnemyAI::AttackPlayer(AObjectiveBase* Objective)

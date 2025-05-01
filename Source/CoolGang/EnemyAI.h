@@ -44,12 +44,14 @@ public:
 	
 	void Die();
 
+	UFUNCTION()
+	void AttackPlayer(AObjectiveBase*  Objective);
+
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
 
-	UFUNCTION()
-	void AttackPlayer(AObjectiveBase*  Objective);
+
 	
 	UPROPERTY(EditAnywhere)
 	float AttackRange;
@@ -74,4 +76,7 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bChangedToTargetPlayer;
 };
