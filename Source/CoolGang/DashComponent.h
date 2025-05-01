@@ -42,7 +42,9 @@ private:
 	
 	UPROPERTY()
 	 ACharacter* OwnerCharacter;
-
+	UPROPERTY()
+	class UCharacterMovementComponent* CharacterMovement;
+	
 	FTimerHandle CooldownTimer;
 	FTimerHandle DashTimer;
 	
@@ -51,6 +53,7 @@ private:
 	FVector StartLocation;
 	FVector DashDirection;
 	float OriginalGroundFriction;
+	
 	
 	bool CheckToReset();
 

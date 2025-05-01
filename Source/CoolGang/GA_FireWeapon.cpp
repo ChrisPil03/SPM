@@ -131,14 +131,13 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 
 	if ( GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, Params))
 	{
-		DrawDebugSphere(GetWorld(), Hit.Location,  2.0f, 12,FColor::Red, true);
+		DrawDebugSphere(GetWorld(), Hit.Location, 2.0f, 12,FColor::Red, false, 2.0f);
+		//BlinkDebug(Hit);
 		return true;
 	}
 	
 		return false;
-	
 
-	
 }
 
 bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
@@ -168,13 +167,50 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 		if (bHit)
 		{
 			HitResults.Add(Hit);
-			DrawDebugSphere(GetWorld(), Hit.Location,  2.0f, 12,FColor::Red, true);
-			// Optional: Log or do effects here
-			UE_LOG(LogTemp, Log, TEXT("Hit actor: %s"), *Hit.GetActor()->GetName());
+			DrawDebugSphere(GetWorld(), Hit.Location, 2.0f, 12,FColor::Red, false, 2.0f);
+			//BlinkDebug(Hit);
+			
 			bHasTarget = true;
 		}
 	}
 
 	return bHasTarget;
+}
+
+
+void UGA_FireWeapon::BlinkDebug(FHitResult& HitResult)
+{
+	AActor* HitActor = HitResult.GetActor();
+	if (HitActor == nullptr)
+	{
+		return;
+	}
+
+	UStaticMeshComponent* MeshComponent = HitActor->FindComponentByClass<UStaticMeshComponent>();
+
+	if (MeshComponent == nullptr)
+	{
+		return;		
+	}
+		// Save original material
+		UMaterialInterface* OriginalMaterialInterface = MeshComponent->GetMaterial(0);
+		FString AssetPath = OriginalMaterialInterface->GetPathName();
+		
+		// Load red material
+		if (UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Assets/Materials/M_Debug.M_Debug")))
+		{
+			MeshComponent->SetMaterial(0, RedMaterial);
+
+			// Start a timer to revert the material after 0.2 seconds
+			
+			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, AssetPath, MeshComponent]()
+			{
+				UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, *AssetPath );
+				MeshComponent->SetMaterial(0, Material);
+			});
+	
+			GetWorld()->GetTimerManager().SetTimer(BlinkTimerHandle, TimerDelegate, 0.1, false);
+		}
+	
 }
 

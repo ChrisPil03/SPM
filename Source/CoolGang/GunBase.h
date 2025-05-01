@@ -51,8 +51,10 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactEffect;
 
+	
+
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
-	class UNiagaraSystem* MuzzleFlash;
+	class UNiagaraSystem* MuzzleFlashEffect;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	USceneComponent* MuzzlePosition;
@@ -74,13 +76,13 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	float MaxRange {1000};
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat")
 	float ReloadTime {2};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
 	int MagazineSize {30};
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat ")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat ")
 	int AmmoCount {30};
 
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
@@ -110,10 +112,10 @@ protected:
 	bool bIsRecoiling  = false;
 	bool bIsReloading  = false;
 
-	void BlinkDebug(FHitResult& h);
+
 	void InitWeaponStats();
-	void InitAbilitySystemComponent();
-	FTimerHandle BlinkTimerHandle;
+	void GiveAbilities();
+	
 
 	float ElapsedTime =  0.0f;
 	 
@@ -152,6 +154,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void StopFire();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopReload();
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Fire();
@@ -186,7 +191,6 @@ public:
 	}
 	
 	void Initialize();
-	
 };
 
 

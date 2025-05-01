@@ -25,6 +25,7 @@ void AObjectiveRestoreServers::BeginPlay()
 {
 	Super::BeginPlay();
 	InitializeServerHall();
+	ControlPanel->SetCanInteractWith(false);
 }
 
 void AObjectiveRestoreServers::Tick(float DeltaTime)
@@ -53,7 +54,7 @@ void AObjectiveRestoreServers::SetIsActive(const bool bNewState)
 {
 	UE_LOG(LogTemp, Warning, TEXT("SetIsActive Restore servers"));
 	Super::SetIsActive(bNewState);
-
+	
 	if (bNewState)
 	{
 		SelectServersToRestore();

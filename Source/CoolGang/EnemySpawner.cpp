@@ -3,10 +3,12 @@
 
 #include "EnemySpawner.h"
 #include "TimerManager.h"
-#include "EnemySpawnManager.h"
+#include "EnemySpawnManagerSubsystem.h"
 #include "AbilitySystemComponent.h"
 #include "EnemyAI.h"
 #include "EnemyAttributeSet.h"
+#include "ObjectiveDefendGenerator.h"
+#include "ObjectiveManagerSubsystem.h"
 
 AEnemySpawner::AEnemySpawner()
 {
@@ -16,7 +18,7 @@ AEnemySpawner::AEnemySpawner()
 void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 	EnemySpawnManager->RegisterSpawner(SpawnArea, this);
 }
 
@@ -57,6 +59,7 @@ AEnemyAI* AEnemySpawner::SpawnEnemy() const
 		
 		return DeadEnemies[0];
 	}
+
 	return GetWorld()->SpawnActor<AEnemyAI>(EnemyClass, Location, Rotation);
 }
 

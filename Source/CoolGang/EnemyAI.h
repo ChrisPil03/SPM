@@ -7,7 +7,7 @@
 #include "PlayerCharacter.h"
 #include "EnemyAI.generated.h"
 
-class AEnemySpawnManager;
+class UEnemySpawnManagerSubsystem;
 class UCapsuleComponent;
 class UStaticMeshComponent;
 
@@ -39,26 +39,29 @@ public:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent *AbilitySystemComponent;
 
+	UFUNCTION(BlueprintCallable)
+	TScriptInterface<IAttackable> GetTarget() const;
+	
 	void Die();
 
-private:
-	UPROPERTY(EditAnywhere)
-	UStaticMeshComponent *BaseMesh;
+	UFUNCTION()
+	void AttackPlayer(AObjectiveBase*  Objective);
 
+private:
+	UFUNCTION()
+	void AttackObjective(AObjectiveBase* Objective);
+
+
+	
 	UPROPERTY(EditAnywhere)
 	float AttackRange;
 
 	UPROPERTY(VisibleAnywhere)
 	UHealthComponent *HealthComponent;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AEnemySpawnManager> EnemySpawnManagerClass;
-
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	AEnemySpawnManager *EnemySpawnManager;
-
+	UPROPERTY()
+	UEnemySpawnManagerSubsystem* EnemySpawnManager;
 	
-
 	UPROPERTY(EditAnywhere)
 	float AttackDamage;
 
@@ -68,6 +71,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxHealth;
 
+	UPROPERTY(VisibleAnywhere)
+	TScriptInterface<IAttackable> CurrentTarget;
+	
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
+
+	UPROPERTY(VisibleAnywhere)
+	bool bChangedToTargetPlayer;
 };

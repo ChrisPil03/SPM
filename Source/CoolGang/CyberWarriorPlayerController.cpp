@@ -40,14 +40,9 @@ void ACyberWarriorPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsW
 			LoseScreen->AddToViewport();
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Restarting"));
 	GetWorldTimerManager().SetTimer(RestartTimer, this, &APlayerController::RestartLevel, RestartDelay);
 }
-
-void ACyberWarriorPlayerController::RestartGame()
-{
-	Super::RestartLevel();
-}
-
 
 void ACyberWarriorPlayerController::BeginPlay()
 {

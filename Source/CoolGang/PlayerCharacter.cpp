@@ -12,6 +12,7 @@
 #include "GameFramework/GameMode.h"
 #include "CyberWarriorGameModeBase.h"
 #include "AbilitySystemComponent.h"
+#include "DiveGameMode.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -41,11 +42,11 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	{
 		Die();
 	}
-
+	
+	
 	if (IsDead())
 	{
-		ACyberWarriorGameModeBase *GameMode = GetWorld()->GetAuthGameMode<ACyberWarriorGameModeBase>();
-
+		ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
 		if (GameMode != nullptr)
 		{
 			GameMode->PlayerKilled(this);
@@ -83,14 +84,16 @@ void APlayerCharacter::BeginPlay()
 	EquippedGun->Initialize();
 	Guns.Add(EquippedGun);
 
+	EquippedGun->SetActorHiddenInGame(false);
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (HealthComponent->GetCurrentHealth() <= 0)
+	ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
+	
+	if (HealthComponent->GetCurrentHealth() <= 0 || GameMode->GameIsOver())
 	{
 		Die();
 	}
@@ -151,6 +154,7 @@ void APlayerCharacter::ReloadCurrentGun()
 	{
 		return;
 	}
+	ReleasedTrigger();
 	EquippedGun->Reload();
 }
 
@@ -173,11 +177,12 @@ void APlayerCharacter::Dash()
 }
 
 
-inline void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
+void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 {
 	if (EquippedGun)
 	{
 		EquippedGun->SetActorHiddenInGame(true);
+		ReleasedTrigger();
 	}
 
 	EquippedGun = NewWeapon;

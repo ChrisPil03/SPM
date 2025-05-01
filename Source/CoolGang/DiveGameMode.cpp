@@ -1,14 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "DiveGameMode.h"
 #include <cmath>
 #include <algorithm>
 
+#include "ObjectiveManagerSubsystem.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
-
-
 
 void ADiveGameMode::BeginPlay()
 {
@@ -45,16 +43,20 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 	if (NextObjectiveTimer <= 0)
 	{
 		NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
-		//ActivateRandomObjective();
+		UE_LOG(LogTemp, Warning, TEXT("Activating random objective"))
+		GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(10, 0.1, 10);
 	
 	}
 }
 
-void ADiveGameMode::EndGame() const
+void ADiveGameMode::EndGame()
 {
+	bGameHasEnded = true;
 	AController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	Controller->GameHasEnded(Controller->GetPawn(), false);
 }
+
+
 
 float ADiveGameMode::ComputeTimer(int cycleIndex, float T0, float Tmin, float k)
 {

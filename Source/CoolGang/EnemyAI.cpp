@@ -7,57 +7,49 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
-#include "EnemySpawnManager.h"
+#include "EnemySpawnManagerSubsystem.h"
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "GameplayEffect.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
-
+#include "ObjectiveManagerSubsystem.h"
 #include "EnemyAttributeSet.h"
+#include "ObjectiveBase.h"
+#include "Attackable.h"
+#include "AI/NavigationSystemBase.h"
+#include "AI/NavigationSystemBase.h"
+
 
 // Sets default values
 AEnemyAI::AEnemyAI()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
-
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-
-	
-	
 }
 
 void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
-
-	if (EnemySpawnManagerClass) // Ensure the class variable is set
+	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
+	for (AObjectiveBase* Objective : AllObjectives)
 	{
-		AEnemySpawnManager* FoundManager = Cast<AEnemySpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), EnemySpawnManagerClass));
-
-		if (IsValid(FoundManager)) // Use IsValid() to check for null and pending kill
+		UE_LOG(LogEngine, Warning, TEXT("Objective found: %s"), *Objective->GetName())
+		
+		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
 		{
-			EnemySpawnManager = FoundManager; // Assign if found
-			UE_LOG(LogTemp, Display, TEXT("AI %s found EnemySpawnManager: %s"), *GetName(), *EnemySpawnManager->GetName());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("AI %s could NOT find any actor of class %s!"), *GetName(), *EnemySpawnManagerClass->GetName());
-			// EnemySpawnManager remains null or whatever its default was
+			UE_LOG(LogEngine, Warning, TEXT("Setting up callback functions"))
+			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+			//Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("AI %s has EnemySpawnManagerClass unset! Cannot search."), *GetName());
-	}
-
-	
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
@@ -86,8 +78,6 @@ void AEnemyAI::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("Enemy AbilitySystemComponent is null in BeginPlay!"));
 	}
 }
-	
-
 
 void AEnemyAI::Attack()
 {
@@ -101,8 +91,8 @@ void AEnemyAI::Attack()
 	{
 		UE_LOG(LogTemp, Error, TEXT("EnemyAttributeSet is null !"));
 	}
-	
-	UGameplayStatics::ApplyDamage(Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)),  EnemyAttributeSet->GetDamage(), MyOwnerInstigator, this, DamageTypeClass);
+	UE_LOG(LogEngine, Warning, TEXT("Dealing Damage to: %s"), *CurrentTarget.GetObject()->GetName())
+	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()),  EnemyAttributeSet->GetDamage(), MyOwnerInstigator, this, DamageTypeClass);
 }
 
 
@@ -116,12 +106,34 @@ UHealthComponent* AEnemyAI::GetHealthComponent() const
 	return HealthComponent;
 }
 
+TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
+{
+	return CurrentTarget;
+}
+
 void AEnemyAI::Die()
 {
 	FVector Location = FVector(10000, 10000, 10000);
 	
 	SetActorLocation(Location);
+	bChangedToTargetPlayer = false;
 	EnemySpawnManager->MarkEnemyAsDead(this);
+}
+
+void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
+{
+	if (!bChangedToTargetPlayer && EnemySpawnManager->GetAliveEnemies().Contains(this))
+	{
+		UE_LOG(LogEngine, Warning, TEXT("Time to attack objective: %s"), *Objective->GetName())
+		CurrentTarget = Objective;
+		bChangedToTargetPlayer = true;
+	}
+}
+
+void AEnemyAI::AttackPlayer(AObjectiveBase* Objective)
+{
+	UE_LOG(LogEngine, Warning, TEXT("Time to attack the player"))
+	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 }
 
 void AEnemyAI::Tick(float DeltaTime)
@@ -131,14 +143,10 @@ void AEnemyAI::Tick(float DeltaTime)
 	{
 		return;
 	}
-	//|| EnemyAttributeSet->GetHealth() <= 0
-
+	
 	if ((HealthComponent->GetCurrentHealth() <= 0 ) && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
-		
 		Die();
-
-		
 	}
 }
 

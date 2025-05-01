@@ -1,9 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ObjectiveBase.h"
-#include "ObjectiveManager.h"
+#include "ObjectiveManagerSubsystem.h"
 #include "SystemIntegrity.h"
 #include "Kismet/GameplayStatics.h"
+
 
 AObjectiveBase::AObjectiveBase() :
 	bIsActive(false),
@@ -22,9 +23,55 @@ AObjectiveBase::AObjectiveBase() :
 void AObjectiveBase::BeginPlay()
 {
 	Super::BeginPlay();
+	SetIsActive(false);
 	FindObjectiveManager();
 	FindSystemIntegrity();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
+}
+
+void AObjectiveBase::SetIsActive(const bool bNewState)
+{
+	UE_LOG(LogEngine, Warning, TEXT("State has changed to: %d"), bNewState)
+	bIsActive = bNewState;
+	if (bNewState)
+	{
+		if (OnObjectiveActivated.IsBound())
+		{
+			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
+			OnObjectiveActivated.Broadcast(this);
+		}
+	}
+	else
+	{
+		if (OnObjectiveDeactivated.IsBound())
+		{
+			UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
+			OnObjectiveDeactivated.Broadcast(this);
+		}
+	}
+	
+}
+
+void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Starting Malfunction Timer"));
+	MalfunctionTimerDelegate.BindUFunction(this, FName("StartMalfunctioning"), MalfunctionDamageInterval, MalfunctionDamage);
+	GetWorldTimerManager().SetTimer(MalfunctionTimerHandle, MalfunctionTimerDelegate, MalfunctionTimer, false);
+
+}
+
+void AObjectiveBase::StopMalfunctioning()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Objective complete, stopping malfunction"));
+	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
+	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
+}
+
+void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Starting to malfunction"));
+	MalfunctionIntervalDelegate.BindUFunction(this, FName("WeakenSystemIntegrity"), MalfunctionDamage);
+	GetWorldTimerManager().SetTimer(MalfunctionIntervalHandle, MalfunctionIntervalDelegate, MalfunctionDamageInterval, true);
 }
 
 float AObjectiveBase::GetObjectiveProgress() const
@@ -51,6 +98,7 @@ void AObjectiveBase::Tick(float DeltaTime)
 	if (bIsTimeBased && GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaTime);
+		BroadcastObjectiveInProgress();
 	}
 }
 
@@ -87,8 +135,7 @@ void AObjectiveBase::CompleteObjective()
 		UE_LOG(LogTemp, Error, TEXT("ObjectiveBase: ObjectiveManager is nullptr"));
 		return;
 	}
-	ObjectiveManager->RegisterCompletedObjective();
-	SetIsActive(false);
+	ObjectiveManager->RegisterCompletedObjective(this);
 }
 
 void AObjectiveBase::FailObjective()
@@ -139,16 +186,7 @@ void AObjectiveBase::WeakenSystemIntegrity(const float Damage)
 
 void AObjectiveBase::FindObjectiveManager()
 {
-	TArray<AActor*> ObjectiveManagerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AObjectiveManager::StaticClass(), ObjectiveManagerActors);
-
-	if (ObjectiveManagerActors.Num() > 0)
-	{
-		ObjectiveManager = Cast<AObjectiveManager>(ObjectiveManagerActors[0]);
-	}else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: ObjectiveManager not found"));
-	}
+	ObjectiveManager = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>();
 }
 
 void AObjectiveBase::FindSystemIntegrity()
@@ -165,3 +203,11 @@ void AObjectiveBase::FindSystemIntegrity()
 	}
 }
 
+void AObjectiveBase::BroadcastObjectiveInProgress()
+{
+	if (OnObjectiveInProgress.IsBound())
+	{
+		UE_LOG(LogEngine, Warning, TEXT("Broadcasting InProgress."));
+		OnObjectiveInProgress.Broadcast(this);
+	}
+}

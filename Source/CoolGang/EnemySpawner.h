@@ -6,8 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "EnemySpawner.generated.h"
 
+class UEnemySpawnManagerSubsystem;
 class AEnemyAI;
-class AEnemySpawnManager;
 class APlayerLocationDetection;
 
 UCLASS()
@@ -35,9 +35,8 @@ private:
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	TSubclassOf<AEnemyAI> EnemyClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	AEnemySpawnManager* EnemySpawnManager;
+	
+	UEnemySpawnManagerSubsystem* EnemySpawnManager;
 	
 };
 
