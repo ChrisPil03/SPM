@@ -10,6 +10,22 @@
 void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
+	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
+	{
+		
+		float Magnitude = Data.EvaluatedData.Magnitude;
+	    const UGameplayEffect* AppliedEffect = Data.EffectSpec.Def;
+		if (AppliedEffect->GetName() == TEXT("Default__GE_DamageReduction_C"))
+
+	    {
+	        float DamageReduction = Magnitude;
+	        // Apply the damage reduction
+
+			Damage = Damage.GetCurrentValue() * DamageReduction;
+	        
+	    }
+	
+	}
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		float CurrentHealth = GetHealth();
