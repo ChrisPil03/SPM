@@ -36,16 +36,12 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 void UGA_FireWeapon::Fire()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
-
-	// Assuming we have a reference to the Weapon
+	
 	APlayerCharacter* OwningPlayerCharacter = Cast<APlayerCharacter>(GetOwningActorFromActorInfo()->GetOwner());
 	AGunBase*  EquippedWeapon = OwningPlayerCharacter->GetEquippedGun();
 	if (EquippedWeapon)
 	{
-		// Get the weapon type (could be shotgun, pistol, rifle, etc.)
 		EWeaponType WeaponType = EquippedWeapon->GetWeaponType();
-
-		// Determine the ammo type and execute the appropriate firing logic
 		switch (WeaponType)
 		{
 		case EWeaponType::Shotgun:
@@ -122,9 +118,7 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 	FRotator Rotation;
 	GetTraceStartLocationAndRotation(StartPoint, Rotation);
 	const FVector BulletDirection = Rotation.Vector();
-	
 	FVector EndPoint = StartPoint + (BulletDirection * 20000000);  // range 
-	
 	
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
@@ -137,7 +131,6 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 		//BlinkDebug(Hit);
 		return true;
 	}
-	
 		return false;
 
 }
@@ -151,7 +144,6 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 	const FVector BulletDirection = Rotation.Vector();
 	const UAbilitySystemComponent* ASC = GetActorInfo().AbilitySystemComponent.Get();
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
-	
 	float NumPellets = Attributes->GetPellets();
 	const float ConeHalfAngleDegrees = 5.0f;
 
