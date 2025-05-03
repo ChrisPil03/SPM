@@ -152,6 +152,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "System Integrity")
 	float BaseIntegrityDamage;
+
+	UPROPERTY(EditAnywhere, Category = "System Integrity")
+	float ObjectiveFailedIntegrityChunkDamage;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 	

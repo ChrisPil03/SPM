@@ -15,7 +15,8 @@ AObjectiveBase::AObjectiveBase() :
 	bIsTimeBased(false),
 	Progress(0.f),
 	SystemIntegrity(nullptr),
-	BaseIntegrityDamage(100.f)
+	BaseIntegrityDamage(100.f),
+	ObjectiveFailedIntegrityChunkDamage(25000.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -137,6 +138,7 @@ void AObjectiveBase::FailObjective()
 		UE_LOG(LogTemp, Warning, TEXT("Objective failed"));
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
+		WeakenSystemIntegrity(ObjectiveFailedIntegrityChunkDamage);
 	}
 }
 

@@ -47,13 +47,15 @@ void AObjectiveCapture::Tick(float DeltaTime)
 		}
 		IncreaseObjectiveProgress(DeltaTime);
 	}
-	else if (!GetIsPlayerInZone())
+	else
 	{
-		DecreaseObjectiveProgress(DeltaTime);
-	}
-	if (GetObjectiveProgress() == FProgressTimer::ZeroCompletion)
-	{
-		FailDelayProgressTimer->IncreaseProgress(DeltaTime);
+		if (GetObjectiveProgress() == FProgressTimer::ZeroCompletion)
+		{
+			FailDelayProgressTimer->IncreaseProgress(DeltaTime);
+		}else
+		{
+			DecreaseObjectiveProgress(DeltaTime);
+		}
 	}
 }
 
