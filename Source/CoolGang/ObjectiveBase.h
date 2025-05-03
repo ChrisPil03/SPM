@@ -117,6 +117,7 @@ private:
 	void FindObjectiveManager();
 	void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();
+	void BroadcastObjectiveIsActive();
 
 	FTimerHandle MalfunctionTimerHandle;
 	FTimerDelegate MalfunctionTimerDelegate;

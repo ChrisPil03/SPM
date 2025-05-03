@@ -62,8 +62,8 @@ void AEnemyAI::BeginPlay()
 		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
 		{
 			UE_LOG(LogEngine, Warning, TEXT("Setting up callback functions"))
-			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
-			//Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+			//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+			Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}

@@ -33,15 +33,15 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 {
 	UE_LOG(LogEngine, Warning, TEXT("State has changed to: %d"), bNewState)
 	bIsActive = bNewState;
-	if (bNewState)
-	{
-		if (OnObjectiveActivated.IsBound())
-		{
-			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
-			OnObjectiveActivated.Broadcast(this);
-		}
-	}
-	else
+	// if (bNewState)
+	// {
+	// 	if (OnObjectiveActivated.IsBound())
+	// 	{
+	// 		UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
+	// 		OnObjectiveActivated.Broadcast(this);
+	// 	}
+	// }
+	if (!bNewState)
 	{
 		if (OnObjectiveDeactivated.IsBound())
 		{
@@ -49,7 +49,6 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 			OnObjectiveDeactivated.Broadcast(this);
 		}
 	}
-	
 }
 
 void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
@@ -86,10 +85,12 @@ void AObjectiveBase::Tick(float DeltaTime)
 	{
 		return;
 	}
+	BroadcastObjectiveIsActive();
+	
 	if (bIsTimeBased && GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaTime);
-		BroadcastObjectiveInProgress();
+		//BroadcastObjectiveInProgress();
 	}
 }
 
@@ -200,5 +201,13 @@ void AObjectiveBase::BroadcastObjectiveInProgress()
 	{
 		UE_LOG(LogEngine, Warning, TEXT("Broadcasting InProgress."));
 		OnObjectiveInProgress.Broadcast(this);
+	}
+}
+
+void AObjectiveBase::BroadcastObjectiveIsActive()
+{
+	if (OnObjectiveActivated.IsBound())
+	{
+		OnObjectiveActivated.Broadcast(this);
 	}
 }

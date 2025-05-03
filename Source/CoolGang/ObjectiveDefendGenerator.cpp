@@ -1,6 +1,6 @@
 #include "ObjectiveDefendGenerator.h"
 #include "HealthComponent.h"
-#include "InteractableObject.h"
+// #include "InteractableObject.h"
 #include "Components/CapsuleComponent.h"
 
 AObjectiveDefendGenerator::AObjectiveDefendGenerator()
@@ -18,54 +18,58 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator()
 void AObjectiveDefendGenerator::BeginPlay()
 {
 	Super::BeginPlay();
-	BindControlPanel();
+	// BindControlPanel();
 	BindDeathFunction();
 	BindCompletionFunction();
 }
 
-void AObjectiveDefendGenerator::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
-{
-	if (!GetIsActive())
-	{
-		return;
-	}
-	StartObjective();
-	InitiateQuarantine();
-}
+// void AObjectiveDefendGenerator::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
+// {
+// 	if (!GetIsActive())
+// 	{
+// 		return;
+// 	}
+// 	StartObjective();
+// 	InitiateQuarantine();
+// }
 
-void AObjectiveDefendGenerator::InitiateQuarantine()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Quarantine initiated"));
-}
+// void AObjectiveDefendGenerator::InitiateQuarantine()
+// {
+// 	UE_LOG(LogTemp, Warning, TEXT("Quarantine initiated"));
+// }
 
-bool AObjectiveDefendGenerator::CanNotTakeDamage()
+bool AObjectiveDefendGenerator::CannotTakeDamage() const
 {
-	return !GetIsActive() || GetIsComplete() || GetIsFailed() || GetIsNotStarted();
-}
-
-void AObjectiveDefendGenerator::CompleteObjective()
-{
-	Super::CompleteObjective();
+	return !GetIsActive() || GetIsComplete() || GetIsFailed();
 }
 
 void AObjectiveDefendGenerator::ResetObjective()
 {
 	Super::ResetObjective();
-	HealthComponent->ResetHealthToMax();
-	ControlPanel->SetCanInteractWith(true);
+	//HealthComponent->ResetHealthToMax();
+	//ControlPanel->SetCanInteractWith(true);
 }
 
 float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {
-	if (CanNotTakeDamage())
+	if (CannotTakeDamage())
 	{
 		UE_LOG(LogEngine, Warning, TEXT("Cannot take damage"));
 		return 0;
 	}
-	UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
+	//UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
 	DamageAmount = FMath::Min(DamageAmount, HealthComponent->GetCurrentHealth());
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void AObjectiveDefendGenerator::SetIsActive(const bool bNewState)
+{
+	Super::SetIsActive(bNewState);
+	if (bNewState)
+	{
+		StartObjective();
+	}
 }
 
 float AObjectiveDefendGenerator::GetHealthPercentage() const
@@ -77,15 +81,15 @@ float AObjectiveDefendGenerator::GetHealthPercentage() const
 	return HealthComponent->GetCurrentHealth() / HealthComponent->GetMaxHealth();
 }
 
-void AObjectiveDefendGenerator::BindControlPanel()
-{
-	if (ControlPanel)
-	{
-		FPerformDelegate Delegate;
-		Delegate.AddUObject(this, &AObjectiveDefendGenerator::RegisterControlPanelInteraction);
-		ControlPanel->SetInteractFunction(Delegate);
-	}
-}
+// void AObjectiveDefendGenerator::BindControlPanel()
+// {
+// 	if (ControlPanel)
+// 	{
+// 		FPerformDelegate Delegate;
+// 		Delegate.AddUObject(this, &AObjectiveDefendGenerator::RegisterControlPanelInteraction);
+// 		ControlPanel->SetInteractFunction(Delegate);
+// 	}
+// }
 
 void AObjectiveDefendGenerator::BindDeathFunction()
 {

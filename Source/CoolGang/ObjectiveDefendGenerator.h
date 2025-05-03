@@ -21,7 +21,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void CompleteObjective() override;
 
 public:	
 	virtual void ResetObjective() override;
@@ -30,17 +29,18 @@ public:
 		FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
+	virtual void SetIsActive(const bool bNewState) override;
+	
 	UFUNCTION(BlueprintCallable)
 	float GetHealthPercentage() const;
 
 private:
-	void BindControlPanel();
+	// void BindControlPanel();
 	void BindDeathFunction();
 	void BindCompletionFunction();
-	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
-
-	void InitiateQuarantine();
-	bool CanNotTakeDamage();
+	// void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
+	// void InitiateQuarantine();
+	bool CannotTakeDamage() const;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
@@ -51,6 +51,6 @@ private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	UHealthComponent* HealthComponent;
 
-	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess))
-	AInteractableObject* ControlPanel;
+	// UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess))
+	// AInteractableObject* ControlPanel;
 };
