@@ -25,6 +25,12 @@ public:
 
 	void SetCompletionDelegate(const FTimerCompletionDelegate& NewDelegate) { CompletionDelegate = NewDelegate; }
 
+	template <typename T>
+	void SetCompletionFunction(T* Object, void (T::*Func)())
+	{
+		CompletionDelegate.BindUObject(Object, Func);
+	}
+
 private:
 	void UpdateProgress(const float NewProgress);
 	

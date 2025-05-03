@@ -23,6 +23,16 @@ void AObjectiveDefendGenerator::BeginPlay()
 	BindCompletionFunction();
 }
 
+void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (GetIsInProgress())
+	{
+		IncreaseObjectiveProgress(DeltaSeconds);
+	}
+}
+
 // void AObjectiveDefendGenerator::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
 // {
 // 	if (!GetIsActive())

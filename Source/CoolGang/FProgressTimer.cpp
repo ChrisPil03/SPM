@@ -25,14 +25,14 @@ void FProgressTimer::IncreaseProgress(const float DeltaTime)
 
 void FProgressTimer::DecreaseProgress(const float DeltaTime)
 {
-	if (!bIsPaused || Progress > ZeroCompletion)
-	{
-		UpdateProgress(Progress -= DeltaTime / Duration);
-	}
-
 	if (bIsCompleted)
 	{
 		bIsCompleted = false;
+	}
+
+	if (!bIsPaused && Progress > ZeroCompletion)
+	{
+		UpdateProgress(Progress -= DeltaTime / Duration);
 	}
 }
 

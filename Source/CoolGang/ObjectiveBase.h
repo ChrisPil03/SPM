@@ -15,7 +15,6 @@ enum class EObjectiveState : uint8
 {
 	NotStarted,
 	InProgress,
-	Aborting,
 	Complete,
 	Failed
 };
@@ -81,8 +80,8 @@ public:
 	bool GetIsNotStarted() const { return ObjectiveState == EObjectiveState::NotStarted; }
 	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsInProgress() const { return ObjectiveState == EObjectiveState::InProgress; }
-	UFUNCTION(BlueprintCallable, Category = "Objective States")
-	bool GetIsAborting() const { return ObjectiveState == EObjectiveState::Aborting; }
+	// UFUNCTION(BlueprintCallable, Category = "Objective States")
+	// bool GetIsAborting() const { return ObjectiveState == EObjectiveState::Aborting; }
 	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsComplete() const { return ObjectiveState == EObjectiveState::Complete; }
 	UFUNCTION(BlueprintCallable, Category = "Objective States")

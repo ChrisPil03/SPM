@@ -81,17 +81,17 @@ void AObjectiveBase::Tick(float DeltaTime)
 	{
 		WeakenSystemIntegrity(BaseIntegrityDamage * DeltaTime);
 	}
-	if (!bIsActive)
+	if (bIsActive)
 	{
-		return;
+		BroadcastObjectiveIsActive();
 	}
-	BroadcastObjectiveIsActive();
+
 	
-	if (bIsTimeBased && GetIsInProgress())
-	{
-		IncreaseObjectiveProgress(DeltaTime);
-		//BroadcastObjectiveInProgress();
-	}
+	// if (bIsTimeBased && GetIsInProgress())
+	// {
+	// 	IncreaseObjectiveProgress(DeltaTime);
+	// 	//BroadcastObjectiveInProgress();
+	// }
 }
 
 void AObjectiveBase::StartObjective()
@@ -108,7 +108,7 @@ void AObjectiveBase::ResetObjective()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
 
-	SetIsActive(false);
+	//SetIsActive(false);
 	SetObjectiveState(EObjectiveState::NotStarted);
 	ResetProgress();
 	StopDisplayObjectiveDescription();

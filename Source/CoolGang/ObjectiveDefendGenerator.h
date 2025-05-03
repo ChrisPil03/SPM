@@ -22,7 +22,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void ResetObjective() override;
 	virtual float TakeDamage(
 		float DamageAmount,
