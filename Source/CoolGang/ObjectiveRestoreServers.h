@@ -63,9 +63,6 @@ private:
 	void ResetServerRoom();
 
 	void OnInteract(AInteractableObject* InteractableObject);
-	//void BindPlayerLocationDetection();
-	// void OnEnterRoom(APlayerLocationDetection* Room);
-	// void OnExitRoom(APlayerLocationDetection* Room);
 
 	void InitializeTimers();
 	void ResetHeatBuildup();

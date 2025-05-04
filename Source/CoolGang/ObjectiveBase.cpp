@@ -120,8 +120,8 @@ void AObjectiveBase::ResetObjective()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
 	//SetIsActive(false);
-	SetObjectiveState(EObjectiveState::NotStarted);
 	ResetProgress();
+	SetObjectiveState(EObjectiveState::NotStarted);
 }
 
 void AObjectiveBase::CompleteObjective()
@@ -184,6 +184,12 @@ void AObjectiveBase::WeakenSystemIntegrity(const float Damage)
 	{
 		SystemIntegrity->WeakenIntegrity(Damage);
 	}
+}
+
+void AObjectiveBase::ResetProgress()
+{
+	ProgressTimer->ResetTimer();
+	Progress = ProgressTimer->GetProgress();
 }
 
 void AObjectiveBase::FindObjectiveManager()

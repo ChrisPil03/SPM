@@ -116,7 +116,7 @@ public:
 		DisplayObjectiveMessage = DisplayMessage; }
 
 private:
-	void ResetProgress() const { ProgressTimer->ResetTimer(); }
+	void ResetProgress();
 	void FindObjectiveManager();
 	void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();

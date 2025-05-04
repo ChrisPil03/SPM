@@ -45,7 +45,6 @@ void AObjectiveRestoreServers::Tick(float DeltaTime)
 	{
 		if (!FailDelayProgressTimer)
 		{
-			UE_LOG(LogTemp, Error, TEXT("FailDelayProgressTimer == nullptr"))
 			return;
 		}
 		FailDelayProgressTimer->IncreaseProgress(DeltaTime);
@@ -79,7 +78,6 @@ void AObjectiveRestoreServers::InitializeServerHall()
 	FindAllServers();
 	BindControlPanel();
 	InitializeTimers();
-	//BindPlayerLocationDetection();
 }
 
 void AObjectiveRestoreServers::SelectServersToRestore()
@@ -178,27 +176,6 @@ void AObjectiveRestoreServers::OnInteract(AInteractableObject* InteractableObjec
 {
 	StartObjective();
 }
-
-// void AObjectiveRestoreServers::BindPlayerLocationDetection()
-// {
-// 	if (PlayerLocationDetection)
-// 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("Player location detection binded"));
-// 		PlayerLocationDetection->AddOnTriggerEnterFunction(this, &AObjectiveRestoreServers::OnEnterRoom);
-// 		PlayerLocationDetection->AddOnTriggerExitFunction(this, &AObjectiveRestoreServers::OnExitRoom);
-// 	}
-// }
-
-// void AObjectiveRestoreServers::OnEnterRoom(APlayerLocationDetection* Room)
-// {
-// 	UE_LOG(LogTemp, Display, TEXT("Entered server room"));
-// 	StartObjective();
-// }
-//
-// void AObjectiveRestoreServers::OnExitRoom(APlayerLocationDetection* Room)
-// {
-// 	UE_LOG(LogTemp, Display, TEXT("Exited server room PlayerLocationDetection"));
-// }
 
 void AObjectiveRestoreServers::ActivateControlPanel(const bool NewState)
 {
