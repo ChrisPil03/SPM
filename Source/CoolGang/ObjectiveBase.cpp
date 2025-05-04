@@ -23,18 +23,11 @@ AObjectiveBase::AObjectiveBase() :
 	CompletedMessage("OBJECTIVE COMPLETED"),
 	FailedMessage("OBJECTIVE FAILED"),
 	InPlayerLocationDetection(nullptr),
+	EnterRoomVoiceLine(nullptr),
+	ObjectiveActivatedVoiceLine(nullptr),
 	DisplayObjectiveMessage(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
-}
-
-AObjectiveBase::~AObjectiveBase()
-{
-	if (DisplayObjectiveMessage)
-	{
-		delete DisplayObjectiveMessage;
-		DisplayObjectiveMessage = nullptr;
-	}
 }
 
 void AObjectiveBase::BeginPlay()

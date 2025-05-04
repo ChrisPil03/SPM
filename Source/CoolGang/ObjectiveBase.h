@@ -31,7 +31,6 @@ class COOLGANG_API AObjectiveBase : public AActor
 	
 public:
 	AObjectiveBase();
-	virtual ~AObjectiveBase();
 	
 protected:
 	virtual void BeginPlay() override;
