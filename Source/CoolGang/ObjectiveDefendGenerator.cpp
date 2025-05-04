@@ -3,7 +3,8 @@
 // #include "InteractableObject.h"
 #include "Components/CapsuleComponent.h"
 
-AObjectiveDefendGenerator::AObjectiveDefendGenerator()
+AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
+	StartDelay(3.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
@@ -21,6 +22,11 @@ void AObjectiveDefendGenerator::BeginPlay()
 	// BindControlPanel();
 	BindDeathFunction();
 	BindCompletionFunction();
+}
+
+void AObjectiveDefendGenerator::StartObjective()
+{
+	Super::StartObjective();
 }
 
 void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
@@ -78,7 +84,11 @@ void AObjectiveDefendGenerator::SetIsActive(const bool bNewState)
 	Super::SetIsActive(bNewState);
 	if (bNewState)
 	{
-		StartObjective();
+		GetWorldTimerManager().SetTimer(
+			StartWaitTimerHandle,
+			this, &AObjectiveDefendGenerator::StartObjective,
+			StartDelay,
+			false);
 	}
 }
 

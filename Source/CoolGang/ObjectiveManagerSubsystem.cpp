@@ -61,7 +61,7 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 		LastActivatedObjective = SelectedObjective;
 		CreateObjectiveUIListItem(SelectedObjective->GetObjectiveName(), SelectedObjective);
 		
-		UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
 	}
 }
 
@@ -70,13 +70,7 @@ void UObjectiveManagerSubsystem::RegisterCompletedObjective(AObjectiveBase* Comp
 	CompletedObjective->StopMalfunctioning();
 	CompletedObjective->SetIsActive(false);
 	CompletedObjectives++;
-
-	UE_LOG(LogTemp, Warning, TEXT("Completed Objectives: %d"), CompletedObjectives);
-
-	// if (GetIsObjectivesCompleted())
-	// {
-	// 	ObjectivesCompleted();
-	// }
+	//UE_LOG(LogTemp, Warning, TEXT("Completed Objectives: %d"), CompletedObjectives);
 }
 
 void UObjectiveManagerSubsystem::ResetAllObjectives()
@@ -92,11 +86,6 @@ TArray<AObjectiveBase*> UObjectiveManagerSubsystem::GetAllObjectives() const
 	return ObjectivesInLevel;
 }
 
-void UObjectiveManagerSubsystem::ObjectivesCompleted()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Objectives Completed!"));
-}
-
 void UObjectiveManagerSubsystem::CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective)
 {
 	if (CreateObjectiveListItemDelegate.IsBound())
@@ -105,9 +94,12 @@ void UObjectiveManagerSubsystem::CreateObjectiveUIListItem(FString ObjectiveName
 	}
 }
 
-bool UObjectiveManagerSubsystem::GetIsObjectivesCompleted() const
+void UObjectiveManagerSubsystem::BindDisplayMessage(AObjectiveBase* Objective)
 {
-	return CompletedObjectives == ObjectivesInLevel.Num();
+	if (Objective)
+	{
+		Objective->SetDisplayObjectiveMessageDelegate(&DisplayObjectiveMessage);
+	}
 }
 
 void UObjectiveManagerSubsystem::FindObjectivesInLevel()
@@ -126,6 +118,7 @@ void UObjectiveManagerSubsystem::FindObjectivesInLevel()
 		if (AObjectiveBase* Objective = Cast<AObjectiveBase>(Actor))
 		{
 			ObjectivesInLevel.Add(Objective);
+			BindDisplayMessage(Objective);
 		}
 	}
 }

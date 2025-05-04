@@ -15,7 +15,8 @@ AObjectiveRestoreServers::AObjectiveRestoreServers() :
 	CoolingTime(3.f),
 	CoolingProgress(0.f),
 	OverheatSystemIntegrityDamage(50.f),
-	FailDelay(15.f)
+	FailDelay(15.f),
+	OverheatedMessage("SERVERS OVERHEATING")
 {
 	ServersToRestore.Reserve(NumberOfServersToRestore);
 	SetIsTimeBased(false);
@@ -304,6 +305,7 @@ void AObjectiveRestoreServers::TriggerOverheat()
 	UE_LOG(LogTemp, Warning, TEXT("Trigger Overheat"));
 	SetServerHallStatus(EServerHallStatus::Overheated);
 	ActivateControlPanel(true);
+	DisplayMessage(OverheatedMessage);
 
 	for (AObjectiveServer* Server : ServersToRestore)
 	{

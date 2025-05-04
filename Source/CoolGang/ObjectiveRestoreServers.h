@@ -129,6 +129,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Overheat")
 	float FailDelay;
 
+	UPROPERTY(EditAnywhere, Category = "Message")
+	FString OverheatedMessage;
+
 	TUniquePtr<FProgressTimer> CoolingTimer;
 	TUniquePtr<FProgressTimer> FailDelayProgressTimer;
 };

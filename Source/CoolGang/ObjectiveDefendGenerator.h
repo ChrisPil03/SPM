@@ -21,6 +21,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void StartObjective() override;
 
 public:
 	virtual void Tick(float DeltaSeconds) override;
@@ -51,6 +52,11 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	UHealthComponent* HealthComponent;
+
+	UPROPERTY(EditDefaultsOnly)
+	float StartDelay;
+
+	FTimerHandle StartWaitTimerHandle;
 
 	// UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess))
 	// AInteractableObject* ControlPanel;
