@@ -57,11 +57,8 @@ void AEnemyAI::BeginPlay()
 	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
 	for (AObjectiveBase* Objective : AllObjectives)
 	{
-		UE_LOG(LogEngine, Warning, TEXT("Objective found: %s"), *Objective->GetName())
-		
 		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
 		{
-			UE_LOG(LogEngine, Warning, TEXT("Setting up callback functions"))
 			//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
 			Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
@@ -244,5 +241,3 @@ void AEnemyAI::ReleaseToPool()
     	EnemySpawnManager->MarkEnemyAsDead(this);
 		SetActorTickEnabled(false);
 }
-
-

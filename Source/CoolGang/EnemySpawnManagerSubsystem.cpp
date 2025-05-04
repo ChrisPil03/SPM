@@ -1,9 +1,13 @@
 #include "EnemySpawnManagerSubsystem.h"
+
+#include "AIController.h"
 #include "EnemySpawner.h"
 #include "EnemyAI.h"
 #include "PlayerLocationDetection.h"
 #include "Kismet/GameplayStatics.h"
-#include "Engine/World.h" // Needed for GetWorld()
+#include "Engine/World.h"
+#include "TimerManager.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogEnemySpawnSub, Log, All);
 
@@ -20,7 +24,8 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
     SpawnInterval = BaselineSpawnInterval;
     SpawnIntervalIncreaseCount = 0;
     SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
-
+    OutOfRangeDelegate.BindUFunction(this, FName("CheckOutOfRange"));
+    GetWorld()->GetTimerManager().SetTimer(OutOfRangeCheckTimer, OutOfRangeDelegate, RangeCheckTimerInterval, true);
     AliveEnemies.Empty();
     DeadEnemies.Empty();
     SpawnersByLocation.Empty();
@@ -42,7 +47,6 @@ void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
         SpawnEnemy();
         SpawnInterval = UpdatedSpawnInterval;
     }
-
 
     SpawnIntervalIncreaseProgress -= DeltaTime;
     if (SpawnIntervalIncreaseProgress <= 0.f)
@@ -68,14 +72,10 @@ void UEnemySpawnManagerSubsystem::SpawnEnemy()
     {
         return;
     }
-    
-    int32 RandomIndex = FMath::RandRange(0, CopyCurrentEnemySpawners.Num() - 1);
 
-    AEnemyAI* Enemy = CopyCurrentEnemySpawners[RandomIndex]->SpawnEnemy();
+    AEnemyAI* Enemy = ChooseRandomSpawner()->SpawnEnemy();
     MarkEnemyAsAlive(Enemy);
-    CopyCurrentEnemySpawners.RemoveAt(RandomIndex);
 }
-
 
 void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* SpawnLocation, AEnemySpawner* Spawner)
 {
@@ -104,6 +104,33 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
     }
  }
 
+
+AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
+{
+    int32 RandomIndex = FMath::RandRange(0, CopyCurrentEnemySpawners.Num() - 1);
+    AEnemySpawner* ChosenSpawner = CopyCurrentEnemySpawners[RandomIndex];
+    CopyCurrentEnemySpawners.RemoveAt(RandomIndex);
+    return ChosenSpawner;
+}
+
+void UEnemySpawnManagerSubsystem::CheckOutOfRange()
+{
+    for (AEnemyAI* Enemy : AliveEnemies)
+    {
+        FName DistanceSqKey = "DistanceToTargetSquared";
+        float DistanceSq = Cast<AAIController>(Enemy->GetController())->GetBlackboardComponent()->GetValueAsFloat(DistanceSqKey);
+
+        if (DistanceSq > RelocateDistanceThreshold)
+        {
+            RelocateEnemy(Enemy);
+        }
+    }
+}
+
+void UEnemySpawnManagerSubsystem::RelocateEnemy(AEnemyAI* Enemy)
+{
+    ChooseRandomSpawner()->RelocateEnemy(Enemy);
+}
 
 void UEnemySpawnManagerSubsystem::BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params)
 {
@@ -149,17 +176,15 @@ const TArray<AEnemyAI*>& UEnemySpawnManagerSubsystem::GetDeadEnemies() const
     return DeadEnemies;
 }
 
+float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
+{
 
+  float tNorm = (maxCycles <= 0) ? 0.0f : FMath::Clamp(float(cycleIndex) / float(maxCycles), 0.0f, 1.0f);
 
-  float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
-  {
+  float deltaNorm = FMath::Pow(tNorm, exponent);
 
-      float tNorm = (maxCycles <= 0) ? 0.0f : FMath::Clamp(float(cycleIndex) / float(maxCycles), 0.0f, 1.0f);
-    
-      float deltaNorm = FMath::Pow(tNorm, exponent);
-    
-      float t = baselineInterval
-              - intervalScale * deltaNorm;
-    
-      return FMath::Max(minimumInterval, t);
-  }
+  float t = baselineInterval
+          - intervalScale * deltaNorm;
+
+  return FMath::Max(minimumInterval, t);
+}

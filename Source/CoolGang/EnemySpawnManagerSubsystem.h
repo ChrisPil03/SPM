@@ -59,11 +59,21 @@ protected:
     int32 SpawnIntervalIncreaseCount;
     double SpawnIntervalIncreaseProgress;
 
+    UPROPERTY()
+    float RelocateDistanceThreshold = 10000.f;
+    
     TArray<AEnemyAI*> AliveEnemies;
     TArray<AEnemyAI*> DeadEnemies;
 
+    FTimerDelegate OutOfRangeDelegate;
+    FTimerHandle OutOfRangeCheckTimer;
+    float RangeCheckTimerInterval = 1.f;
 
 private:
+    AEnemySpawner* ChooseRandomSpawner();
+    
+    void CheckOutOfRange();
+    void RelocateEnemy(AEnemyAI* Enemy);
     void BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params);
     
     void OnEnterTriggerBox(APlayerLocationDetection* SpawnBox);

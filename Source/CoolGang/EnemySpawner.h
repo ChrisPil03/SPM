@@ -20,6 +20,8 @@ public:
 	AEnemySpawner();
 
 	AEnemyAI* SpawnEnemy() const;
+	void RelocateEnemy(AEnemyAI* Enemy) const;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -29,13 +31,17 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 private:
+	AEnemyAI* ReuseDeadEnemy(AEnemyAI* Enemy) const;
+	
+	void SetEnemyPosition(AEnemyAI* Enemy) const;
 	
 	UPROPERTY(EditInstanceOnly)
 	APlayerLocationDetection* SpawnArea;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	TArray<TSubclassOf<AEnemyAI>> EnemyClassArray;
-	
+
+	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
 	
 };
