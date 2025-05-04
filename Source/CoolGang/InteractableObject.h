@@ -36,7 +36,7 @@ public:
 	template <typename T>
 	void SetOnInteractFunction(T* Object, void (T::*Func)(AInteractableObject*))
 	{
-		PerformDelegate.AddUObject(this, Func);
+		PerformDelegate.AddUObject(Object, Func);
 	}
 
 private:

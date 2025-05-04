@@ -23,6 +23,7 @@ protected:
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
 
 public:
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual float GetObjectiveProgress() const override;
 private:

@@ -15,7 +15,7 @@ public:
 	void IncreaseProgress(const float DeltaTime);
 	void DecreaseProgress(const float DeltaTime);
 	
-	void Reset();
+	void ResetTimer();
 
 	void SetProgress(const float NewProgress) { UpdateProgress(NewProgress); }
 	void SetIsPaused(const bool bNewState) { bIsPaused = bNewState; }
@@ -24,6 +24,12 @@ public:
 	float GetProgress() const { return Progress; }
 
 	void SetCompletionDelegate(const FTimerCompletionDelegate& NewDelegate) { CompletionDelegate = NewDelegate; }
+
+	template <typename T>
+	void SetCompletionFunction(T* Object, void (T::*Func)())
+	{
+		CompletionDelegate.BindUObject(Object, Func);
+	}
 
 private:
 	void UpdateProgress(const float NewProgress);

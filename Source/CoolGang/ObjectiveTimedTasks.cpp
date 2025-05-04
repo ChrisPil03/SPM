@@ -47,6 +47,15 @@ void AObjectiveTimedTasks::IncreaseObjectiveProgress(float const DeltaTime)
 	// }
 }
 
+void AObjectiveTimedTasks::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (GetIsInProgress())
+	{
+		IncreaseObjectiveProgress(DeltaSeconds);
+	}
+}
+
 void AObjectiveTimedTasks::SetIsActive(const bool bNewState)
 {
 	Super::SetIsActive(bNewState);

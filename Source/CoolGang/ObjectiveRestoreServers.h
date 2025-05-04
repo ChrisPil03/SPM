@@ -48,6 +48,7 @@ public:
 	float GetCoolingProgress() const { return CoolingProgress; }
 
 	virtual void SetIsActive(const bool bNewState) override;
+	virtual void FailObjective() override;
 	
 private:
 	void InitializeServerHall();
@@ -59,14 +60,11 @@ private:
 	bool ValidServerToRestore(const AObjectiveServer* Server) const;
 	bool GetIsServersRestored() const { return RestoredServers == NumberOfServersToRestore; }
 	void ResetServersToRestore();
+	void ResetServerRoom();
 
 	void OnInteract(AInteractableObject* InteractableObject);
-	//void BindPlayerLocationDetection();
-	// void OnEnterRoom(APlayerLocationDetection* Room);
-	// void OnExitRoom(APlayerLocationDetection* Room);
 
-	void InitializeTimer();
-	void ResetCoolingTimerProgress() const;
+	void InitializeTimers();
 	void ResetHeatBuildup();
 	void TriggerOverheat();
 	void InitiateCoolingCycle();
@@ -125,5 +123,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Overheat")
 	float OverheatSystemIntegrityDamage;
 
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	float FailDelay;
+
+	UPROPERTY(EditAnywhere, Category = "Message")
+	FString OverheatedMessage;
+
 	TUniquePtr<FProgressTimer> CoolingTimer;
+	TUniquePtr<FProgressTimer> FailDelayProgressTimer;
 };
