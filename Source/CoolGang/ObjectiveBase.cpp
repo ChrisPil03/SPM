@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ObjectiveBase.h"
+
+#include "PlayerLocationDetection.h"
 #include "SystemIntegrity.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -19,9 +21,20 @@ AObjectiveBase::AObjectiveBase() :
 	ActivatedMessage("MALFUNCTION DETECTED"),
 	StartedMessage("OBJECTIVE STARTED"),
 	CompletedMessage("OBJECTIVE COMPLETED"),
-	FailedMessage("OBJECTIVE FAILED")
+	FailedMessage("OBJECTIVE FAILED"),
+	InPlayerLocationDetection(nullptr),
+	DisplayObjectiveMessage(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
+}
+
+AObjectiveBase::~AObjectiveBase()
+{
+	if (DisplayObjectiveMessage)
+	{
+		delete DisplayObjectiveMessage;
+		DisplayObjectiveMessage = nullptr;
+	}
 }
 
 void AObjectiveBase::BeginPlay()
@@ -30,6 +43,7 @@ void AObjectiveBase::BeginPlay()
 	SetIsActive(false);
 	FindObjectiveManager();
 	FindSystemIntegrity();
+	BindPlayerLocationDetection();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
 }
 
@@ -40,6 +54,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 	if (bNewState)
 	{
 		DisplayMessage(ActivatedMessage);
+		Play2DSoundOnce(ObjectiveActivatedVoiceLine);
 		// 	if (OnObjectiveActivated.IsBound())
 		// 	{
 		// 		UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
@@ -211,6 +226,36 @@ void AObjectiveBase::BroadcastObjectiveIsActive()
 	if (OnObjectiveActivated.IsBound())
 	{
 		OnObjectiveActivated.Broadcast(this);
+	}
+}
+
+void AObjectiveBase::BindPlayerLocationDetection()
+{
+	if (InPlayerLocationDetection)
+	{
+		InPlayerLocationDetection->AddOnTriggerEnterFunction(this, &AObjectiveBase::OnTriggerEnterRoom);
+		InPlayerLocationDetection->AddOnTriggerExitFunction(this, &AObjectiveBase::OnTriggerExitRoom);
+	}
+}
+
+void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
+{
+	if (GetIsActive() && GetIsNotStarted())
+	{
+		Play2DSoundOnce(EnterRoomVoiceLine);
+	}
+}
+
+void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
+{
+	
+}
+
+void AObjectiveBase::Play2DSoundOnce(USoundBase* Sound)
+{
+	if (Sound)
+	{
+		UGameplayStatics::PlaySound2D(this, Sound);
 	}
 }
 

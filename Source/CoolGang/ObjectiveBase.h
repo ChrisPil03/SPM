@@ -8,6 +8,7 @@
 #include "ObjectiveManagerSubsystem.h"
 #include "ObjectiveBase.generated.h"
 
+class APlayerLocationDetection;
 class ASystemIntegrity;
 
 UENUM(BlueprintType)
@@ -30,6 +31,7 @@ class COOLGANG_API AObjectiveBase : public AActor
 	
 public:
 	AObjectiveBase();
+	virtual ~AObjectiveBase();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -120,6 +122,10 @@ private:
 	void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();
 	void BroadcastObjectiveIsActive();
+	void BindPlayerLocationDetection();
+	void OnTriggerEnterRoom(APlayerLocationDetection* Room);
+	void OnTriggerExitRoom(APlayerLocationDetection* Room);
+	void Play2DSoundOnce(USoundBase* Sound);
 
 	FTimerHandle MalfunctionTimerHandle;
 	FTimerDelegate MalfunctionTimerDelegate;
@@ -170,12 +176,21 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Message")
 	FString FailedMessage;
+
+	UPROPERTY(EditInstanceOnly, Category = "Objective")
+	APlayerLocationDetection* InPlayerLocationDetection;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* EnterRoomVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ObjectiveActivatedVoiceLine;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 	
 	FOnObjectiveActivated OnObjectiveActivated;
 	FOnObjectiveDeactivated OnObjectiveDeactivated;
 	FOnObjectiveInProgress OnObjectiveInProgress;
-
+	
 	FDisplayObjectiveMessage* DisplayObjectiveMessage;
 };
