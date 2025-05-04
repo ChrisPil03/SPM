@@ -112,7 +112,7 @@ public:
 	void StopDisplayObjectiveDescription();
 
 private:
-	void ResetProgress() const { ProgressTimer->Reset(); }
+	void ResetProgress() const { ProgressTimer->ResetTimer(); }
 	void FindObjectiveManager();
 	void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();

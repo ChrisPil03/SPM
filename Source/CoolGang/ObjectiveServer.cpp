@@ -137,7 +137,7 @@ void AObjectiveServer::ResetServer()
 {
 	Super::Reset();
 	SetServerState(EServerState::Idle);
-	ProgressTimer->Reset();
+	ProgressTimer->ResetTimer();
 	RestoreProgress = 0;
 	ResetMaterial();
 }

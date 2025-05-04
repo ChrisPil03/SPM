@@ -15,7 +15,7 @@ public:
 	void IncreaseProgress(const float DeltaTime);
 	void DecreaseProgress(const float DeltaTime);
 	
-	void Reset();
+	void ResetTimer();
 
 	void SetProgress(const float NewProgress) { UpdateProgress(NewProgress); }
 	void SetIsPaused(const bool bNewState) { bIsPaused = bNewState; }

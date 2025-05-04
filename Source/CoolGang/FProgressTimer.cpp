@@ -36,7 +36,7 @@ void FProgressTimer::DecreaseProgress(const float DeltaTime)
 	}
 }
 
-void FProgressTimer::Reset()
+void FProgressTimer::ResetTimer()
 {
 	Progress = ZeroCompletion;
 	bIsCompleted = false;
