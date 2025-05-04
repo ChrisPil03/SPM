@@ -74,6 +74,10 @@ void UEnemySpawnManagerSubsystem::SpawnEnemy()
     }
 
     AEnemyAI* Enemy = ChooseRandomSpawner()->SpawnEnemy();
+    if (Enemy == nullptr)
+    {
+        return;
+    }
     MarkEnemyAsAlive(Enemy);
 }
 
@@ -107,10 +111,14 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
 
 AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
 {
-    int32 RandomIndex = FMath::RandRange(0, CopyCurrentEnemySpawners.Num() - 1);
-    AEnemySpawner* ChosenSpawner = CopyCurrentEnemySpawners[RandomIndex];
-    CopyCurrentEnemySpawners.RemoveAt(RandomIndex);
-    return ChosenSpawner;
+    if (CopyCurrentEnemySpawners.Num() > 0)
+    {
+        int32 RandomIndex = FMath::RandRange(0, CopyCurrentEnemySpawners.Num() - 1);
+        AEnemySpawner* ChosenSpawner = CopyCurrentEnemySpawners[RandomIndex];
+        CopyCurrentEnemySpawners.RemoveAt(RandomIndex);
+        return ChosenSpawner;
+    }
+    return nullptr;
 }
 
 void UEnemySpawnManagerSubsystem::CheckOutOfRange()

@@ -71,8 +71,10 @@ protected:
 
 private:
     AEnemySpawner* ChooseRandomSpawner();
-    
+
+    UFUNCTION()
     void CheckOutOfRange();
+    
     void RelocateEnemy(AEnemyAI* Enemy);
     void BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params);
     

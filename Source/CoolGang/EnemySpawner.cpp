@@ -28,7 +28,6 @@ void AEnemySpawner::Tick(float DeltaTime)
 
 AEnemyAI* AEnemySpawner::ReuseDeadEnemy(AEnemyAI* Enemy) const
 {
-	
 	SetEnemyPosition(Enemy);
 	Enemy->SetAlive();
 	AEnemyAI* DeadEnemy = Cast<AEnemyAI>(Enemy);
