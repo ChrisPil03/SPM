@@ -26,26 +26,26 @@ public:
 	// Sets default values for this actor's properties
 	AGunBase();
 
-protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
 	// maybe need to change later
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
-
+	UPROPERTY(EditAnywhere)
+	USceneComponent* Root;
 	///   Sound   ///
-	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* BulletSound;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly , Category = "Gun | Sound" )
+	USoundCue* BulletSound;
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* PullTriggerSound;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
+	USoundCue* PullTriggerSound;
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* ReloadSound;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
+	USoundCue* ReloadSound;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* ImpactSound;
+	USoundCue* ImpactSound;
 
 	///   Effect   ///
 	UPROPERTY(EditAnywhere)
