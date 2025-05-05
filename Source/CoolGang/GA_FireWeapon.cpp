@@ -26,16 +26,16 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 {
 	const UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
-	UE_LOG(LogTemp, Warning, TEXT("Check cost for shoot") );
+	//UE_LOG(LogTemp, Warning, TEXT("Check cost for shoot") );
 	float CurrentAmmo = Attributes->GetAmmoCount();
-	UE_LOG(LogTemp, Warning, TEXT("Ammo before shoot: %f"), CurrentAmmo );
+	//UE_LOG(LogTemp, Warning, TEXT("Ammo before shoot: %f"), CurrentAmmo );
 	// Check that at least 1 bullet is available
 	return CurrentAmmo >= 1;
 }
 
 void UGA_FireWeapon::Fire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot"));
 
 	// Assuming we have a reference to the Weapon
 	APlayerCharacter* OwningPlayerCharacter = Cast<APlayerCharacter>(GetOwningActorFromActorInfo()->GetOwner());
@@ -58,7 +58,7 @@ void UGA_FireWeapon::Fire()
 			SingleBulletFire();
 			break;
 		default:
-			UE_LOG(LogTemp, Warning, TEXT("Unknown Weapon Type!"));
+			//UE_LOG(LogTemp, Warning, TEXT("Unknown Weapon Type!"));
 			break;
 		}
 	}
@@ -66,7 +66,7 @@ void UGA_FireWeapon::Fire()
 
 void UGA_FireWeapon::SingleBulletFire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot") );
+	//UE_LOG(LogTemp, Warning, TEXT("Shoot") );
 	
 	FHitResult HitResult;
 	SingleTrace(HitResult);
@@ -103,13 +103,13 @@ bool UGA_FireWeapon::GetTraceStartLocationAndRotation(FVector& OutStartPoint, FR
 	APawn* OwningPawn = Cast<APawn>(GetOwningActorFromActorInfo()->GetOwner()); 
 	if (OwningPawn == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OwningPawn is nullptr") );
+		//UE_LOG(LogTemp, Warning, TEXT("OwningPawn is nullptr") );
 		return false;
 	}
 	AController* OwnerController = OwningPawn->GetController();
 	if (OwnerController == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerController is nullptr") );
+		//UE_LOG(LogTemp, Warning, TEXT("OwnerController is nullptr") );
 		return false;
 	}
 	OwnerController->GetPlayerViewPoint(OutStartPoint, OutRotation);

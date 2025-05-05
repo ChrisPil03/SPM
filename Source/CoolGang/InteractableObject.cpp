@@ -27,11 +27,11 @@ void AInteractableObject::Interact(AActor* Interactor)
 {
 	if (bCanInteractWith)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Interacted with object: %s"), *GetName());
+		//UE_LOG(LogTemp, Display, TEXT("Interacted with object: %s"), *GetName());
 		
 		if (!PerformDelegate.IsBound())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("No function bound to perform on interact!"));
+			//UE_LOG(LogTemp, Warning, TEXT("No function bound to perform on interact!"));
 			return;
 		}
 		PerformDelegate.Broadcast(this);

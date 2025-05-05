@@ -52,7 +52,6 @@ protected:
     
     TMap<APlayerLocationDetection*, TArray<AEnemySpawner*>> SpawnersByLocation;
     TArray<AEnemySpawner*> CurrentEnemySpawners;
-    TArray<AEnemySpawner*> CopyCurrentEnemySpawners;
 
     double UpdatedSpawnInterval;
     double SpawnInterval;
@@ -60,7 +59,7 @@ protected:
     double SpawnIntervalIncreaseProgress;
 
     UPROPERTY()
-    float RelocateDistanceThreshold = 10000.f;
+    float RelocateDistanceThreshold = 10000.f * 10000.f;
     
     TArray<AEnemyAI*> AliveEnemies;
     TArray<AEnemyAI*> DeadEnemies;

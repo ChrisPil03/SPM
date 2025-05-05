@@ -71,7 +71,7 @@ float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent con
 {
 	if (CannotTakeDamage())
 	{
-		UE_LOG(LogEngine, Warning, TEXT("Cannot take damage"));
+		//UE_LOG(LogEngine, Warning, TEXT("Cannot take damage"));
 		return 0;
 	}
 	//UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
