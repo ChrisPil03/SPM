@@ -19,8 +19,7 @@
 AGunBase::AGunBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	
+	PrimaryActorTick.bCanEverTick = false;
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	SetRootComponent(Mesh);
 	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
@@ -34,25 +33,13 @@ void AGunBase::BeginPlay()
 {
 	Super::BeginPlay();
 	TimeBetweenShots = 60.0f / FireRate;
-	AmmoCount = MagazineSize;
-	
-	
 }
-
-// Called every frame
-void AGunBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
-}
-
 
 void AGunBase::Initialize()
 {
 	GiveAbilities();
 	InitWeaponStats();
 }
-
 
 void AGunBase::InitWeaponStats()
 {
@@ -75,6 +62,7 @@ void AGunBase::InitWeaponStats()
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.FireRate"), FireRate);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.ReloadTime"), ReloadTime);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Pellets"), Pellets);
+		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.BulletSpreadAngle"), BulletSpreadAngle);
 		WeaponAttributeSet = AbilitySystemComponent->GetSet<UWeaponAttributeSet>();
 		AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 	}
@@ -122,7 +110,4 @@ AController* AGunBase::GetOwnerController() const
 		return nullptr;
 	}
 	return OwnerPawn->GetController();
-
 }
-
-
