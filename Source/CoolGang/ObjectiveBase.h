@@ -8,6 +8,8 @@
 #include "ObjectiveManagerSubsystem.h"
 #include "ObjectiveBase.generated.h"
 
+class UAnnouncementSubsystem;
+class UDisplayTextMessageSubsystem;
 class APlayerLocationDetection;
 class ASystemIntegrity;
 
@@ -48,8 +50,10 @@ protected:
 	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
 	ASystemIntegrity* GetSystemIntegrity() const { return SystemIntegrity; }
 	float GetBaseIntegrityDamage() const { return BaseIntegrityDamage; }
+	
+	void EnqueueVoiceLineWithMessage(USoundBase* VoiceLine, const FString& Message) const;
+	void DisplayMessageForSeconds(const FString& Message, const float Seconds) const;
 
-	void DisplayMessage(const FString& Message) const;
 
 public:
 
@@ -111,20 +115,18 @@ public:
 	const FString& GetCompletedMessage() const { return CompletedMessage; }
 	UFUNCTION(BlueprintCallable, Category = "Message")
 	const FString& GetFailedMessage() const { return FailedMessage; }
-	
-	void SetDisplayObjectiveMessageDelegate(FDisplayObjectiveMessage* DisplayMessage){
-		DisplayObjectiveMessage = DisplayMessage; }
 
 private:
 	void ResetProgress();
 	void FindObjectiveManager();
+	void FindAnnouncementSubsystem();
+	void FindDisplayTextMessageSubsystem();
 	void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();
 	void BroadcastObjectiveIsActive();
 	void BindPlayerLocationDetection();
 	void OnTriggerEnterRoom(APlayerLocationDetection* Room);
 	void OnTriggerExitRoom(APlayerLocationDetection* Room);
-	void Play2DSoundOnce(USoundBase* Sound);
 
 	FTimerHandle MalfunctionTimerHandle;
 	FTimerDelegate MalfunctionTimerDelegate;
@@ -184,12 +186,25 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Audio")
 	USoundBase* ObjectiveActivatedVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ObjectiveStartedVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ObjectiveCompletedVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ObjectiveFailedVoiceLine;
+
+	UPROPERTY()
+	UAnnouncementSubsystem* AnnouncementSubsystem;
+
+	UPROPERTY()
+	UDisplayTextMessageSubsystem* DisplayTextMessageSubsystem;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 	
 	FOnObjectiveActivated OnObjectiveActivated;
 	FOnObjectiveDeactivated OnObjectiveDeactivated;
 	FOnObjectiveInProgress OnObjectiveInProgress;
-	
-	FDisplayObjectiveMessage* DisplayObjectiveMessage;
 };
