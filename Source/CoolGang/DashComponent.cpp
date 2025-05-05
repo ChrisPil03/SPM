@@ -110,7 +110,7 @@ void UDashComponent::Reset()
 	// Stop movement by resetting velocity
 	bShouldDecelerate = true;
 	
-	UE_LOG(LogTemp, Warning, TEXT("Reset dash"));
+	//UE_LOG(LogTemp, Warning, TEXT("Reset dash"));
 	
 }
 

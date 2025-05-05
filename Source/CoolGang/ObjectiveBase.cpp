@@ -67,7 +67,6 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 
 void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Starting Malfunction Timer"));
 	MalfunctionTimerDelegate.BindUFunction(this, FName("StartMalfunctioning"), MalfunctionDamageInterval, MalfunctionDamage);
 	GetWorldTimerManager().SetTimer(MalfunctionTimerHandle, MalfunctionTimerDelegate, MalfunctionTimer, false);
 
@@ -75,14 +74,12 @@ void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const f
 
 void AObjectiveBase::StopMalfunctioning()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Objective complete, stopping malfunction"));
 	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
 	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
 }
 
 void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Starting to malfunction"));
 	MalfunctionIntervalDelegate.BindUFunction(this, FName("WeakenSystemIntegrity"), MalfunctionDamage);
 	GetWorldTimerManager().SetTimer(MalfunctionIntervalHandle, MalfunctionIntervalDelegate, MalfunctionDamageInterval, true);
 }

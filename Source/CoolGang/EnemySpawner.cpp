@@ -7,8 +7,6 @@
 #include "AbilitySystemComponent.h"
 #include "EnemyAI.h"
 #include "EnemyAttributeSet.h"
-#include "ObjectiveDefendGenerator.h"
-#include "ObjectiveManagerSubsystem.h"
 
 AEnemySpawner::AEnemySpawner()
 {
@@ -28,39 +26,56 @@ void AEnemySpawner::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-AEnemyAI* AEnemySpawner::SpawnEnemy() const
+AEnemyAI* AEnemySpawner::ReuseDeadEnemy(AEnemyAI* Enemy) const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Spawning"))
+	if (Enemy)
+	{
+		UAbilitySystemComponent* ASC = Enemy->AbilitySystemComponent;
+		if (ASC)
+		{
+			const UEnemyAttributeSet* AttributeSet = ASC->GetSet<UEnemyAttributeSet>();
+			if (AttributeSet)
+			{
+				float EnemyMaxHealth = AttributeSet->GetMaxHealth();
+				
+				UEnemyAttributeSet* MutableAttributeSet = const_cast<UEnemyAttributeSet*>(AttributeSet);
+				MutableAttributeSet->SetHealth(EnemyMaxHealth);
+			}
+		}
+		SetEnemyPosition(Enemy);
+		Enemy->SetAlive();
+	}
+	return Enemy;
+}
+
+void AEnemySpawner::SetEnemyPosition(AEnemyAI* Enemy) const
+{
+	if (!IsValid(Enemy))
+	{
+		return;
+	}
 	FVector Location = GetActorLocation();
 	FRotator Rotation = GetActorRotation();
+	Enemy->SetActorLocationAndRotation(Location, Rotation);
+}
 
+AEnemyAI* AEnemySpawner::SpawnEnemy() const
+{
+	FVector Location = GetActorLocation();
+	FRotator Rotation = GetActorRotation();
+	
+	int32 RandomIndex = FMath::RandRange(0, EnemyClassArray.Num() - 1);
 	TArray<AEnemyAI*> DeadEnemies = EnemySpawnManager->GetDeadEnemies();
 	if (DeadEnemies.Num() > 0)
 	{
-		DeadEnemies[0]->SetActorLocationAndRotation(Location, Rotation);
-		DeadEnemies[0]->SetAlive();
-		AEnemyAI* DeadEnemy = Cast<AEnemyAI>(DeadEnemies[0]);
-		if (DeadEnemy)
-		{
-			UAbilitySystemComponent* ASC = DeadEnemy->AbilitySystemComponent;
-			if (ASC)
-			{
-				const UEnemyAttributeSet* AttributeSet = ASC->GetSet<UEnemyAttributeSet>();
-				if (AttributeSet)
-				{
-					float EnemyMaxHealth = AttributeSet->GetMaxHealth();
-
-					// Now set health
-					UEnemyAttributeSet* MutableAttributeSet = const_cast<UEnemyAttributeSet*>(AttributeSet);
-					MutableAttributeSet->SetHealth(EnemyMaxHealth);
-				}
-			}
-		}
-		
-		return DeadEnemies[0];
+		return ReuseDeadEnemy(DeadEnemies[0]);
 	}
-	int32 RandomIndex = FMath::RandRange(0, EnemyClassArray.Num() - 1);
-
 	return GetWorld()->SpawnActor<AEnemyAI>(EnemyClassArray[RandomIndex], Location, Rotation);
 }
+
+void AEnemySpawner::RelocateEnemy(AEnemyAI* Enemy) const
+{
+	SetEnemyPosition(Enemy);
+}
+
 

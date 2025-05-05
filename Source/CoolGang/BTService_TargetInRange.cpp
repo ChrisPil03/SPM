@@ -17,11 +17,9 @@ void UBTService_TargetInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-
 	AEnemyAI* Enemy = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn());
 	if (Enemy == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No AIPawn"));
 		return;
 	}
 	
@@ -30,14 +28,7 @@ void UBTService_TargetInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 	{
 		return;
 	}
-	UE_LOG(LogEngine, Warning, TEXT("Distance to target: %f\n Attack range is: %f"), Enemy->GetDistanceTo(Target), Enemy->GetAttackRange())
-	if (Enemy->GetDistanceTo(Target) <= Enemy->GetAttackRange())
-	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), true);
-	}
-	else
-	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), false);
-	}
+	
+	OwnerComp.GetBlackboardComponent()->SetValueAsFloat(GetSelectedBlackboardKey(), Enemy->GetSquaredDistanceTo(Target));
 }
 

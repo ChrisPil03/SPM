@@ -1,9 +1,14 @@
 #include "EnemySpawnManagerSubsystem.h"
+
+#include "AIController.h"
 #include "EnemySpawner.h"
 #include "EnemyAI.h"
 #include "PlayerLocationDetection.h"
 #include "Kismet/GameplayStatics.h"
-#include "Engine/World.h" // Needed for GetWorld()
+#include "Engine/World.h"
+#include "TimerManager.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Math/UnitConversion.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogEnemySpawnSub, Log, All);
 
@@ -20,12 +25,12 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
     SpawnInterval = BaselineSpawnInterval;
     SpawnIntervalIncreaseCount = 0;
     SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
-
+    OutOfRangeDelegate.BindUFunction(this, FName("CheckOutOfRange"));
+    GetWorld()->GetTimerManager().SetTimer(OutOfRangeCheckTimer, OutOfRangeDelegate, RangeCheckTimerInterval, true);
     AliveEnemies.Empty();
     DeadEnemies.Empty();
     SpawnersByLocation.Empty();
     CurrentEnemySpawners.Empty();
-    CopyCurrentEnemySpawners.Empty();
 
     FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::BindPlayerLocationDetection);
     
@@ -43,7 +48,6 @@ void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
         SpawnInterval = UpdatedSpawnInterval;
     }
 
-
     SpawnIntervalIncreaseProgress -= DeltaTime;
     if (SpawnIntervalIncreaseProgress <= 0.f)
     {
@@ -59,23 +63,19 @@ void UEnemySpawnManagerSubsystem::SpawnEnemy()
     {
         return;
     }
-    if (CopyCurrentEnemySpawners.IsEmpty())
-    {
-        CopyCurrentEnemySpawners = CurrentEnemySpawners;
-    }
-    
-    if (CopyCurrentEnemySpawners.IsEmpty())
+
+    if (CurrentEnemySpawners.IsEmpty())
     {
         return;
     }
-    
-    int32 RandomIndex = FMath::RandRange(0, CopyCurrentEnemySpawners.Num() - 1);
 
-    AEnemyAI* Enemy = CopyCurrentEnemySpawners[RandomIndex]->SpawnEnemy();
+    AEnemyAI* Enemy = ChooseRandomSpawner()->SpawnEnemy();
+    if (Enemy == nullptr)
+    {
+        return;
+    }
     MarkEnemyAsAlive(Enemy);
-    CopyCurrentEnemySpawners.RemoveAt(RandomIndex);
 }
-
 
 void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* SpawnLocation, AEnemySpawner* Spawner)
 {
@@ -105,6 +105,60 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
  }
 
 
+AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Trying to choose a spawner"))
+    if (CurrentEnemySpawners.Num() > 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Amount of spawners in CurrentEnemySpawners: %d"), CurrentEnemySpawners.Num())
+        int32 RandomIndex = FMath::RandRange(0, CurrentEnemySpawners.Num() - 1);
+        AEnemySpawner* ChosenSpawner = CurrentEnemySpawners[RandomIndex];
+        return ChosenSpawner;
+    }
+    UE_LOG(LogTemp, Warning, TEXT("No spawner found"))
+    return nullptr;
+}
+
+void UEnemySpawnManagerSubsystem::CheckOutOfRange()
+{
+    if (AliveEnemies.Num() == 0)
+    {
+        return;
+    }
+    for (AEnemyAI* Enemy : AliveEnemies)
+    {
+        FName DistanceSqKey = "DistanceToTargetSquared";
+        AAIController* EnemyController = Cast<AAIController>(Enemy->GetController());
+        if (EnemyController)
+        {
+            UBlackboardComponent* Blackboard = EnemyController->GetBlackboardComponent();
+
+            if (Blackboard)
+            {
+               float DistanceSq =  Blackboard->GetValueAsFloat(DistanceSqKey);
+
+                if (DistanceSq > RelocateDistanceThreshold)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Distance is: %f"), DistanceSq)
+                    RelocateEnemy(Enemy);
+                }
+            }
+        }
+        
+
+        
+    }
+}
+
+void UEnemySpawnManagerSubsystem::RelocateEnemy(AEnemyAI* Enemy)
+{
+    AEnemySpawner* ChosenSpawner = ChooseRandomSpawner();
+    if (ChosenSpawner)
+    {
+        ChosenSpawner->RelocateEnemy(Enemy);
+    }
+}
+
 void UEnemySpawnManagerSubsystem::BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params)
 {
     TArray<AActor*> FoundLocations;
@@ -122,20 +176,55 @@ void UEnemySpawnManagerSubsystem::BindPlayerLocationDetection(const UWorld::FAct
 
 void UEnemySpawnManagerSubsystem::OnEnterTriggerBox(APlayerLocationDetection* SpawnBox)
 {
-    for (AEnemySpawner* Spawner : *SpawnersByLocation.Find(SpawnBox))
+    if (!IsValid(SpawnBox))
     {
-        CurrentEnemySpawners.Add(Spawner);
+        return;
     }
-    CopyCurrentEnemySpawners.Empty();
+
+    TArray<AEnemySpawner*>* SpawnerArrayPtr = SpawnersByLocation.Find(SpawnBox);
+    if (SpawnerArrayPtr != nullptr)
+    {
+        TArray<AEnemySpawner*>& SpawnerArray = *SpawnerArrayPtr;
+        for (AEnemySpawner* Spawner : SpawnerArray)
+        {
+            if (IsValid(Spawner))
+            {
+                CurrentEnemySpawners.AddUnique(Spawner);
+            }
+            else
+            {
+                UE_LOG(LogEnemySpawnSub, Warning, TEXT("Found an invalid Spawner pointer associated with SpawnBox %s."), *SpawnBox->GetName());
+            }
+        }
+    }
+    else
+    {
+        UE_LOG(LogEnemySpawnSub, Warning, TEXT("OnEnterTriggerBox: SpawnBox '%s' not found as a key in SpawnersByLocation map. No spawners added."), *SpawnBox->GetName());
+    }
 }
 
 void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* SpawnBox)
 {
-    for (AEnemySpawner* Spawner : *SpawnersByLocation.Find(SpawnBox))
+    if (!IsValid(SpawnBox))
     {
-        CurrentEnemySpawners.Remove(Spawner);
+        UE_LOG(LogEnemySpawnSub, Warning, TEXT("OnExitTriggerBox called with invalid SpawnBox pointer."));
+        return;
     }
-    CopyCurrentEnemySpawners.Empty();
+
+    TArray<AEnemySpawner*>* SpawnerArrayPtr = SpawnersByLocation.Find(SpawnBox);
+
+    if (SpawnerArrayPtr != nullptr)
+    {
+        TArray<AEnemySpawner*>& SpawnerArray = *SpawnerArrayPtr;
+        for (AEnemySpawner* Spawner : SpawnerArray)
+        {
+            CurrentEnemySpawners.Remove(Spawner);
+        }
+    }
+    else
+    {
+        UE_LOG(LogEnemySpawnSub, Warning, TEXT("OnExitTriggerBox: SpawnBox '%s' not found as a key in SpawnersByLocation map. No spawners removed."), *SpawnBox->GetName());
+    }
 }
 
 
@@ -149,17 +238,15 @@ const TArray<AEnemyAI*>& UEnemySpawnManagerSubsystem::GetDeadEnemies() const
     return DeadEnemies;
 }
 
+float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
+{
 
+  float tNorm = (maxCycles <= 0) ? 0.0f : FMath::Clamp(float(cycleIndex) / float(maxCycles), 0.0f, 1.0f);
 
-  float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
-  {
+  float deltaNorm = FMath::Pow(tNorm, exponent);
 
-      float tNorm = (maxCycles <= 0) ? 0.0f : FMath::Clamp(float(cycleIndex) / float(maxCycles), 0.0f, 1.0f);
-    
-      float deltaNorm = FMath::Pow(tNorm, exponent);
-    
-      float t = baselineInterval
-              - intervalScale * deltaNorm;
-    
-      return FMath::Max(minimumInterval, t);
-  }
+  float t = baselineInterval
+          - intervalScale * deltaNorm;
+
+  return FMath::Max(minimumInterval, t);
+}
