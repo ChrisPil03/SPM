@@ -283,6 +283,7 @@ void AObjectiveRestoreServers::TriggerOverheat()
 	SetServerHallStatus(EServerHallStatus::Overheated);
 	ActivateControlPanel(true);
 	DisplayMessage(OverheatedMessage);
+	EnqueueVoiceLineAudio(OverheatVoiceLine);
 
 	for (AObjectiveServer* Server : ServersToRestore)
 	{

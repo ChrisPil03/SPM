@@ -172,5 +172,9 @@ void AObjectiveCapture::OnSphereEndOverlap(
 	if (OtherActor == PlayerInZone)
 	{
 		PlayerInZone = nullptr;
+		if (GetIsInProgress())
+		{
+			EnqueueVoiceLineAudio(ExitZoneVoiceLine);
+		}
 	}
 }

@@ -4,7 +4,9 @@
 #include "Components/CapsuleComponent.h"
 
 AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
-	StartDelay(3.f)
+	StartDelay(3.f),
+	bHalfHealthVoiceLinePlayed(false),
+	bLowHealthVoiceLinePlayed(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
@@ -62,6 +64,8 @@ bool AObjectiveDefendGenerator::CannotTakeDamage() const
 void AObjectiveDefendGenerator::ResetObjective()
 {
 	Super::ResetObjective();
+	bHalfHealthVoiceLinePlayed = false;
+	bLowHealthVoiceLinePlayed = false;
 	//HealthComponent->ResetHealthToMax();
 	//ControlPanel->SetCanInteractWith(true);
 }
@@ -76,6 +80,18 @@ float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent con
 	}
 	//UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
 	DamageAmount = FMath::Min(DamageAmount, HealthComponent->GetCurrentHealth());
+	if (!bHalfHealthVoiceLinePlayed &&
+		HealthComponent->GetCurrentHealth() - DamageAmount <= HealthComponent->GetMaxHealth() / 2)
+	{
+		EnqueueVoiceLineAudio(DownToHalfHealthVoiceLine);
+		bHalfHealthVoiceLinePlayed = true;
+	}
+	if (!bLowHealthVoiceLinePlayed &&
+		HealthComponent->GetCurrentHealth() - DamageAmount <= HealthComponent->GetMaxHealth() / 10)
+	{
+		EnqueueVoiceLineAudio(LowHealthVoiceLine);
+		bLowHealthVoiceLinePlayed = true;
+	}
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 

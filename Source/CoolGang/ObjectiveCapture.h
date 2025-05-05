@@ -84,6 +84,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Objective")
 	float FailObjectiveDelay;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ExitZoneVoiceLine;
 	
 	FTimerHandle DelayTimerHandle;
 

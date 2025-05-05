@@ -4,6 +4,7 @@
 
 #include "PlayerLocationDetection.h"
 #include "SystemIntegrity.h"
+#include "VoiceLinesAudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -28,6 +29,7 @@ AObjectiveBase::AObjectiveBase() :
 	DisplayObjectiveMessage(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
+	VoiceLinesAudioComponent = CreateDefaultSubobject<UVoiceLinesAudioComponent>("Voice Line Audio Component");
 }
 
 void AObjectiveBase::BeginPlay()
@@ -47,7 +49,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 	if (bNewState)
 	{
 		DisplayMessage(ActivatedMessage);
-		Play2DSoundOnce(ObjectiveActivatedVoiceLine);
+		EnqueueVoiceLineAudio(ObjectiveActivatedVoiceLine);
 		// 	if (OnObjectiveActivated.IsBound())
 		// 	{
 		// 		UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
@@ -113,6 +115,7 @@ void AObjectiveBase::StartObjective()
 		//UE_LOG(LogTemp, Warning, TEXT("Objective Started"));
 		SetObjectiveState(EObjectiveState::InProgress);
 		DisplayMessage(StartedMessage);
+		EnqueueVoiceLineAudio(ObjectiveStartedVoiceLine);
 	}
 }
 
@@ -129,6 +132,7 @@ void AObjectiveBase::CompleteObjective()
 	//UE_LOG(LogTemp, Warning, TEXT("Objective Completed"));
 	SetObjectiveState(EObjectiveState::Complete);
 	DisplayMessage(CompletedMessage);
+	EnqueueVoiceLineAudio(ObjectiveCompletedVoiceLine);
 
 	if (ObjectiveManager == nullptr)
 	{
@@ -146,6 +150,7 @@ void AObjectiveBase::FailObjective()
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
 		DisplayMessage(FailedMessage);
+		EnqueueVoiceLineAudio(ObjectiveFailedVoiceLine);
 		WeakenSystemIntegrity(ObjectiveFailedIntegrityChunkDamage);
 	}
 }
@@ -241,7 +246,7 @@ void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
 {
 	if (GetIsActive() && GetIsNotStarted())
 	{
-		Play2DSoundOnce(EnterRoomVoiceLine);
+		EnqueueVoiceLineAudio(EnterRoomVoiceLine);
 	}
 }
 
@@ -250,11 +255,11 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 	
 }
 
-void AObjectiveBase::Play2DSoundOnce(USoundBase* Sound)
+void AObjectiveBase::EnqueueVoiceLineAudio(USoundBase* VoiceLine)
 {
-	if (Sound)
+	if (VoiceLine && VoiceLinesAudioComponent)
 	{
-		UGameplayStatics::PlaySound2D(this, Sound);
+		VoiceLinesAudioComponent->EnqueueVoiceLine(VoiceLine);
 	}
 }
 

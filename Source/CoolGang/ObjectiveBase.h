@@ -8,6 +8,7 @@
 #include "ObjectiveManagerSubsystem.h"
 #include "ObjectiveBase.generated.h"
 
+class UVoiceLinesAudioComponent;
 class APlayerLocationDetection;
 class ASystemIntegrity;
 
@@ -50,6 +51,7 @@ protected:
 	float GetBaseIntegrityDamage() const { return BaseIntegrityDamage; }
 
 	void DisplayMessage(const FString& Message) const;
+	void EnqueueVoiceLineAudio(USoundBase* VoiceLine);
 
 public:
 
@@ -124,7 +126,6 @@ private:
 	void BindPlayerLocationDetection();
 	void OnTriggerEnterRoom(APlayerLocationDetection* Room);
 	void OnTriggerExitRoom(APlayerLocationDetection* Room);
-	void Play2DSoundOnce(USoundBase* Sound);
 
 	FTimerHandle MalfunctionTimerHandle;
 	FTimerDelegate MalfunctionTimerDelegate;
@@ -184,6 +185,18 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Audio")
 	USoundBase* ObjectiveActivatedVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ObjectiveStartedVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ObjectiveCompletedVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ObjectiveFailedVoiceLine;
+
+	UPROPERTY()
+	UVoiceLinesAudioComponent* VoiceLinesAudioComponent;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 	

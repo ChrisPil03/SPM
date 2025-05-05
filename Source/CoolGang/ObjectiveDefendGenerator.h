@@ -56,6 +56,15 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float StartDelay;
 
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* DownToHalfHealthVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* LowHealthVoiceLine;
+
+	bool bHalfHealthVoiceLinePlayed;
+	bool bLowHealthVoiceLinePlayed;
+
 	FTimerHandle StartWaitTimerHandle;
 
 	// UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess))
