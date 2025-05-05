@@ -4,7 +4,7 @@
 
 #include "PlayerLocationDetection.h"
 #include "SystemIntegrity.h"
-#include "VoiceLinesAudioComponent.h"
+#include "VoiceLinesSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -26,10 +26,13 @@ AObjectiveBase::AObjectiveBase() :
 	InPlayerLocationDetection(nullptr),
 	EnterRoomVoiceLine(nullptr),
 	ObjectiveActivatedVoiceLine(nullptr),
+	ObjectiveStartedVoiceLine(nullptr),
+	ObjectiveCompletedVoiceLine(nullptr),
+	ObjectiveFailedVoiceLine(nullptr),
+	VoiceLinesSubsystem(nullptr),
 	DisplayObjectiveMessage(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
-	VoiceLinesAudioComponent = CreateDefaultSubobject<UVoiceLinesAudioComponent>("Voice Line Audio Component");
 }
 
 void AObjectiveBase::BeginPlay()
@@ -37,6 +40,7 @@ void AObjectiveBase::BeginPlay()
 	Super::BeginPlay();
 	SetIsActive(false);
 	FindObjectiveManager();
+	FindVoiceLinesSubsystem();
 	FindSystemIntegrity();
 	BindPlayerLocationDetection();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
@@ -199,6 +203,11 @@ void AObjectiveBase::FindObjectiveManager()
 	ObjectiveManager = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>();
 }
 
+void AObjectiveBase::FindVoiceLinesSubsystem()
+{
+	VoiceLinesSubsystem = GetGameInstance()->GetSubsystem<UVoiceLinesSubsystem>();
+}
+
 void AObjectiveBase::FindSystemIntegrity()
 {
 	TArray<AActor*> SystemIntegrityActors;
@@ -252,11 +261,11 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 	
 }
 
-void AObjectiveBase::EnqueueVoiceLineAudio(USoundBase* VoiceLine)
+void AObjectiveBase::EnqueueVoiceLineAudio(USoundBase* VoiceLine) const
 {
-	if (VoiceLine && VoiceLinesAudioComponent)
+	if (VoiceLine && VoiceLinesSubsystem)
 	{
-		VoiceLinesAudioComponent->EnqueueVoiceLine(VoiceLine);
+		VoiceLinesSubsystem->EnqueueVoiceLine(VoiceLine);
 	}
 }
 

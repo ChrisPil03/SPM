@@ -8,6 +8,7 @@
 #include "ObjectiveManagerSubsystem.h"
 #include "ObjectiveBase.generated.h"
 
+class UVoiceLinesSubsystem;
 class UVoiceLinesAudioComponent;
 class APlayerLocationDetection;
 class ASystemIntegrity;
@@ -51,7 +52,7 @@ protected:
 	float GetBaseIntegrityDamage() const { return BaseIntegrityDamage; }
 
 	void DisplayMessage(const FString& Message) const;
-	void EnqueueVoiceLineAudio(USoundBase* VoiceLine);
+	void EnqueueVoiceLineAudio(USoundBase* VoiceLine) const;
 
 public:
 
@@ -120,6 +121,7 @@ public:
 private:
 	void ResetProgress();
 	void FindObjectiveManager();
+	void FindVoiceLinesSubsystem();
 	void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();
 	void BroadcastObjectiveIsActive();
@@ -196,7 +198,7 @@ private:
 	USoundBase* ObjectiveFailedVoiceLine;
 
 	UPROPERTY()
-	UVoiceLinesAudioComponent* VoiceLinesAudioComponent;
+	UVoiceLinesSubsystem* VoiceLinesSubsystem;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 	
