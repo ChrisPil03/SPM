@@ -43,7 +43,7 @@ void AObjectiveCapture::Tick(float DeltaTime)
 	{
 		if (FailDelayProgressTimer->GetProgress() > 0)
 		{
-			FailDelayProgressTimer->Reset();
+			FailDelayProgressTimer->ResetTimer();
 		}
 		IncreaseObjectiveProgress(DeltaTime);
 	}
