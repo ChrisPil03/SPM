@@ -174,7 +174,7 @@ void AObjectiveCapture::OnSphereEndOverlap(
 		PlayerInZone = nullptr;
 		if (GetIsInProgress())
 		{
-			EnqueueVoiceLineAudio(ExitZoneVoiceLine);
+			EnqueueVoiceLineWithMessage(ExitZoneVoiceLine, "");
 		}
 	}
 }

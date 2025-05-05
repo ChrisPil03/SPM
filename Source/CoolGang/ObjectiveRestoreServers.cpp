@@ -282,8 +282,8 @@ void AObjectiveRestoreServers::TriggerOverheat()
 	UE_LOG(LogTemp, Warning, TEXT("Trigger Overheat"));
 	SetServerHallStatus(EServerHallStatus::Overheated);
 	ActivateControlPanel(true);
-	DisplayMessage(OverheatedMessage);
-	EnqueueVoiceLineAudio(OverheatVoiceLine);
+	DisplayMessageForSeconds(OverheatedMessage, 3.f);
+	//EnqueueVoiceLineWithMessage(OverheatVoiceLine, OverheatedMessage);
 
 	for (AObjectiveServer* Server : ServersToRestore)
 	{
@@ -339,10 +339,6 @@ void AObjectiveRestoreServers::InitializeTimers()
 	CoolingTimer->SetCompletionFunction(this, &AObjectiveRestoreServers::ResumeOperating);
 	FailDelayProgressTimer = MakeUnique<FProgressTimer>(FailDelay);
 	FailDelayProgressTimer->SetCompletionFunction(this, &AObjectiveRestoreServers::FailObjective);
-	if (FailDelayProgressTimer)
-	{
-		UE_LOG(LogTemp, Error, TEXT("FailDelayProgressTimer != nullptr"));
-	}
 }
 
 void AObjectiveRestoreServers::ResetHeatBuildup()

@@ -8,8 +8,8 @@
 #include "ObjectiveManagerSubsystem.h"
 #include "ObjectiveBase.generated.h"
 
-class UVoiceLinesSubsystem;
-class UVoiceLinesAudioComponent;
+class UAnnouncementSubsystem;
+class UDisplayTextMessageSubsystem;
 class APlayerLocationDetection;
 class ASystemIntegrity;
 
@@ -50,9 +50,10 @@ protected:
 	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
 	ASystemIntegrity* GetSystemIntegrity() const { return SystemIntegrity; }
 	float GetBaseIntegrityDamage() const { return BaseIntegrityDamage; }
+	
+	void EnqueueVoiceLineWithMessage(USoundBase* VoiceLine, const FString& Message) const;
+	void DisplayMessageForSeconds(const FString& Message, const float Seconds) const;
 
-	void DisplayMessage(const FString& Message) const;
-	void EnqueueVoiceLineAudio(USoundBase* VoiceLine) const;
 
 public:
 
@@ -114,14 +115,12 @@ public:
 	const FString& GetCompletedMessage() const { return CompletedMessage; }
 	UFUNCTION(BlueprintCallable, Category = "Message")
 	const FString& GetFailedMessage() const { return FailedMessage; }
-	
-	void SetDisplayObjectiveMessageDelegate(FDisplayObjectiveMessage* DisplayMessage){
-		DisplayObjectiveMessage = DisplayMessage; }
 
 private:
 	void ResetProgress();
 	void FindObjectiveManager();
-	void FindVoiceLinesSubsystem();
+	void FindAnnouncementSubsystem();
+	void FindDisplayTextMessageSubsystem();
 	void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();
 	void BroadcastObjectiveIsActive();
@@ -198,13 +197,14 @@ private:
 	USoundBase* ObjectiveFailedVoiceLine;
 
 	UPROPERTY()
-	UVoiceLinesSubsystem* VoiceLinesSubsystem;
+	UAnnouncementSubsystem* AnnouncementSubsystem;
+
+	UPROPERTY()
+	UDisplayTextMessageSubsystem* DisplayTextMessageSubsystem;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 	
 	FOnObjectiveActivated OnObjectiveActivated;
 	FOnObjectiveDeactivated OnObjectiveDeactivated;
 	FOnObjectiveInProgress OnObjectiveInProgress;
-	
-	FDisplayObjectiveMessage* DisplayObjectiveMessage;
 };

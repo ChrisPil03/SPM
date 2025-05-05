@@ -83,13 +83,13 @@ float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent con
 	if (!bHalfHealthVoiceLinePlayed &&
 		HealthComponent->GetCurrentHealth() - DamageAmount <= HealthComponent->GetMaxHealth() / 2)
 	{
-		EnqueueVoiceLineAudio(DownToHalfHealthVoiceLine);
+		EnqueueVoiceLineWithMessage(DownToHalfHealthVoiceLine, "");
 		bHalfHealthVoiceLinePlayed = true;
 	}
 	if (!bLowHealthVoiceLinePlayed &&
 		HealthComponent->GetCurrentHealth() - DamageAmount <= HealthComponent->GetMaxHealth() / 10)
 	{
-		EnqueueVoiceLineAudio(LowHealthVoiceLine);
+		EnqueueVoiceLineWithMessage(LowHealthVoiceLine, "");
 		bLowHealthVoiceLinePlayed = true;
 	}
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
