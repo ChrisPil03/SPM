@@ -26,17 +26,13 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 {
 	const UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
-	UE_LOG(LogTemp, Warning, TEXT("Check cost for shoot") );
 	float CurrentAmmo = Attributes->GetAmmoCount();
-	UE_LOG(LogTemp, Warning, TEXT("Ammo before shoot: %f"), CurrentAmmo );
 	// Check that at least 1 bullet is available
 	return CurrentAmmo >= 1;
 }
 
 void UGA_FireWeapon::Fire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
-	
 	APlayerCharacter* OwningPlayerCharacter = Cast<APlayerCharacter>(GetOwningActorFromActorInfo()->GetOwner());
 	AGunBase*  EquippedWeapon = OwningPlayerCharacter->GetEquippedGun();
 	if (EquippedWeapon)
@@ -62,8 +58,6 @@ void UGA_FireWeapon::Fire()
 
 void UGA_FireWeapon::SingleBulletFire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot") );
-	
 	FHitResult HitResult;
 	SingleTrace(HitResult);
 	
@@ -77,8 +71,6 @@ void UGA_FireWeapon::SingleBulletFire()
 
 void UGA_FireWeapon::PelletsFire()
 {
-
-
 	TArray<FHitResult> HitResults;
 	MultiTrace(HitResults);
 	
@@ -151,20 +143,17 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 	{
 		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
 		FVector EndPoint = StartPoint + (ShootDirection * 10000.0f); // Trace distance
-
 		FHitResult Hit;
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
 		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner()); // Ignore self
-
 		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, QueryParams);
-
+		
 		if (bHit)
 		{
 			HitResults.Add(Hit);
 			DrawDebugSphere(GetWorld(), Hit.Location, 2.0f, 12,FColor::Red, false, 2.0f);
 			//BlinkDebug(Hit);
-			
 			bHasTarget = true;
 		}
 	}
@@ -190,14 +179,16 @@ void UGA_FireWeapon::BlinkDebug(FHitResult& HitResult)
 		// Save original material
 		UMaterialInterface* OriginalMaterialInterface = MeshComponent->GetMaterial(0);
 		FString AssetPath = OriginalMaterialInterface->GetPathName();
-		
+	if (AssetPath.Equals(TEXT("/Game/Assets/Materials/M_Debug.M_Debug")))
+	{
+		return;
+	}
 		// Load red material
 		if (UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Assets/Materials/M_Debug.M_Debug")))
 		{
 			MeshComponent->SetMaterial(0, RedMaterial);
-
-			// Start a timer to revert the material after 0.2 seconds
 			
+			// Start a timer to revert the material after InRate seconds
 			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, AssetPath, MeshComponent]()
 			{
 				UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, *AssetPath );
