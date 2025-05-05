@@ -26,26 +26,18 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 {
 	const UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
-	UE_LOG(LogTemp, Warning, TEXT("Check cost for shoot") );
 	float CurrentAmmo = Attributes->GetAmmoCount();
-	UE_LOG(LogTemp, Warning, TEXT("Ammo before shoot: %f"), CurrentAmmo );
 	// Check that at least 1 bullet is available
 	return CurrentAmmo >= 1;
 }
 
 void UGA_FireWeapon::Fire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot"));
-
-	// Assuming we have a reference to the Weapon
 	APlayerCharacter* OwningPlayerCharacter = Cast<APlayerCharacter>(GetOwningActorFromActorInfo()->GetOwner());
 	AGunBase*  EquippedWeapon = OwningPlayerCharacter->GetEquippedGun();
 	if (EquippedWeapon)
 	{
-		// Get the weapon type (could be shotgun, pistol, rifle, etc.)
 		EWeaponType WeaponType = EquippedWeapon->GetWeaponType();
-
-		// Determine the ammo type and execute the appropriate firing logic
 		switch (WeaponType)
 		{
 		case EWeaponType::Shotgun:
@@ -66,8 +58,6 @@ void UGA_FireWeapon::Fire()
 
 void UGA_FireWeapon::SingleBulletFire()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Shoot") );
-	
 	FHitResult HitResult;
 	SingleTrace(HitResult);
 	
@@ -81,8 +71,6 @@ void UGA_FireWeapon::SingleBulletFire()
 
 void UGA_FireWeapon::PelletsFire()
 {
-
-
 	TArray<FHitResult> HitResults;
 	MultiTrace(HitResults);
 	
@@ -122,9 +110,7 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 	FRotator Rotation;
 	GetTraceStartLocationAndRotation(StartPoint, Rotation);
 	const FVector BulletDirection = Rotation.Vector();
-	
 	FVector EndPoint = StartPoint + (BulletDirection * 20000000);  // range 
-	
 	
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
@@ -137,7 +123,6 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 		//BlinkDebug(Hit);
 		return true;
 	}
-	
 		return false;
 
 }
@@ -151,28 +136,24 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 	const FVector BulletDirection = Rotation.Vector();
 	const UAbilitySystemComponent* ASC = GetActorInfo().AbilitySystemComponent.Get();
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
-	
 	float NumPellets = Attributes->GetPellets();
-	const float ConeHalfAngleDegrees = 5.0f;
+	const float ConeHalfAngleDegrees = Attributes->GetBulletSpreadAngle();
 
 	for (int32 i = 0; i < NumPellets; ++i)
 	{
 		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
 		FVector EndPoint = StartPoint + (ShootDirection * 10000.0f); // Trace distance
-
 		FHitResult Hit;
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
 		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner()); // Ignore self
-
 		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, QueryParams);
-
+		
 		if (bHit)
 		{
 			HitResults.Add(Hit);
 			DrawDebugSphere(GetWorld(), Hit.Location, 2.0f, 12,FColor::Red, false, 2.0f);
 			//BlinkDebug(Hit);
-			
 			bHasTarget = true;
 		}
 	}
@@ -198,14 +179,16 @@ void UGA_FireWeapon::BlinkDebug(FHitResult& HitResult)
 		// Save original material
 		UMaterialInterface* OriginalMaterialInterface = MeshComponent->GetMaterial(0);
 		FString AssetPath = OriginalMaterialInterface->GetPathName();
-		
+	if (AssetPath.Equals(TEXT("/Game/Assets/Materials/M_Debug.M_Debug")))
+	{
+		return;
+	}
 		// Load red material
 		if (UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Assets/Materials/M_Debug.M_Debug")))
 		{
 			MeshComponent->SetMaterial(0, RedMaterial);
-
-			// Start a timer to revert the material after 0.2 seconds
 			
+			// Start a timer to revert the material after InRate seconds
 			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, AssetPath, MeshComponent]()
 			{
 				UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, *AssetPath );

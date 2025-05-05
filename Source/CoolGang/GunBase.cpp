@@ -19,8 +19,7 @@
 AGunBase::AGunBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	
+	PrimaryActorTick.bCanEverTick = false;
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	SetRootComponent(Mesh);
 	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
@@ -34,18 +33,7 @@ void AGunBase::BeginPlay()
 {
 	Super::BeginPlay();
 	TimeBetweenShots = 60.0f / FireRate;
-	AmmoCount = MagazineSize;
-	
-	
 }
-
-// Called every frame
-void AGunBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	
-}
-
 
 void AGunBase::Initialize()
 {
@@ -53,12 +41,11 @@ void AGunBase::Initialize()
 	InitWeaponStats();
 }
 
-
 void AGunBase::InitWeaponStats()
 {
 	if (AbilitySystemComponent == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
+		//UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
 		return;
 	}
 	
@@ -67,7 +54,7 @@ void AGunBase::InitWeaponStats()
 
 	if (Spec.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Init Gun Spec is valid"));
+		//UE_LOG(LogTemp, Warning, TEXT("Init Gun Spec is valid"));
 
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.AmmoCount"), AmmoCount);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MagazineSize"), MagazineSize);
@@ -75,12 +62,13 @@ void AGunBase::InitWeaponStats()
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.FireRate"), FireRate);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.ReloadTime"), ReloadTime);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Pellets"), Pellets);
+		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.BulletSpreadAngle"), BulletSpreadAngle);
 		WeaponAttributeSet = AbilitySystemComponent->GetSet<UWeaponAttributeSet>();
 		AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Init Gun Spec is NOT valid"));
+		//UE_LOG(LogTemp, Error, TEXT("Init Gun Spec is NOT valid"));
 	}
 }
 
@@ -88,7 +76,7 @@ void AGunBase::GiveAbilities()
 {
 	if (GetOwner() == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GunOwner is nullptr"));
+		//UE_LOG(LogTemp, Warning, TEXT("GunOwner is nullptr"));
 		return;
 	}
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
@@ -122,7 +110,4 @@ AController* AGunBase::GetOwnerController() const
 		return nullptr;
 	}
 	return OwnerPawn->GetController();
-
 }
-
-

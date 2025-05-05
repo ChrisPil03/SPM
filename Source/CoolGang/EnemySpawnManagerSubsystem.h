@@ -52,18 +52,29 @@ protected:
     
     TMap<APlayerLocationDetection*, TArray<AEnemySpawner*>> SpawnersByLocation;
     TArray<AEnemySpawner*> CurrentEnemySpawners;
-    TArray<AEnemySpawner*> CopyCurrentEnemySpawners;
 
     double UpdatedSpawnInterval;
     double SpawnInterval;
     int32 SpawnIntervalIncreaseCount;
     double SpawnIntervalIncreaseProgress;
 
+    UPROPERTY()
+    float RelocateDistanceThreshold = 10000.f * 10000.f;
+    
     TArray<AEnemyAI*> AliveEnemies;
     TArray<AEnemyAI*> DeadEnemies;
 
+    FTimerDelegate OutOfRangeDelegate;
+    FTimerHandle OutOfRangeCheckTimer;
+    float RangeCheckTimerInterval = 1.f;
 
 private:
+    AEnemySpawner* ChooseRandomSpawner();
+
+    UFUNCTION()
+    void CheckOutOfRange();
+    
+    void RelocateEnemy(AEnemyAI* Enemy);
     void BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params);
     
     void OnEnterTriggerBox(APlayerLocationDetection* SpawnBox);
