@@ -20,7 +20,7 @@ void UBTService_TargetInLineOfSight::TickNode(UBehaviorTreeComponent& OwnerComp,
 
 	if (Enemy == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No AIPawn"));
+		//UE_LOG(LogTemp, Warning, TEXT("No AIPawn"));
 		return;
 	}
 	
@@ -33,12 +33,13 @@ void UBTService_TargetInLineOfSight::TickNode(UBehaviorTreeComponent& OwnerComp,
 	
 	if (OwnerComp.GetAIOwner()->LineOfSightTo(Target))
 	{
-		UE_LOG(LogEngine, Warning, TEXT("Can see the target"));
+
+		//UE_LOG(LogEngine, Warning, TEXT("Can see the target"));
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), true);
 	}
 	else
 	{
-		UE_LOG(LogEngine, Warning, TEXT("Cannot see the target"));
+		//UE_LOG(LogEngine, Warning, TEXT("Cannot see the target"));
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(GetSelectedBlackboardKey(), false);
 	}
 }

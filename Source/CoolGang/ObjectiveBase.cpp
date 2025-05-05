@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ObjectiveBase.h"
-#include "ObjectiveManagerSubsystem.h"
+
+#include "PlayerLocationDetection.h"
 #include "SystemIntegrity.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -10,12 +11,21 @@ AObjectiveBase::AObjectiveBase() :
 	bIsActive(false),
 	ObjectiveState(EObjectiveState::NotStarted),
 	ObjectiveManager(nullptr),
-	ObjectiveDescription("Missing Description"),
+	ObjectiveDescription("MISSING DESCRIPTION"),
 	ObjectiveTime(30.f),
 	bIsTimeBased(false),
 	Progress(0.f),
 	SystemIntegrity(nullptr),
-	BaseIntegrityDamage(100.f)
+	BaseIntegrityDamage(100.f),
+	ObjectiveFailedIntegrityChunkDamage(25000.f),
+	ActivatedMessage("MALFUNCTION DETECTED"),
+	StartedMessage("OBJECTIVE STARTED"),
+	CompletedMessage("OBJECTIVE COMPLETED"),
+	FailedMessage("OBJECTIVE FAILED"),
+	InPlayerLocationDetection(nullptr),
+	EnterRoomVoiceLine(nullptr),
+	ObjectiveActivatedVoiceLine(nullptr),
+	DisplayObjectiveMessage(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -26,6 +36,7 @@ void AObjectiveBase::BeginPlay()
 	SetIsActive(false);
 	FindObjectiveManager();
 	FindSystemIntegrity();
+	BindPlayerLocationDetection();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
 }
 
@@ -35,13 +46,14 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 	bIsActive = bNewState;
 	if (bNewState)
 	{
-		if (OnObjectiveActivated.IsBound())
-		{
-			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
-			OnObjectiveActivated.Broadcast(this);
-		}
-	}
-	else
+		DisplayMessage(ActivatedMessage);
+		Play2DSoundOnce(ObjectiveActivatedVoiceLine);
+		// 	if (OnObjectiveActivated.IsBound())
+		// 	{
+		// 		UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
+		// 		OnObjectiveActivated.Broadcast(this);
+		// 	}
+	} else
 	{
 		if (OnObjectiveDeactivated.IsBound())
 		{
@@ -49,12 +61,10 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 			OnObjectiveDeactivated.Broadcast(this);
 		}
 	}
-	
 }
 
 void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Starting Malfunction Timer"));
 	MalfunctionTimerDelegate.BindUFunction(this, FName("StartMalfunctioning"), MalfunctionDamageInterval, MalfunctionDamage);
 	GetWorldTimerManager().SetTimer(MalfunctionTimerHandle, MalfunctionTimerDelegate, MalfunctionTimer, false);
 
@@ -62,14 +72,12 @@ void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const f
 
 void AObjectiveBase::StopMalfunctioning()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Objective complete, stopping malfunction"));
 	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
 	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
 }
 
 void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Starting to malfunction"));
 	MalfunctionIntervalDelegate.BindUFunction(this, FName("WeakenSystemIntegrity"), MalfunctionDamage);
 	GetWorldTimerManager().SetTimer(MalfunctionIntervalHandle, MalfunctionIntervalDelegate, MalfunctionDamageInterval, true);
 }
@@ -82,44 +90,42 @@ void AObjectiveBase::Tick(float DeltaTime)
 	{
 		WeakenSystemIntegrity(BaseIntegrityDamage * DeltaTime);
 	}
-	if (!bIsActive)
+	if (bIsActive)
 	{
-		return;
+		BroadcastObjectiveIsActive();
 	}
-	if (bIsTimeBased && GetIsInProgress())
-	{
-		IncreaseObjectiveProgress(DeltaTime);
-		BroadcastObjectiveInProgress();
-	}
+
+	
+	// if (bIsTimeBased && GetIsInProgress())
+	// {
+	// 	IncreaseObjectiveProgress(DeltaTime);
+	// 	//BroadcastObjectiveInProgress();
+	// }
 }
 
 void AObjectiveBase::StartObjective()
 {
 	if (GetIsNotStarted())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Objective Started"));
+		//UE_LOG(LogTemp, Warning, TEXT("Objective Started"));
 		SetObjectiveState(EObjectiveState::InProgress);
-		DisplayObjectiveDescription();
+		DisplayMessage(StartedMessage);
 	}
 }
 
 void AObjectiveBase::ResetObjective()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
-
-	SetIsActive(false);
-	SetObjectiveState(EObjectiveState::NotStarted);
+	//SetIsActive(false);
 	ResetProgress();
-	StopDisplayObjectiveDescription();
+	SetObjectiveState(EObjectiveState::NotStarted);
 }
 
 void AObjectiveBase::CompleteObjective()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Objective Completed"));
-	
+	//UE_LOG(LogTemp, Warning, TEXT("Objective Completed"));
 	SetObjectiveState(EObjectiveState::Complete);
-	StopDisplayObjectiveDescription();
-	DisplayObjectiveCompleted();
+	DisplayMessage(CompletedMessage);
 
 	if (ObjectiveManager == nullptr)
 	{
@@ -133,9 +139,11 @@ void AObjectiveBase::FailObjective()
 {
 	if (!GetIsFailed())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Objective failed"));
+		//UE_LOG(LogTemp, Warning, TEXT("Objective failed"));
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
+		DisplayMessage(FailedMessage);
+		WeakenSystemIntegrity(ObjectiveFailedIntegrityChunkDamage);
 	}
 }
 
@@ -175,6 +183,12 @@ void AObjectiveBase::WeakenSystemIntegrity(const float Damage)
 	}
 }
 
+void AObjectiveBase::ResetProgress()
+{
+	ProgressTimer->ResetTimer();
+	Progress = ProgressTimer->GetProgress();
+}
+
 void AObjectiveBase::FindObjectiveManager()
 {
 	ObjectiveManager = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>();
@@ -200,5 +214,53 @@ void AObjectiveBase::BroadcastObjectiveInProgress()
 	{
 		UE_LOG(LogEngine, Warning, TEXT("Broadcasting InProgress."));
 		OnObjectiveInProgress.Broadcast(this);
+	}
+}
+
+void AObjectiveBase::BroadcastObjectiveIsActive()
+{
+	if (OnObjectiveActivated.IsBound())
+	{
+		OnObjectiveActivated.Broadcast(this);
+	}
+}
+
+void AObjectiveBase::BindPlayerLocationDetection()
+{
+	if (InPlayerLocationDetection)
+	{
+		InPlayerLocationDetection->AddOnTriggerEnterFunction(this, &AObjectiveBase::OnTriggerEnterRoom);
+		InPlayerLocationDetection->AddOnTriggerExitFunction(this, &AObjectiveBase::OnTriggerExitRoom);
+	}
+}
+
+void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
+{
+	if (GetIsActive() && GetIsNotStarted())
+	{
+		Play2DSoundOnce(EnterRoomVoiceLine);
+	}
+}
+
+void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
+{
+	
+}
+
+void AObjectiveBase::Play2DSoundOnce(USoundBase* Sound)
+{
+	if (Sound)
+	{
+		UGameplayStatics::PlaySound2D(this, Sound);
+	}
+}
+
+void AObjectiveBase::DisplayMessage(const FString& Message) const
+{
+	UE_LOG(LogTemp, Warning, TEXT("Display message"));
+	if (DisplayObjectiveMessage->IsBound())
+	{
+		DisplayObjectiveMessage->Broadcast(Message);
+		UE_LOG(LogTemp, Warning, TEXT("Display message broadcasted"));
 	}
 }

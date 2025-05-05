@@ -45,7 +45,7 @@ void AGunBase::InitWeaponStats()
 {
 	if (AbilitySystemComponent == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
+		//UE_LOG(LogTemp, Error, TEXT("AbilitySystemComponent is null in BeginPlay!"));
 		return;
 	}
 	
@@ -54,7 +54,7 @@ void AGunBase::InitWeaponStats()
 
 	if (Spec.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Init Gun Spec is valid"));
+		//UE_LOG(LogTemp, Warning, TEXT("Init Gun Spec is valid"));
 
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.AmmoCount"), AmmoCount);
 		Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MagazineSize"), MagazineSize);
@@ -68,7 +68,7 @@ void AGunBase::InitWeaponStats()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Init Gun Spec is NOT valid"));
+		//UE_LOG(LogTemp, Error, TEXT("Init Gun Spec is NOT valid"));
 	}
 }
 
@@ -76,7 +76,7 @@ void AGunBase::GiveAbilities()
 {
 	if (GetOwner() == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GunOwner is nullptr"));
+		//UE_LOG(LogTemp, Warning, TEXT("GunOwner is nullptr"));
 		return;
 	}
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);

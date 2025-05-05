@@ -57,13 +57,10 @@ void AEnemyAI::BeginPlay()
 	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
 	for (AObjectiveBase* Objective : AllObjectives)
 	{
-		UE_LOG(LogEngine, Warning, TEXT("Objective found: %s"), *Objective->GetName())
-		
 		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
 		{
-			UE_LOG(LogEngine, Warning, TEXT("Setting up callback functions"))
-			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
-			//Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+			//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+			Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
@@ -76,7 +73,6 @@ void AEnemyAI::BeginPlay()
 
 		if (Spec.IsValid())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Init Enemy Spec is valid"));
 
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MaxHealth"), MaxHealth);
@@ -85,14 +81,6 @@ void AEnemyAI::BeginPlay()
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 			
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Init Enemy Spec is NOT valid"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Enemy AbilitySystemComponent is null in BeginPlay!"));
 	}
 }
 
@@ -109,12 +97,7 @@ void AEnemyAI::Attack()
 	{
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("EnemyAttributeSet is null !"));
-	}
 	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-	UE_LOG(LogEngine, Warning, TEXT("Dealing Damage to: %s, %f"), *CurrentTarget.GetObject()->GetName(), Damage)
 	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
 }
 
@@ -169,7 +152,6 @@ void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
 	if (!bChangedToTargetPlayer && EnemySpawnManager->GetAliveEnemies().Contains(this))
 	{
-		UE_LOG(LogEngine, Warning, TEXT("Time to attack objective: %s"), *Objective->GetName())
 		CurrentTarget = Objective;
 		bChangedToTargetPlayer = true;
 	}
@@ -177,7 +159,6 @@ void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 
 void AEnemyAI::AttackPlayer(AObjectiveBase* Objective)
 {
-	UE_LOG(LogEngine, Warning, TEXT("Time to attack the player"))
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 }
 
@@ -222,7 +203,6 @@ void AEnemyAI::SetAlive()
 
 void AEnemyAI::OnDeathFXFinished(UNiagaraComponent* PooledNiagaraComp)
 {
-	UE_LOG(LogEngine, Warning, TEXT("OnDeathFXFinished"));
 	bDeathVFXComplete = true;
 	if (bFadeComplete)
 	{
@@ -247,5 +227,3 @@ void AEnemyAI::ReleaseToPool()
     	EnemySpawnManager->MarkEnemyAsDead(this);
 		SetActorTickEnabled(false);
 }
-
-

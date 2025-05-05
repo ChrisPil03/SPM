@@ -5,17 +5,17 @@
 #include "CoreMinimal.h"
 #include "FProgressTimer.h"
 #include "GameFramework/Actor.h"
+#include "ObjectiveManagerSubsystem.h"
 #include "ObjectiveBase.generated.h"
 
+class APlayerLocationDetection;
 class ASystemIntegrity;
-class UObjectiveManagerSubsystem;
 
 UENUM(BlueprintType)
 enum class EObjectiveState : uint8
 {
 	NotStarted,
 	InProgress,
-	Aborting,
 	Complete,
 	Failed
 };
@@ -48,6 +48,8 @@ protected:
 	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
 	ASystemIntegrity* GetSystemIntegrity() const { return SystemIntegrity; }
 	float GetBaseIntegrityDamage() const { return BaseIntegrityDamage; }
+
+	void DisplayMessage(const FString& Message) const;
 
 public:
 
@@ -82,8 +84,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsInProgress() const { return ObjectiveState == EObjectiveState::InProgress; }
 	UFUNCTION(BlueprintCallable, Category = "Objective States")
-	bool GetIsAborting() const { return ObjectiveState == EObjectiveState::Aborting; }
-	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsComplete() const { return ObjectiveState == EObjectiveState::Complete; }
 	UFUNCTION(BlueprintCallable, Category = "Objective States")
 	bool GetIsFailed() const { return ObjectiveState == EObjectiveState::Failed; }
@@ -102,21 +102,29 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	virtual float GetObjectiveProgress() const { return Progress; }
+
+	UFUNCTION(BlueprintCallable, Category = "Message")
+	const FString& GetActivatedMessage() const { return ActivatedMessage; }
+	UFUNCTION(BlueprintCallable, Category = "Message")
+	const FString& GetStartedMessage() const { return StartedMessage; }
+	UFUNCTION(BlueprintCallable, Category = "Message")
+	const FString& GetCompletedMessage() const { return CompletedMessage; }
+	UFUNCTION(BlueprintCallable, Category = "Message")
+	const FString& GetFailedMessage() const { return FailedMessage; }
 	
-	UFUNCTION(BlueprintImplementableEvent)
-	void DisplayObjectiveDescription();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void DisplayObjectiveCompleted();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void StopDisplayObjectiveDescription();
+	void SetDisplayObjectiveMessageDelegate(FDisplayObjectiveMessage* DisplayMessage){
+		DisplayObjectiveMessage = DisplayMessage; }
 
 private:
-	void ResetProgress() const { ProgressTimer->Reset(); }
+	void ResetProgress();
 	void FindObjectiveManager();
 	void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();
+	void BroadcastObjectiveIsActive();
+	void BindPlayerLocationDetection();
+	void OnTriggerEnterRoom(APlayerLocationDetection* Room);
+	void OnTriggerExitRoom(APlayerLocationDetection* Room);
+	void Play2DSoundOnce(USoundBase* Sound);
 
 	FTimerHandle MalfunctionTimerHandle;
 	FTimerDelegate MalfunctionTimerDelegate;
@@ -152,10 +160,36 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "System Integrity")
 	float BaseIntegrityDamage;
+
+	UPROPERTY(EditAnywhere, Category = "System Integrity")
+	float ObjectiveFailedIntegrityChunkDamage;
+
+	UPROPERTY(EditAnywhere, Category = "Message")
+	FString ActivatedMessage;
+
+	UPROPERTY(EditAnywhere, Category = "Message")
+	FString StartedMessage;
+
+	UPROPERTY(EditAnywhere, Category = "Message")
+	FString CompletedMessage;
+
+	UPROPERTY(EditAnywhere, Category = "Message")
+	FString FailedMessage;
+
+	UPROPERTY(EditInstanceOnly, Category = "Objective")
+	APlayerLocationDetection* InPlayerLocationDetection;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* EnterRoomVoiceLine;
+
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ObjectiveActivatedVoiceLine;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 	
 	FOnObjectiveActivated OnObjectiveActivated;
 	FOnObjectiveDeactivated OnObjectiveDeactivated;
 	FOnObjectiveInProgress OnObjectiveInProgress;
+	
+	FDisplayObjectiveMessage* DisplayObjectiveMessage;
 };

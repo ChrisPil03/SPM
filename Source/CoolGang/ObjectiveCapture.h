@@ -28,9 +28,9 @@ protected:
 	
 public:
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void Interact(AActor* Interactor) override;
 	virtual void SetIsActive(const bool bNewState) override;
+	virtual void FailObjective() override;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SpawnCaptureZone();
@@ -44,6 +44,7 @@ public:
 private:
 	void ShowInteractableOutline(const bool bNewState);
 	void SetCanInteractWith(const bool bNewState);
+	bool GetIsPlayerInZone() const { return PlayerInZone != nullptr; }
 	
 	UFUNCTION()
 	void OnSphereBeginOverlap(
@@ -80,6 +81,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "CaptureZone")
 	int32 DestroyZoneDelay;
+
+	UPROPERTY(EditAnywhere, Category = "Objective")
+	float FailObjectiveDelay;
 	
 	FTimerHandle DelayTimerHandle;
+
+	TUniquePtr<FProgressTimer> FailDelayProgressTimer;
 };

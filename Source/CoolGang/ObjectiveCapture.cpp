@@ -3,6 +3,7 @@
 #include "ObjectiveCapture.h"
 #include "PlayerCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AObjectiveCapture::AObjectiveCapture()
 {
@@ -12,6 +13,7 @@ AObjectiveCapture::AObjectiveCapture()
 	SetIsTimeBased(true);
 	bCanInteractWith = false;
 	DestroyZoneDelay = 1;
+	FailObjectiveDelay = 5.f;
 	
 	SphereTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Trigger Component"));
 	SphereTrigger->InitSphereRadius(CaptureRadius);
@@ -23,6 +25,8 @@ AObjectiveCapture::AObjectiveCapture()
 void AObjectiveCapture::BeginPlay()
 {
 	Super::BeginPlay();
+	FailDelayProgressTimer = MakeUnique<FProgressTimer>(FailObjectiveDelay);
+	FailDelayProgressTimer->SetCompletionFunction(this, &AObjectiveCapture::FailObjective);
 	SphereTrigger->OnComponentBeginOverlap.AddDynamic(this, &AObjectiveCapture::OnSphereBeginOverlap);
 	SphereTrigger->OnComponentEndOverlap.AddDynamic(this, &AObjectiveCapture::OnSphereEndOverlap);
 }
@@ -30,10 +34,28 @@ void AObjectiveCapture::BeginPlay()
 void AObjectiveCapture::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	if (GetIsAborting())
+
+	if (!GetIsInProgress())
 	{
-		DecreaseObjectiveProgress(DeltaTime);
+		return;
+	}
+	if (GetIsPlayerInZone())
+	{
+		if (FailDelayProgressTimer->GetProgress() > 0)
+		{
+			FailDelayProgressTimer->ResetTimer();
+		}
+		IncreaseObjectiveProgress(DeltaTime);
+	}
+	else
+	{
+		if (GetObjectiveProgress() == FProgressTimer::ZeroCompletion)
+		{
+			FailDelayProgressTimer->IncreaseProgress(DeltaTime);
+		}else
+		{
+			DecreaseObjectiveProgress(DeltaTime);
+		}
 	}
 }
 
@@ -53,7 +75,7 @@ void AObjectiveCapture::Interact(AActor* Interactor)
 void AObjectiveCapture::SetIsActive(const bool bNewState)
 {
 	Super::SetIsActive(bNewState);
-	ShowInteractableOutline(bNewState);
+	SetCanInteractWith(bNewState);
 }
 
 void AObjectiveCapture::StartObjective()
@@ -72,15 +94,15 @@ void AObjectiveCapture::CompleteObjective()
 void AObjectiveCapture::ResetObjective()
 {
 	Super::ResetObjective();
-	DestroyCaptureZone();
-	SetCanInteractWith(true);
+	//DestroyCaptureZone();
+	//SetCanInteractWith(true);
 }
 
 void AObjectiveCapture::IncreaseObjectiveProgress(float const DeltaTime)
 {
 	Super::IncreaseObjectiveProgress(DeltaTime);
 	UpdateCaptureZoneSize();
-
+	
 	if (GetObjectiveProgress() == FProgressTimer::FullCompletion)
 	{
 		CompleteObjective();
@@ -89,12 +111,19 @@ void AObjectiveCapture::IncreaseObjectiveProgress(float const DeltaTime)
 
 void AObjectiveCapture::DecreaseObjectiveProgress(float const DeltaTime)
 {
-	Super::DecreaseObjectiveProgress(DeltaTime);
-	UpdateCaptureZoneSize();
-
-	if (GetObjectiveProgress() == FProgressTimer::ZeroCompletion)
+	if (GetObjectiveProgress() > FProgressTimer::ZeroCompletion)
 	{
-		ResetObjective();
+		Super::DecreaseObjectiveProgress(DeltaTime);
+		UpdateCaptureZoneSize();
+	}
+}
+
+void AObjectiveCapture::FailObjective()
+{
+	if (!GetIsPlayerInZone())
+	{
+		Super::FailObjective();
+		DestroyCaptureZone();
 	}
 }
 
@@ -126,11 +155,6 @@ void AObjectiveCapture::OnSphereBeginOverlap(
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
 		PlayerInZone = Player;
-		
-		if (GetIsAborting())
-		{
-			SetObjectiveState(EObjectiveState::InProgress);
-		}
 	}
 }
 
@@ -148,10 +172,5 @@ void AObjectiveCapture::OnSphereEndOverlap(
 	if (OtherActor == PlayerInZone)
 	{
 		PlayerInZone = nullptr;
-
-		if (GetIsInProgress())
-		{
-			SetObjectiveState(EObjectiveState::Aborting);
-		}
 	}
 }

@@ -14,7 +14,9 @@ AObjectiveRestoreServers::AObjectiveRestoreServers() :
 	CurrentHeatBuildup(0.f),
 	CoolingTime(3.f),
 	CoolingProgress(0.f),
-	OverheatSystemIntegrityDamage(50.f)
+	OverheatSystemIntegrityDamage(50.f),
+	FailDelay(15.f),
+	OverheatedMessage("SERVERS OVERHEATING")
 {
 	ServersToRestore.Reserve(NumberOfServersToRestore);
 	SetIsTimeBased(false);
@@ -39,11 +41,15 @@ void AObjectiveRestoreServers::Tick(float DeltaTime)
 	{
 		IncreaseObjectiveProgress(DeltaTime);
 	}
-	if (GetIsOverheated())
+	else if (GetIsOverheated())
 	{
-		WeakenSystemIntegrity(OverheatSystemIntegrityDamage * DeltaTime);
+		if (!FailDelayProgressTimer)
+		{
+			return;
+		}
+		FailDelayProgressTimer->IncreaseProgress(DeltaTime);
 	}
-	if (GetIsCooling())
+	else if (GetIsCooling())
 	{
 		CoolDown(DeltaTime);
 	}
@@ -61,12 +67,17 @@ void AObjectiveRestoreServers::SetIsActive(const bool bNewState)
 	}
 }
 
+void AObjectiveRestoreServers::FailObjective()
+{
+	Super::FailObjective();
+	ResetServerRoom();
+}
+
 void AObjectiveRestoreServers::InitializeServerHall()
 {
 	FindAllServers();
 	BindControlPanel();
-	InitializeTimer();
-	//BindPlayerLocationDetection();
+	InitializeTimers();
 }
 
 void AObjectiveRestoreServers::SelectServersToRestore()
@@ -132,9 +143,7 @@ void AObjectiveRestoreServers::BindControlPanel()
 {
 	if (ControlPanel)
 	{
-		FPerformDelegate CoolingCycleDelegate;
-		CoolingCycleDelegate.AddUObject(this, &AObjectiveRestoreServers::RegisterControlPanelInteraction);
-		ControlPanel->SetInteractFunction(CoolingCycleDelegate);
+		ControlPanel->SetOnInteractFunction(this, &AObjectiveRestoreServers::RegisterControlPanelInteraction);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ObjectiveRestoreServers: ControlPanel is missing"));
@@ -152,31 +161,21 @@ void AObjectiveRestoreServers::ResetServersToRestore()
 	RestoredServers = 0;
 }
 
+void AObjectiveRestoreServers::ResetServerRoom()
+{
+	SetServerHallStatus(EServerHallStatus::Operating);
+	ResetHeatBuildup();
+	ActivateControlPanel(false);
+	CoolingProgress = 0;
+	CoolingTimer->ResetTimer();
+	FailDelayProgressTimer->ResetTimer();
+	ResetServersToRestore();
+}
+
 void AObjectiveRestoreServers::OnInteract(AInteractableObject* InteractableObject)
 {
 	StartObjective();
 }
-
-// void AObjectiveRestoreServers::BindPlayerLocationDetection()
-// {
-// 	if (PlayerLocationDetection)
-// 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("Player location detection binded"));
-// 		PlayerLocationDetection->AddOnTriggerEnterFunction(this, &AObjectiveRestoreServers::OnEnterRoom);
-// 		PlayerLocationDetection->AddOnTriggerExitFunction(this, &AObjectiveRestoreServers::OnExitRoom);
-// 	}
-// }
-
-// void AObjectiveRestoreServers::OnEnterRoom(APlayerLocationDetection* Room)
-// {
-// 	UE_LOG(LogTemp, Display, TEXT("Entered server room"));
-// 	StartObjective();
-// }
-//
-// void AObjectiveRestoreServers::OnExitRoom(APlayerLocationDetection* Room)
-// {
-// 	UE_LOG(LogTemp, Display, TEXT("Exited server room PlayerLocationDetection"));
-// }
 
 void AObjectiveRestoreServers::ActivateControlPanel(const bool NewState)
 {
@@ -220,25 +219,17 @@ void AObjectiveRestoreServers::RegisterServerInteraction(AInteractableObject* In
 
 void AObjectiveRestoreServers::RegisterControlPanelInteraction(AInteractableObject* InteractableObject)
 {
-	if (!GetIsActive())
+	if (!GetIsActive() && !GetIsOverheated())
 	{
 		return;
 	}
-	if (bCanOverheat)
-	{
-		InitiateCoolingCycle();
-	}
+	InitiateCoolingCycle();
 }
 
 void AObjectiveRestoreServers::ResetObjective()
 {
 	Super::ResetObjective();
-	SetServerHallStatus(EServerHallStatus::Operating);
-	ResetHeatBuildup();
-	ActivateControlPanel(true);
-	CoolingProgress = 0;
-	CoolingTimer->Reset();
-	ResetServersToRestore();
+	ResetServerRoom();
 }
 
 void AObjectiveRestoreServers::CompleteObjective()
@@ -290,6 +281,8 @@ void AObjectiveRestoreServers::TriggerOverheat()
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Trigger Overheat"));
 	SetServerHallStatus(EServerHallStatus::Overheated);
+	ActivateControlPanel(true);
+	DisplayMessage(OverheatedMessage);
 
 	for (AObjectiveServer* Server : ServersToRestore)
 	{
@@ -304,10 +297,11 @@ void AObjectiveRestoreServers::InitiateCoolingCycle()
 {
 	if (!GetIsCooling() && GetIsInProgress())
 	{
+		if (FailDelayProgressTimer->GetProgress() > FProgressTimer::ZeroCompletion)
+		{
+			FailDelayProgressTimer->ResetTimer();
+		}
 		SetServerHallStatus(EServerHallStatus::Cooling);
-	}else
-	{
-		ControlPanel->SetCanInteractWith(true);
 	}
 }
 
@@ -326,8 +320,7 @@ void AObjectiveRestoreServers::ResumeOperating()
 	{
 		SetServerHallStatus(EServerHallStatus::Operating);
 		ResetHeatBuildup();
-		ResetCoolingTimerProgress();
-		ActivateControlPanel(true);
+		CoolingTimer->ResetTimer();
 
 		for (AObjectiveServer* Server : ServersToRestore)
 		{
@@ -339,18 +332,16 @@ void AObjectiveRestoreServers::ResumeOperating()
 	}
 }
 
-void AObjectiveRestoreServers::InitializeTimer()
+void AObjectiveRestoreServers::InitializeTimers()
 {
 	CoolingTimer = MakeUnique<FProgressTimer>(CoolingTime);
-
-	FTimerCompletionDelegate CoolingDelegate;
-	CoolingDelegate.BindUObject(this, &AObjectiveRestoreServers::ResumeOperating);
-	CoolingTimer->SetCompletionDelegate(CoolingDelegate);
-}
-
-void AObjectiveRestoreServers::ResetCoolingTimerProgress() const
-{
-	CoolingTimer->Reset();
+	CoolingTimer->SetCompletionFunction(this, &AObjectiveRestoreServers::ResumeOperating);
+	FailDelayProgressTimer = MakeUnique<FProgressTimer>(FailDelay);
+	FailDelayProgressTimer->SetCompletionFunction(this, &AObjectiveRestoreServers::FailObjective);
+	if (FailDelayProgressTimer)
+	{
+		UE_LOG(LogTemp, Error, TEXT("FailDelayProgressTimer != nullptr"));
+	}
 }
 
 void AObjectiveRestoreServers::ResetHeatBuildup()
