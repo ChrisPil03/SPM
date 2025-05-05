@@ -85,17 +85,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat ")
 	int AmmoCount {30};
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float MinRecoil {0.5f};
-
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float MaxRecoil {1.0f};
-
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float RecoilDuration {0.3f};
-
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float RecoilExponent {2.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat ")
+	float BulletSpreadAngle {0};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
@@ -188,6 +179,11 @@ public:
 	class UAbilitySystemComponent* GetAbilitySystemComponent() const
 	{
 		return AbilitySystemComponent;
+	}
+	UFUNCTION(BlueprintCallable)
+	TSubclassOf<UCameraShakeBase> GetCameraShakeClass() const
+	{
+		return CameraShakeClass;
 	}
 	
 	void Initialize();

@@ -137,7 +137,7 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 	const UAbilitySystemComponent* ASC = GetActorInfo().AbilitySystemComponent.Get();
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
 	float NumPellets = Attributes->GetPellets();
-	const float ConeHalfAngleDegrees = 5.0f;
+	const float ConeHalfAngleDegrees = Attributes->GetBulletSpreadAngle();
 
 	for (int32 i = 0; i < NumPellets; ++i)
 	{

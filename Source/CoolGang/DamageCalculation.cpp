@@ -62,10 +62,10 @@ void UDamageCalculation::Execute_Implementation(const FGameplayEffectCustomExecu
     // First try to get damage from captured attribute
     if (!ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().DamageDef, EvaluateParameters, WeaponDamage))
     {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to capture weapon Damage attribute"));
+        UE_LOG(LogTemp, Warning, TEXT("Failed to capture weapon Damage attribute in %s"), *SourceASC->GetOwner()->GetActorNameOrLabel());
         
         // Fallback: Try to get damage from SetByCaller in the GameplayEffect
-        WeaponDamage = Spec.GetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Data.Damage")), false, 0.0f);
+      
         
         if (WeaponDamage <= 0.0f)
         {
