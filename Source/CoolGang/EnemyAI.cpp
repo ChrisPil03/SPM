@@ -77,9 +77,9 @@ void AEnemyAI::BeginPlay()
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MaxHealth"), MaxHealth);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), AttackDamage);
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.PlayerDamage"), AttackDamage);
 			EnemyAttributeSet = AbilitySystemComponent->GetSet<UEnemyAttributeSet>();
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
-			
 		}
 	}
 }
@@ -96,9 +96,31 @@ void AEnemyAI::Attack()
 	if (EnemyAttributeSet != nullptr)
 	{
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
+
+		AActor *DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
+		if (DamagedActor->ActorHasTag("Player"))
+		{
+			const float PlayerDamage = EnemyAttributeSet->PlayerDamage.GetCurrentValue();
+			UE_LOG(LogTemp, Warning, TEXT("Apply player specific damage %f"), PlayerDamage);
+			UGameplayStatics::ApplyDamage(DamagedActor, PlayerDamage, MyOwnerInstigator, this, DamageTypeClass);
+		} else
+		{
+			const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
+			UE_LOG(LogTemp, Warning, TEXT("Apply damage %f"), Damage);
+			UGameplayStatics::ApplyDamage(DamagedActor, Damage, MyOwnerInstigator, this, DamageTypeClass);
+		}
+
+
+		
+	} else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't deal damage! :("));
 	}
-	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+
+	
+	
+	
+	
 }
 
 
