@@ -1,7 +1,6 @@
 
 #include "ObjectiveRestoreServers.h"
 #include "ObjectiveServer.h"
-#include "PlayerLocationDetection.h"
 #include "Kismet/GameplayStatics.h"
 
 AObjectiveRestoreServers::AObjectiveRestoreServers() :
@@ -290,6 +289,7 @@ void AObjectiveRestoreServers::TriggerOverheat()
 		if (ValidServerToRestore(Server))
 		{
 			Server->PauseRestoration();
+			Server->SetSmokeEffectActive(true);
 		}
 	}
 }
@@ -328,6 +328,7 @@ void AObjectiveRestoreServers::ResumeOperating()
 			if (ValidServerToRestore(Server) && Server->GetIsPaused())
 			{
 				Server->ResumeRestoration();
+				Server->SetSmokeEffectActive(false);
 			}
 		}
 	}
