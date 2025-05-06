@@ -155,7 +155,7 @@ void AObjectiveBase::CompleteObjective()
 	}
 	ObjectiveManager->RegisterCompletedObjective(this);
 
-	if (!bPlayerInRoom)
+	if (!bPlayerInRoom && RoomGate)
 	{
 		RoomGate->CloseGate();
 	}
@@ -171,7 +171,7 @@ void AObjectiveBase::FailObjective()
 		//EnqueueVoiceLineWithMessage(ObjectiveFailedVoiceLine, FailedMessage);
 		WeakenSystemIntegrity(ObjectiveFailedIntegrityChunkDamage);
 
-		if (!bPlayerInRoom)
+		if (!bPlayerInRoom && RoomGate)
 		{
 			RoomGate->CloseGate();
 		}
@@ -298,7 +298,6 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 	{
 		if (RoomGate)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Close the gate"));
 			RoomGate->CloseGate();	
 		}
 	}
