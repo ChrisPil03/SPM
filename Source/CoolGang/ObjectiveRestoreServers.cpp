@@ -115,7 +115,7 @@ void AObjectiveRestoreServers::PrepareServersToRestore()
 		Server->SetServerState(EServerState::NeedRestoring);
 		Server->SetInteractFunction(InteractDelegate);
 		Server->SetHeatUpFunction(HeatUpDelegate);
-		Server->SetCompleteObjectiveFunction(this, &AObjectiveRestoreServers::RegisterServerRestored);
+		Server->CompleteDelegate.AddDynamic(this, &AObjectiveRestoreServers::RegisterServerRestored);
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Prepared Servers to Restore"));
 }
