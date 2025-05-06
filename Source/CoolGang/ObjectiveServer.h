@@ -9,8 +9,8 @@
 
 class UNiagaraComponent;
 
-DECLARE_DELEGATE_OneParam(FServerHeatUpDelegate, float)
-DECLARE_DELEGATE_OneParam(FCompleteDelegate, AInteractableObject*)
+DECLARE_DELEGATE_OneParam(FServerHeatUpDelegate, float);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCompleteDelegate, AInteractableObject*, InteractableObject);
 
 UENUM(BlueprintType)
 enum class EServerState : uint8
@@ -60,12 +60,9 @@ public:
 	void SetSmokeEffectActive(const bool bNewState) const;
 
 	void SetHeatUpFunction(const FServerHeatUpDelegate& NewDelegate) { HeatUpDelegate = NewDelegate; }
-
-	template <typename T>
-	void SetCompleteObjectiveFunction(T* Object, void (T::*Func)(AInteractableObject*))
-	{
-		CompleteDelegate.BindUObject(Object, Func);
-	}
+	
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FCompleteDelegate CompleteDelegate;
 
 private:
 	void SetDebugMaterial() const;
@@ -102,5 +99,4 @@ private:
 	UNiagaraComponent* SmokeNiagaraComponent;
 
 	FServerHeatUpDelegate HeatUpDelegate;
-	FCompleteDelegate CompleteDelegate;
 };
