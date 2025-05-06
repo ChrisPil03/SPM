@@ -214,4 +214,7 @@ private:
 	FOnObjectiveActivated OnObjectiveActivated;
 	FOnObjectiveDeactivated OnObjectiveDeactivated;
 	FOnObjectiveInProgress OnObjectiveInProgress;
+
+	UPROPERTY(BlueprintAssignable, meta = (AllowPrivateAccess = "true"), Category = "Events")
+	FOnObjectiveEvent OnObjectiveCompleted;
 };

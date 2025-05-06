@@ -106,14 +106,10 @@ void AObjectiveServer::CompleteRestoration()
 	UE_LOG(LogTemp, Warning, TEXT("Restoration Complete"));
 	SetServerState(EServerState::Restored);
 	RestoreProgress = FProgressTimer::FullCompletion;
-
-	// if (PerformDelegate.IsBound())
-	// {
-	// 	PerformDelegate.Broadcast(this);
-	// }
+	
 	if (CompleteDelegate.IsBound())
 	{
-		CompleteDelegate.Execute(this);
+		CompleteDelegate.Broadcast(this);
 	}
 	ResetMaterial();
 }
@@ -145,6 +141,7 @@ void AObjectiveServer::ResetServer()
 	ProgressTimer->ResetTimer();
 	RestoreProgress = 0;
 	ResetMaterial();
+	SetSmokeEffectActive(false);
 }
 
 void AObjectiveServer::SetSmokeEffectActive(const bool bNewState) const
