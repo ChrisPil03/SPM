@@ -4,6 +4,7 @@
 #include "PlayerLocationDetection.h"
 #include "SystemIntegrity.h"
 #include "AnnouncementSubsystem.h"
+#include "Gate.h"
 #include "Kismet/GameplayStatics.h"
 
 AObjectiveBase::AObjectiveBase() :
@@ -28,7 +29,8 @@ AObjectiveBase::AObjectiveBase() :
 	ObjectiveCompletedVoiceLine(nullptr),
 	ObjectiveFailedVoiceLine(nullptr),
 	AnnouncementSubsystem(nullptr),
-	DisplayTextMessageSubsystem(nullptr)
+	DisplayTextMessageSubsystem(nullptr),
+	RoomGate(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -51,6 +53,10 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 	bIsActive = bNewState;
 	if (bNewState)
 	{
+		if (RoomGate)
+		{
+			RoomGate->OpenGate();
+		}
 		DisplayMessageForSeconds(ActivatedMessage, 3.f);
 		//EnqueueVoiceLineWithMessage(ObjectiveActivatedVoiceLine, ActivatedMessage);
 		
@@ -148,6 +154,11 @@ void AObjectiveBase::CompleteObjective()
 		return;
 	}
 	ObjectiveManager->RegisterCompletedObjective(this);
+
+	if (!bPlayerInRoom)
+	{
+		RoomGate->CloseGate();
+	}
 }
 
 void AObjectiveBase::FailObjective()
@@ -159,6 +170,11 @@ void AObjectiveBase::FailObjective()
 		DisplayMessageForSeconds(FailedMessage, 3.f);
 		//EnqueueVoiceLineWithMessage(ObjectiveFailedVoiceLine, FailedMessage);
 		WeakenSystemIntegrity(ObjectiveFailedIntegrityChunkDamage);
+
+		if (!bPlayerInRoom)
+		{
+			RoomGate->CloseGate();
+		}
 	}
 }
 
@@ -266,6 +282,8 @@ void AObjectiveBase::BindPlayerLocationDetection()
 
 void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
 {
+	bPlayerInRoom = true;
+	
 	if (GetIsActive() && GetIsNotStarted())
 	{
 		//EnqueueVoiceLineWithMessage(EnterRoomVoiceLine, "");
@@ -274,7 +292,16 @@ void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
 
 void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 {
+	bPlayerInRoom = false;
 	
+	if (!GetIsActive())
+	{
+		if (RoomGate)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Close the gate"));
+			RoomGate->CloseGate();	
+		}
+	}
 }
 
 void AObjectiveBase::EnqueueVoiceLineWithMessage(USoundBase* VoiceLine, const FString& Message) const

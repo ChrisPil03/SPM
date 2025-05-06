@@ -8,6 +8,7 @@
 #include "ObjectiveManagerSubsystem.h"
 #include "ObjectiveBase.generated.h"
 
+class AGate;
 class UAnnouncementSubsystem;
 class UDisplayTextMessageSubsystem;
 class APlayerLocationDetection;
@@ -123,6 +124,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnObjectiveEvent OnStopWeakeningSystemIntegrity;
 
+	UFUNCTION(BlueprintCallable)
+	bool GetIsOn
+
 private:
 	void ResetProgress();
 	void FindObjectiveManager();
@@ -215,6 +219,11 @@ private:
 	FOnObjectiveDeactivated OnObjectiveDeactivated;
 	FOnObjectiveInProgress OnObjectiveInProgress;
 
-	UPROPERTY(BlueprintAssignable, meta = (AllowPrivateAccess = "true"), Category = "Events")
+	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Events")
 	FOnObjectiveEvent OnObjectiveCompleted;
+
+	UPROPERTY(EditInstanceOnly, Category = "Room")
+	AGate* RoomGate;
+
+	bool bPlayerInRoom;
 };
