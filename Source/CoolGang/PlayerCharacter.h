@@ -100,7 +100,7 @@ private:
 	UPROPERTY()
 	class UPlayerAttributeSet* PlayerAttributeSet;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	TArray<AGunBase*> Guns;
 
 

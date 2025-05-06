@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "GameplayAbilitySpec.h"
+
 #include "GunBase.generated.h"
 
 UENUM(BlueprintType)
@@ -16,7 +16,14 @@ enum class EWeaponType : uint8
 	// Add other weapon types as needed
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoCountChangedDelegate, float, Ammo);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagazineSizeChangedDelegate, float, Ammo);
+
+class UGameplayAbility;
+class UGameplayEffect;
+class UAbilitySystemComponent;
+struct FOnAttributeChangeData;
 UCLASS()
 class COOLGANG_API AGunBase : public AActor
 {
@@ -32,6 +39,7 @@ public:
 	// maybe need to change later
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
+	
 	UPROPERTY(EditAnywhere)
 	USceneComponent* Root;
 	///   Sound   ///
@@ -44,21 +52,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
 	USoundCue* ReloadSound;
 	
-	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundCue* ImpactSound;
 
 	///   Effect   ///
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* ImpactEffect;
-
 	
-
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
 	class UNiagaraSystem* MuzzleFlashEffect;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	USceneComponent* MuzzlePosition;
-	
 	
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
@@ -90,74 +93,42 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
-
-	
-	AController* GetOwnerController() const;
-
-	FTimerHandle FireTimerHandle;
-	FTimerHandle ReloadTimerHandle;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun | Stat")
 	float TimeBetweenShots;
-	bool bCanFire = true;
-	bool bIsRecoiling  = false;
-	bool bIsReloading  = false;
-
-
+	
 	void InitWeaponStats();
 	void GiveAbilities();
 	
-
-	float ElapsedTime =  0.0f;
-	 
-
-	float StartPitch = 0.0f;
-	float TargetPitch = 0.0f;
-	
 	UPROPERTY()
 	const class UWeaponAttributeSet* WeaponAttributeSet;
-
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	class UAbilitySystemComponent *AbilitySystemComponent;
+	UAbilitySystemComponent *AbilitySystemComponent;
 
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
-	TSubclassOf<class UGameplayEffect> GE_InitWeaponStats;
+	TSubclassOf<UGameplayEffect> GE_InitWeaponStats;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UGameplayAbility> FireAbilityClass;
+	TSubclassOf<UGameplayAbility> FireAbilityClass;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UGameplayAbility> ReloadAbilityClass;
-
-	UPROPERTY()
-	FGameplayAbilitySpecHandle FireHandle;
-
-	UPROPERTY()
-	FGameplayAbilitySpecHandle ReloadHandle;
+	TSubclassOf<UGameplayAbility> ReloadAbilityClass;
 	
 public:	
-	// Called every frame
-	//virtual void Tick(float DeltaTime) override;
+	
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartFire();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void StopFire();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void StopReload();
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Fire();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void Reload();
-	void StartRecoil();
-	
-	bool CanFire() const;
-	bool bIsFiring = false;
 
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};
@@ -168,18 +139,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetAmmoCountText(float Ammo);
 
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void SetMaxAmmoText(float Ammo);
+	// UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	// void SetMaxAmmoText(float Ammo);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
 	EWeaponType WeaponType;
 
 	EWeaponType GetWeaponType() const { return WeaponType; }
 	
-	class UAbilitySystemComponent* GetAbilitySystemComponent() const
-	{
-		return AbilitySystemComponent;
-	}
+	
 	UFUNCTION(BlueprintCallable)
 	TSubclassOf<UCameraShakeBase> GetCameraShakeClass() const
 	{
@@ -187,6 +155,22 @@ public:
 	}
 	
 	void Initialize();
+protected:
+	UFUNCTION()
+	void CalculateTimeBetweenShots(float NewFireRate);
+
+	void OnFireRateChanged(const FOnAttributeChangeData& Data);
+
+	void OnAmmoCountChanged(const FOnAttributeChangeData& Data) const;
+
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnAmmoCountChangedDelegate OnAmmoCountChangedDelegate;
+
+	void OnMagazineSizeChanged(const FOnAttributeChangeData& Data) const;
+
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnMagazineSizeChangedDelegate OnMagazineSizeChangedDelegate;
+	
 };
 
 

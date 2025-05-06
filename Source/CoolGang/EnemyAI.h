@@ -38,6 +38,9 @@ public:
 
 	UHealthComponent *GetHealthComponent() const;
 
+	UPROPERTY(EditAnywhere, Category = "Drop")
+	TSubclassOf<AActor> Drop;
+
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	const class UEnemyAttributeSet *EnemyAttributeSet;
 
@@ -78,6 +81,7 @@ private:
 	float FadeDuration = 1.0f;
 
 	bool bFadeComplete = true;
+	bool bIsDead = false;
 
 	bool bDeathVFXComplete = false;
 

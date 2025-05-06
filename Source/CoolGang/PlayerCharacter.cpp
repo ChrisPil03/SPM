@@ -89,6 +89,7 @@ void APlayerCharacter::BeginPlay()
 	Guns.Add(EquippedGun);
 
 	EquippedGun->SetActorHiddenInGame(false);
+
 }
 
 // Called every frame
