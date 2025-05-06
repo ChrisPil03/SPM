@@ -7,20 +7,42 @@
 
 UBTService_TargetLocation::UBTService_TargetLocation()
 {
-	NodeName = "Update Player Location";
+	NodeName = "Update Target Location";
 }
 
 void UBTService_TargetLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-	
-	UObject* Target = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn())->GetTarget().GetObject();
-	
-	if (Target == nullptr)
+
+	AAIController* OwnerController = OwnerComp.GetAIOwner();
+	if (!OwnerController)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UBTService_TargetLocation: OwnerController is null."));
 		return;
 	}
-	
-	OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), Target);
-}
 
+	APawn* OwnerPawn = OwnerController->GetPawn();
+	if (!OwnerPawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UBTService_TargetLocation: OwnerPawn is null."));
+		return;
+	}
+
+	AEnemyAI* EnemyAI = Cast<AEnemyAI>(OwnerPawn);
+	if (!EnemyAI)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UBTService_TargetLocation: Pawn is not an AEnemyAI. Pawn is: %s"), *GetNameSafe(OwnerPawn));
+		return;
+	}
+
+	TScriptInterface<IAttackable> TargetInterface = EnemyAI->GetTarget();
+	UObject* TargetObject = TargetInterface.GetObject();
+
+	if (TargetObject == nullptr)
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("UBTService_TargetLocation: TargetObject is null (EnemyAI has no current target)."));
+		OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
+		return;
+	}
+	OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), TargetObject);
+}

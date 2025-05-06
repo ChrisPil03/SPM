@@ -40,7 +40,7 @@ void AEnemyAI::BeginPlay()
 	Super::BeginPlay();
 	CollisionType = GetCapsuleComponent()->GetCollisionEnabled();
 	AIController = Cast<AEnemyAIController>(Controller);
-	
+
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
@@ -114,6 +114,10 @@ UHealthComponent* AEnemyAI::GetHealthComponent() const
 
 TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 {
+	if (CurrentTarget == nullptr)
+	{
+		return nullptr;
+	}
 	return CurrentTarget;
 }
 
