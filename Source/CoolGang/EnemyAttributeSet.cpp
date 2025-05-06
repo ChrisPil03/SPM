@@ -59,8 +59,7 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 			
 			if (AEnemyAI* enemy = Cast<AEnemyAI>(OwnerActor))
 			{
-				
-					enemy->Die(); 
+				enemy->Die(); 
 			}
 		}
 	}
