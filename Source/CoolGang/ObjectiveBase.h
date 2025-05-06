@@ -25,8 +25,9 @@ enum class EObjectiveState : uint8
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveActivated, AObjectiveBase*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveDeactivated, AObjectiveBase*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveInProgress, AObjectiveBase*);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnObjectiveEvent);
 
-UCLASS(Abstract)
+UCLASS(Abstract, BlueprintType)
 class COOLGANG_API AObjectiveBase : public AActor
 {
 	GENERATED_BODY()
@@ -115,6 +116,12 @@ public:
 	const FString& GetCompletedMessage() const { return CompletedMessage; }
 	UFUNCTION(BlueprintCallable, Category = "Message")
 	const FString& GetFailedMessage() const { return FailedMessage; }
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveEvent OnWeakenSystemIntegrity;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveEvent OnStopWeakeningSystemIntegrity;
 
 private:
 	void ResetProgress();
