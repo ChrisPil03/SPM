@@ -154,13 +154,25 @@ void AEnemyAI::Die()
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
 
-	FVector SpawnLocation = GetActorLocation();
-	FRotator SpawnRotation = GetActorRotation();
-	FActorSpawnParameters SpawnParams;
 
-	UE_LOG(LogTemp, Warning, TEXT("Drop"));
-	GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation, SpawnParams);
+	
 }
+
+void AEnemyAI::DropUpgrade()
+{
+	float RandomValue = FMath::FRand(); // Range: 0.0 to 1.0
+	if (RandomValue >= DropRate)
+	{
+		FVector SpawnLocation = GetActorLocation();
+		FRotator SpawnRotation = GetActorRotation();
+		FActorSpawnParameters SpawnParams;
+
+		UE_LOG(LogTemp, Warning, TEXT("Drop"));
+		GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation, SpawnParams);
+	}
+	
+}
+
 
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
