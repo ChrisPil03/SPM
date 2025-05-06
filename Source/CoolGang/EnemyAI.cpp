@@ -29,7 +29,7 @@
 // Sets default values
 AEnemyAI::AEnemyAI()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
@@ -40,7 +40,7 @@ void AEnemyAI::BeginPlay()
 	Super::BeginPlay();
 	CollisionType = GetCapsuleComponent()->GetCollisionEnabled();
 	AIController = Cast<AEnemyAIController>(Controller);
-	
+
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
@@ -53,7 +53,7 @@ void AEnemyAI::BeginPlay()
 			FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), 0.0f);
 		}
 	}
-		
+
 	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
 	for (AObjectiveBase* Objective : AllObjectives)
 	{
@@ -73,7 +73,6 @@ void AEnemyAI::BeginPlay()
 
 		if (Spec.IsValid())
 		{
-
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MaxHealth"), MaxHealth);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), AttackDamage);
@@ -90,23 +89,29 @@ void AEnemyAI::Attack()
 	{
 		return;
 	}
-	
-	UClass* DamageTypeClass = UDamageType::StaticClass();	
+
+	UClass* DamageTypeClass = UDamageType::StaticClass();
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
 	if (EnemyAttributeSet != nullptr)
 	{
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 
-		AActor *DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
+		AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
 		float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-		if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
+		if (DamagedActor->ActorHasTag("Player"))
 		{
-			//TODO: Fetch shield damage reduction.
-			Damage *= 0.5f;
-		} 
-		UE_LOG(LogTemp, Warning, TEXT("Apply damage %f"), Damage);
+			UE_LOG(LogTemp, Warning, TEXT("Hit Player"));
+			if (IsPlayerShieldActive(DamagedActor))
+			{
+				//TODO: Fetch shield damage reduction.
+				Damage *= 0.5f;
+				UE_LOG(LogTemp, Warning, TEXT("Damage reduced to: %f"), Damage);
+			}
+		}
+
 		UGameplayStatics::ApplyDamage(DamagedActor, Damage, MyOwnerInstigator, this, DamageTypeClass);
-	} else
+	}
+	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't deal damage! :("));
 	}
@@ -119,6 +124,7 @@ bool AEnemyAI::IsPlayerShieldActive(AActor* PlayerActor)
 		UAbilitySystemComponent* PlayerASC = PlayerActor->FindComponentByClass<UAbilitySystemComponent>();
 		if (PlayerASC)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Found PlayerActor"));
 			FGameplayTag ShieldTag = FGameplayTag::RequestGameplayTag(TEXT("State.ShieldActive"));
 			return PlayerASC->HasMatchingGameplayTag(ShieldTag);
 		}
@@ -144,17 +150,17 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 void AEnemyAI::Die()
 {
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-	  GetWorld(),
-	  DeathVFX,
-	  GetActorLocation(),
-	  GetActorRotation(),
-	  FVector(1.f,1.f,1.f),
-	  true,
-	  true,
-	  ENCPoolMethod::None,
-	  false
+		GetWorld(),
+		DeathVFX,
+		GetActorLocation(),
+		GetActorRotation(),
+		FVector(1.f, 1.f, 1.f),
+		true,
+		true,
+		ENCPoolMethod::None,
+		false
 	);
-	
+
 	if (NiComp)
 	{
 		NiComp->OnSystemFinished.AddDynamic(this, &AEnemyAI::OnDeathFXFinished);
@@ -164,7 +170,7 @@ void AEnemyAI::Die()
 		Controller->StopMovement();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 	}
-	
+
 	GetCapsuleComponent()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
@@ -193,14 +199,14 @@ void AEnemyAI::Tick(float DeltaTime)
 	{
 		return;
 	}
-	
+
 	if (bFadeComplete)
 	{
 		return;
 	}
-	
+
 	float Elapsed = GetWorld()->GetTimeSeconds() - DeathStartTime;
-	float Alpha   = FMath::Clamp(Elapsed / FadeDuration, 0.f, 1.f);
+	float Alpha = FMath::Clamp(Elapsed / FadeDuration, 0.f, 1.f);
 
 	FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), Alpha);
 
@@ -244,10 +250,10 @@ void AEnemyAI::OnFadeFinished()
 
 void AEnemyAI::ReleaseToPool()
 {
-		FVector Location = FVector(10000, 10000, 10000);
-		SetActorHiddenInGame(true);
-    	SetActorLocation(Location);
-    	bChangedToTargetPlayer = false;
-    	EnemySpawnManager->MarkEnemyAsDead(this);
-		SetActorTickEnabled(false);
+	FVector Location = FVector(10000, 10000, 10000);
+	SetActorHiddenInGame(true);
+	SetActorLocation(Location);
+	bChangedToTargetPlayer = false;
+	EnemySpawnManager->MarkEnemyAsDead(this);
+	SetActorTickEnabled(false);
 }

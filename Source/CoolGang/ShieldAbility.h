@@ -11,11 +11,25 @@ class COOLGANG_API UShieldAbility : public UGameplayAbility
 
 public:
 	UShieldAbility();
+	UFUNCTION(BlueprintCallable)
+	void DeactivateShield();
 
+	
 protected:
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle,
+	                                const FGameplayAbilityActorInfo* ActorInfo,
+	                                const FGameplayTagContainer* SourceTags,
+	                                const FGameplayTagContainer* TargetTags,
+	                                FGameplayTagContainer* OptionalRelevantTags) const override;
+
+
 	// Called when the ability is activated
-	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	                             const FGameplayAbilityActivationInfo ActivationInfo,
+	                             const FGameplayEventData* TriggerEventData) override;
 
 	// Called when the ability ends
-	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	                        const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility,
+	                        bool bWasCancelled) override;
 };
