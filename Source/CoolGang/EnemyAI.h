@@ -36,13 +36,13 @@ public:
 
 	float GetAttackRange() const;
 
-	UHealthComponent *GetHealthComponent() const;
+	UHealthComponent* GetHealthComponent() const;
 
 	UPROPERTY(EditAnywhere, Category = "Stats")
-	const class UEnemyAttributeSet *EnemyAttributeSet;
+	const class UEnemyAttributeSet* EnemyAttributeSet;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	UAbilitySystemComponent *AbilitySystemComponent;
+	UAbilitySystemComponent* AbilitySystemComponent;
 
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IAttackable> GetTarget() const;
@@ -93,7 +93,7 @@ private:
 	float AttackRange;
 
 	UPROPERTY(VisibleAnywhere)
-	UHealthComponent *HealthComponent;
+	UHealthComponent* HealthComponent;
 
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
