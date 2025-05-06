@@ -80,6 +80,11 @@ void AObjectiveBase::StopMalfunctioning()
 {
 	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
 	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
+
+	if (OnStopWeakeningSystemIntegrity.IsBound())
+	{
+		OnStopWeakeningSystemIntegrity.Broadcast();
+	}
 }
 
 void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage)
@@ -115,6 +120,7 @@ void AObjectiveBase::StartObjective()
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
 		DisplayMessageForSeconds(StartedMessage, 3.f);
+		StopMalfunctioning();
 		//EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
 	}
 }
@@ -131,6 +137,10 @@ void AObjectiveBase::CompleteObjective()
 	SetObjectiveState(EObjectiveState::Complete);
 	DisplayMessageForSeconds(CompletedMessage, 3.f);
 	//EnqueueVoiceLineWithMessage(ObjectiveCompletedVoiceLine, CompletedMessage);
+	if (OnObjectiveCompleted.IsBound())
+	{
+		OnObjectiveCompleted.Broadcast();
+	}
 
 	if (ObjectiveManager == nullptr)
 	{
@@ -182,9 +192,14 @@ void AObjectiveBase::SetObjectiveProgress(const float NewProgress)
 
 void AObjectiveBase::WeakenSystemIntegrity(const float Damage)
 {
-	if (SystemIntegrity)
+	if (SystemIntegrity && GetIsNotStarted() || GetIsFailed())
 	{
 		SystemIntegrity->WeakenIntegrity(Damage);
+
+		if (OnWeakenSystemIntegrity.IsBound())
+		{
+			OnWeakenSystemIntegrity.Broadcast();
+		}
 	}
 }
 

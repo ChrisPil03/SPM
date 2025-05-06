@@ -66,7 +66,7 @@ void AObjectiveDefendGenerator::ResetObjective()
 	Super::ResetObjective();
 	bHalfHealthVoiceLinePlayed = false;
 	bLowHealthVoiceLinePlayed = false;
-	//HealthComponent->ResetHealthToMax();
+	HealthComponent->ResetHealthToMax();
 	//ControlPanel->SetCanInteractWith(true);
 }
 
