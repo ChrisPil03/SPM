@@ -1,5 +1,7 @@
 #include "ObjectiveServer.h"
 
+#include "NiagaraComponent.h"
+
 AObjectiveServer::AObjectiveServer() :
 	RestoreTime(0.f),
 	RestoreProgress(FProgressTimer::ZeroCompletion),
@@ -9,6 +11,9 @@ AObjectiveServer::AObjectiveServer() :
 	HeatGeneration(3)
 {
 	PrimaryActorTick.bCanEverTick = true;
+	SmokeNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Smoke Niagara Component");
+	SmokeNiagaraComponent->SetupAttachment(RootComponent);
+	SmokeNiagaraComponent->bAutoActivate = false;
 }
 
 void AObjectiveServer::BeginPlay()
@@ -140,6 +145,21 @@ void AObjectiveServer::ResetServer()
 	ProgressTimer->ResetTimer();
 	RestoreProgress = 0;
 	ResetMaterial();
+}
+
+void AObjectiveServer::SetSmokeEffectActive(const bool bNewState) const
+{
+	if (SmokeNiagaraComponent)
+	{
+		if (bNewState)
+		{
+			SmokeNiagaraComponent->DeactivateImmediate();
+			SmokeNiagaraComponent->Activate(bNewState);
+		}else
+		{
+			SmokeNiagaraComponent->Deactivate();
+		}
+	}
 }
 
 void AObjectiveServer::SetDebugMaterial() const 

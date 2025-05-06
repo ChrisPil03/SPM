@@ -1,11 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ObjectiveBase.h"
 
+#include "DisplayTextMessageSubsystem.h"
 #include "PlayerLocationDetection.h"
 #include "SystemIntegrity.h"
+#include "AnnouncementSubsystem.h"
 #include "Kismet/GameplayStatics.h"
-
 
 AObjectiveBase::AObjectiveBase() :
 	bIsActive(false),
@@ -25,7 +24,11 @@ AObjectiveBase::AObjectiveBase() :
 	InPlayerLocationDetection(nullptr),
 	EnterRoomVoiceLine(nullptr),
 	ObjectiveActivatedVoiceLine(nullptr),
-	DisplayObjectiveMessage(nullptr)
+	ObjectiveStartedVoiceLine(nullptr),
+	ObjectiveCompletedVoiceLine(nullptr),
+	ObjectiveFailedVoiceLine(nullptr),
+	AnnouncementSubsystem(nullptr),
+	DisplayTextMessageSubsystem(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -35,6 +38,8 @@ void AObjectiveBase::BeginPlay()
 	Super::BeginPlay();
 	SetIsActive(false);
 	FindObjectiveManager();
+	FindAnnouncementSubsystem();
+	FindDisplayTextMessageSubsystem();
 	FindSystemIntegrity();
 	BindPlayerLocationDetection();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
@@ -42,12 +47,13 @@ void AObjectiveBase::BeginPlay()
 
 void AObjectiveBase::SetIsActive(const bool bNewState)
 {
-	UE_LOG(LogEngine, Warning, TEXT("State has changed to: %d"), bNewState)
+	//UE_LOG(LogEngine, Warning, TEXT("State has changed to: %d"), bNewState)
 	bIsActive = bNewState;
 	if (bNewState)
 	{
-		DisplayMessage(ActivatedMessage);
-		Play2DSoundOnce(ObjectiveActivatedVoiceLine);
+		DisplayMessageForSeconds(ActivatedMessage, 3.f);
+		//EnqueueVoiceLineWithMessage(ObjectiveActivatedVoiceLine, ActivatedMessage);
+		
 		// 	if (OnObjectiveActivated.IsBound())
 		// 	{
 		// 		UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
@@ -74,6 +80,11 @@ void AObjectiveBase::StopMalfunctioning()
 {
 	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
 	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
+
+	if (OnStopWeakeningSystemIntegrity.IsBound())
+	{
+		OnStopWeakeningSystemIntegrity.Broadcast();
+	}
 }
 
 void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage)
@@ -107,25 +118,25 @@ void AObjectiveBase::StartObjective()
 {
 	if (GetIsNotStarted())
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Objective Started"));
 		SetObjectiveState(EObjectiveState::InProgress);
-		DisplayMessage(StartedMessage);
+		DisplayMessageForSeconds(StartedMessage, 3.f);
+		StopMalfunctioning();
+		//EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
 	}
 }
 
 void AObjectiveBase::ResetObjective()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
-	//SetIsActive(false);
 	ResetProgress();
 	SetObjectiveState(EObjectiveState::NotStarted);
 }
 
 void AObjectiveBase::CompleteObjective()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Objective Completed"));
 	SetObjectiveState(EObjectiveState::Complete);
-	DisplayMessage(CompletedMessage);
+	DisplayMessageForSeconds(CompletedMessage, 3.f);
+	//EnqueueVoiceLineWithMessage(ObjectiveCompletedVoiceLine, CompletedMessage);
 
 	if (ObjectiveManager == nullptr)
 	{
@@ -139,10 +150,10 @@ void AObjectiveBase::FailObjective()
 {
 	if (!GetIsFailed())
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Objective failed"));
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
-		DisplayMessage(FailedMessage);
+		DisplayMessageForSeconds(FailedMessage, 3.f);
+		//EnqueueVoiceLineWithMessage(ObjectiveFailedVoiceLine, FailedMessage);
 		WeakenSystemIntegrity(ObjectiveFailedIntegrityChunkDamage);
 	}
 }
@@ -177,9 +188,14 @@ void AObjectiveBase::SetObjectiveProgress(const float NewProgress)
 
 void AObjectiveBase::WeakenSystemIntegrity(const float Damage)
 {
-	if (SystemIntegrity)
+	if (SystemIntegrity && GetIsNotStarted() || GetIsFailed())
 	{
 		SystemIntegrity->WeakenIntegrity(Damage);
+
+		if (OnWeakenSystemIntegrity.IsBound())
+		{
+			OnWeakenSystemIntegrity.Broadcast();
+		}
 	}
 }
 
@@ -192,6 +208,16 @@ void AObjectiveBase::ResetProgress()
 void AObjectiveBase::FindObjectiveManager()
 {
 	ObjectiveManager = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>();
+}
+
+void AObjectiveBase::FindAnnouncementSubsystem()
+{
+	AnnouncementSubsystem = GetGameInstance()->GetSubsystem<UAnnouncementSubsystem>();
+}
+
+void AObjectiveBase::FindDisplayTextMessageSubsystem()
+{
+	DisplayTextMessageSubsystem = GetWorld()->GetSubsystem<UDisplayTextMessageSubsystem>();
 }
 
 void AObjectiveBase::FindSystemIntegrity()
@@ -238,7 +264,7 @@ void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
 {
 	if (GetIsActive() && GetIsNotStarted())
 	{
-		Play2DSoundOnce(EnterRoomVoiceLine);
+		//EnqueueVoiceLineWithMessage(EnterRoomVoiceLine, "");
 	}
 }
 
@@ -247,20 +273,18 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 	
 }
 
-void AObjectiveBase::Play2DSoundOnce(USoundBase* Sound)
+void AObjectiveBase::EnqueueVoiceLineWithMessage(USoundBase* VoiceLine, const FString& Message) const
 {
-	if (Sound)
+	if (VoiceLine && AnnouncementSubsystem)
 	{
-		UGameplayStatics::PlaySound2D(this, Sound);
+		AnnouncementSubsystem->EnqueueVoiceLineWithMessage(VoiceLine, Message);
 	}
 }
 
-void AObjectiveBase::DisplayMessage(const FString& Message) const
+void AObjectiveBase::DisplayMessageForSeconds(const FString& Message, const float Seconds) const
 {
-	UE_LOG(LogTemp, Warning, TEXT("Display message"));
-	if (DisplayObjectiveMessage->IsBound())
+	if (DisplayTextMessageSubsystem)
 	{
-		DisplayObjectiveMessage->Broadcast(Message);
-		UE_LOG(LogTemp, Warning, TEXT("Display message broadcasted"));
+		DisplayTextMessageSubsystem->DisplayMessageForSeconds(Message, Seconds);
 	}
 }

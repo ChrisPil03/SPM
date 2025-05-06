@@ -43,7 +43,7 @@ void UDamageCalculation::Execute_Implementation(const FGameplayEffectCustomExecu
 
     if (!TargetASC || !SourceASC)
     {
-        //UE_LOG(LogTemp, Warning, TEXT("Invalid ASC in Damage Calculation"));
+        UE_LOG(LogTemp, Warning, TEXT("Invalid ASC in Damage Calculation"));
         return;
     }
 
@@ -62,14 +62,14 @@ void UDamageCalculation::Execute_Implementation(const FGameplayEffectCustomExecu
     // First try to get damage from captured attribute
     if (!ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().DamageDef, EvaluateParameters, WeaponDamage))
     {
-        //UE_LOG(LogTemp, Warning, TEXT("Failed to capture weapon Damage attribute"));
+        UE_LOG(LogTemp, Warning, TEXT("Failed to capture weapon Damage attribute in %s"), *SourceASC->GetOwner()->GetActorNameOrLabel());
         
         // Fallback: Try to get damage from SetByCaller in the GameplayEffect
-        WeaponDamage = Spec.GetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Data.Damage")), false, 0.0f);
+      
         
         if (WeaponDamage <= 0.0f)
         {
-            //UE_LOG(LogTemp, Warning, TEXT("No damage value available. Using default."));
+            UE_LOG(LogTemp, Warning, TEXT("No damage value available. Using default."));
             WeaponDamage = 10.0f; // Default fallback damage
         }
     }

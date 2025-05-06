@@ -129,6 +129,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Message")
 	FString OverheatedMessage;
 
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* OverheatVoiceLine;
+
 	TUniquePtr<FProgressTimer> CoolingTimer;
 	TUniquePtr<FProgressTimer> FailDelayProgressTimer;
 };

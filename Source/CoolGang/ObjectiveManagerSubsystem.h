@@ -8,7 +8,6 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FCreateObjectiveListItem, FString, ObjectiveName, AObjectiveBase*, Objective);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDisplayObjectiveMessage, FString, Message);
 
 class AObjectiveBase;
 
@@ -28,14 +27,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FCreateObjectiveListItem CreateObjectiveListItemDelegate;
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FDisplayObjectiveMessage DisplayObjectiveMessage;
 
 private:
 	void FindObjectivesInLevel();
 	void OnWorldInitialized(const UWorld::FActorsInitializedParams& Params);
 	void CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective);
-	void BindDisplayMessage(AObjectiveBase* Objective);
 	
 	UPROPERTY(VisibleAnywhere)
 	int CompletedObjectives = 0;

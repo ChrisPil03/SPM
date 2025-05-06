@@ -26,26 +26,26 @@ public:
 	// Sets default values for this actor's properties
 	AGunBase();
 
-protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
 	// maybe need to change later
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* Mesh;
-
+	UPROPERTY(EditAnywhere)
+	USceneComponent* Root;
 	///   Sound   ///
-	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* BulletSound;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly , Category = "Gun | Sound" )
+	USoundCue* BulletSound;
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* PullTriggerSound;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
+	USoundCue* PullTriggerSound;
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* ReloadSound;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
+	USoundCue* ReloadSound;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Sound" )
-	USoundBase* ImpactSound;
+	USoundCue* ImpactSound;
 
 	///   Effect   ///
 	UPROPERTY(EditAnywhere)
@@ -85,17 +85,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat ")
 	int AmmoCount {30};
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float MinRecoil {0.5f};
-
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float MaxRecoil {1.0f};
-
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float RecoilDuration {0.3f};
-
-	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
-	float RecoilExponent {2.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat ")
+	float BulletSpreadAngle {0};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Stat")
 	bool bIsAutomatic = false;
@@ -147,7 +138,7 @@ protected:
 	
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartFire();
@@ -188,6 +179,11 @@ public:
 	class UAbilitySystemComponent* GetAbilitySystemComponent() const
 	{
 		return AbilitySystemComponent;
+	}
+	UFUNCTION(BlueprintCallable)
+	TSubclassOf<UCameraShakeBase> GetCameraShakeClass() const
+	{
+		return CameraShakeClass;
 	}
 	
 	void Initialize();

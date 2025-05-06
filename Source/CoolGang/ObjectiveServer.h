@@ -7,6 +7,8 @@
 #include "InteractableObject.h"
 #include "ObjectiveServer.generated.h"
 
+class UNiagaraComponent;
+
 DECLARE_DELEGATE_OneParam(FServerHeatUpDelegate, float)
 DECLARE_DELEGATE_OneParam(FCompleteDelegate, AInteractableObject*)
 
@@ -51,7 +53,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	float GetProgress() const { return ProgressTimer->GetProgress(); }
 	
+	UFUNCTION()
+	void ResumeRestoration();
 	void PauseRestoration();
+	void ResetServer();
+	void SetSmokeEffectActive(const bool bNewState) const;
 
 	void SetHeatUpFunction(const FServerHeatUpDelegate& NewDelegate) { HeatUpDelegate = NewDelegate; }
 
@@ -60,11 +66,6 @@ public:
 	{
 		CompleteDelegate.BindUObject(Object, Func);
 	}
-	
-	UFUNCTION()
-	void ResumeRestoration();
-
-	void ResetServer();
 
 private:
 	void SetDebugMaterial() const;
@@ -96,6 +97,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Overheat")
 	float HeatGeneration;
+
+	UPROPERTY(EditAnywhere, Category = "Overheat")
+	UNiagaraComponent* SmokeNiagaraComponent;
 
 	FServerHeatUpDelegate HeatUpDelegate;
 	FCompleteDelegate CompleteDelegate;
