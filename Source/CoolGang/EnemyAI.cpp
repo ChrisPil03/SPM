@@ -123,6 +123,7 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Dead"))
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
 	  DeathVFX,
