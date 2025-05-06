@@ -137,6 +137,10 @@ void AObjectiveBase::CompleteObjective()
 	SetObjectiveState(EObjectiveState::Complete);
 	DisplayMessageForSeconds(CompletedMessage, 3.f);
 	//EnqueueVoiceLineWithMessage(ObjectiveCompletedVoiceLine, CompletedMessage);
+	if (OnObjectiveCompleted.IsBound())
+	{
+		OnObjectiveCompleted.Broadcast();
+	}
 
 	if (ObjectiveManager == nullptr)
 	{
