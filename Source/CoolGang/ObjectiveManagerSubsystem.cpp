@@ -94,14 +94,6 @@ void UObjectiveManagerSubsystem::CreateObjectiveUIListItem(FString ObjectiveName
 	}
 }
 
-void UObjectiveManagerSubsystem::BindDisplayMessage(AObjectiveBase* Objective)
-{
-	if (Objective)
-	{
-		Objective->SetDisplayObjectiveMessageDelegate(&DisplayObjectiveMessage);
-	}
-}
-
 void UObjectiveManagerSubsystem::FindObjectivesInLevel()
 {
 	TArray<AActor*> FoundObjectives;
@@ -118,7 +110,6 @@ void UObjectiveManagerSubsystem::FindObjectivesInLevel()
 		if (AObjectiveBase* Objective = Cast<AObjectiveBase>(Actor))
 		{
 			ObjectivesInLevel.Add(Objective);
-			BindDisplayMessage(Objective);
 		}
 	}
 }

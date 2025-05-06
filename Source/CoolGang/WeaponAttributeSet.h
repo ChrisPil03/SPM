@@ -47,8 +47,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData ReloadTime;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, ReloadTime)
-	
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData BulletSpreadAngle;
+	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, BulletSpreadAngle)
+
 	
 	UPROPERTY(BlueprintAssignable, Category="Gameplay")
 	FOnAmmoChanged OnAmmoChanged;

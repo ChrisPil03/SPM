@@ -135,9 +135,12 @@ void AEnemyAI::Die()
 	{
 		NiComp->OnSystemFinished.AddDynamic(this, &AEnemyAI::OnDeathFXFinished);
 	}
+	if (Controller)
+	{
+		Controller->StopMovement();
+		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
+	}
 	
-	Controller->StopMovement();
-	Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 	GetCapsuleComponent()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
