@@ -124,9 +124,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnObjectiveEvent OnStopWeakeningSystemIntegrity;
 
-	UFUNCTION(BlueprintCallable)
-	bool GetIsOn
-
 private:
 	void ResetProgress();
 	void FindObjectiveManager();
