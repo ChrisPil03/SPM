@@ -30,10 +30,11 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	
 public:
 	void Attack();
-
+	static bool IsPlayerShieldActive(AActor* PlayerActor);
+	
 	float GetAttackRange() const;
 
 	UHealthComponent *GetHealthComponent() const;

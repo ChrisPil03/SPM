@@ -98,31 +98,33 @@ void AEnemyAI::Attack()
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 
 		AActor *DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
-		if (DamagedActor->ActorHasTag("Player"))
+		float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
+		if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
 		{
-			const float PlayerDamage = EnemyAttributeSet->PlayerDamage.GetCurrentValue();
-			UE_LOG(LogTemp, Warning, TEXT("Apply player specific damage %f"), PlayerDamage);
-			UGameplayStatics::ApplyDamage(DamagedActor, PlayerDamage, MyOwnerInstigator, this, DamageTypeClass);
-		} else
-		{
-			const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-			UE_LOG(LogTemp, Warning, TEXT("Apply damage %f"), Damage);
-			UGameplayStatics::ApplyDamage(DamagedActor, Damage, MyOwnerInstigator, this, DamageTypeClass);
-		}
-
-
-		
+			//TODO: Fetch shield damage reduction.
+			Damage *= 0.5f;
+		} 
+		UE_LOG(LogTemp, Warning, TEXT("Apply damage %f"), Damage);
+		UGameplayStatics::ApplyDamage(DamagedActor, Damage, MyOwnerInstigator, this, DamageTypeClass);
 	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't deal damage! :("));
 	}
-
-	
-	
-	
-	
 }
 
+bool AEnemyAI::IsPlayerShieldActive(AActor* PlayerActor)
+{
+	if (PlayerActor)
+	{
+		UAbilitySystemComponent* PlayerASC = PlayerActor->FindComponentByClass<UAbilitySystemComponent>();
+		if (PlayerASC)
+		{
+			FGameplayTag ShieldTag = FGameplayTag::RequestGameplayTag(TEXT("State.ShieldActive"));
+			return PlayerASC->HasMatchingGameplayTag(ShieldTag);
+		}
+	}
+	return false;
+}
 
 float AEnemyAI::GetAttackRange() const
 {
