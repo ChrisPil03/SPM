@@ -175,7 +175,7 @@ bool APlayerCharacter::IsInRange(FHitResult &HitResult) const
 	EndPoint,
 	FQuat::Identity,
 	ECC_GameTraceChannel2,
-	FCollisionShape::MakeSphere(2),
+	FCollisionShape::MakeSphere(5),
 	Params
 	);
 	
