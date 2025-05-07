@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "DamageCalculation.h"
+#include "EnemyDamageCalculation.h"
 #include "WeaponAttributeSet.h"
 #include "EnemyAttributeSet.h"
 
@@ -26,14 +26,14 @@ static FDamageStatics& DamageStatics()
     return Statics;
 }
 
-UDamageCalculation::UDamageCalculation()
+UEnemyDamageCalculation::UEnemyDamageCalculation()
 {
     // Register attributes we want to capture
     RelevantAttributesToCapture.Add(DamageStatics().DamageDef);
     RelevantAttributesToCapture.Add(DamageStatics().HealthDef);
 }
 
-void UDamageCalculation::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+void UEnemyDamageCalculation::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
     FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
 {
     Super::Execute_Implementation(ExecutionParams, OutExecutionOutput);

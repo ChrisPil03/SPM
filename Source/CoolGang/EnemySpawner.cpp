@@ -30,18 +30,6 @@ AEnemyAI* AEnemySpawner::ReuseDeadEnemy(AEnemyAI* Enemy) const
 {
 	if (Enemy)
 	{
-		UAbilitySystemComponent* ASC = Enemy->AbilitySystemComponent;
-		if (ASC)
-		{
-			const UEnemyAttributeSet* AttributeSet = ASC->GetSet<UEnemyAttributeSet>();
-			if (AttributeSet)
-			{
-				float EnemyMaxHealth = AttributeSet->GetMaxHealth();
-				
-				UEnemyAttributeSet* MutableAttributeSet = const_cast<UEnemyAttributeSet*>(AttributeSet);
-				MutableAttributeSet->SetHealth(EnemyMaxHealth);
-			}
-		}
 		SetEnemyPosition(Enemy);
 		Enemy->SetAlive();
 	}
