@@ -2,14 +2,12 @@
 
 #include "PlayerCharacter.h"
 
-#include "CyberWarriorGameModeBase.h"
 #include "DashComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/GameMode.h"
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
 #include "PlayerAttributeSet.h"
@@ -23,47 +21,10 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	GunComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun Component"));
 	GunComponent->SetupAttachment(CameraComponent);
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-}
-
-float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const &DamageEvent,
-								   class AController *EventInstigator, AActor *DamageCauser)
-{
-
-	UE_LOG(LogTemp, Warning, TEXT("Damage Amount: %f"), DamageAmount);
-	
-	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	if (OnPlayerTakeDamage.IsBound())
-	{
-		OnPlayerTakeDamage.Broadcast();
-	}
-	
-	DamageToApply = FMath::Min(HealthComponent->GetCurrentHealth(), DamageToApply);
-
-	HealthComponent->DamageTaken(this, DamageAmount, UDamageType::StaticClass()->GetDefaultObject<UDamageType>(), EventInstigator, DamageCauser);
-	if (HealthComponent->GetCurrentHealth() == 0)
-	{
-		Die();
-	}
-	
-	
-	if (IsDead())
-	{
-		ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
-		if (GameMode != nullptr)
-		{
-			GameMode->PlayerKilled(this);
-		}
-		DetachFromControllerPendingDestroy();
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	return DamageToApply;
 }
 
 // Called when the game starts or when spawned
@@ -89,10 +50,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
 	
-	if (HealthComponent->GetCurrentHealth() <= 0 || GameMode->GameIsOver())
-	{
-		Die();
-	}
 }
 
 // Called to bind functionality to input
@@ -223,12 +180,6 @@ void APlayerCharacter::Die()
 bool APlayerCharacter::IsDead() const
 {
 	return bDead;
-}
-
-void APlayerCharacter::ResetCharacterHealth()
-{
-	bDead = false;
-	HealthComponent->ResetHealthToMax();
 }
 
 void APlayerCharacter::OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const

@@ -3,7 +3,6 @@
 
 #include "EnemyAI.h"
 
-#include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
@@ -31,7 +30,6 @@ AEnemyAI::AEnemyAI()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
@@ -123,10 +121,6 @@ float AEnemyAI::GetAttackRange() const
 	return AttackRange;
 }
 
-UHealthComponent* AEnemyAI::GetHealthComponent() const
-{
-	return HealthComponent;
-}
 
 TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 {
@@ -245,9 +239,7 @@ void AEnemyAI::SetAlive()
 	AIController->RunBehaviorTree(BehaviorTree);
 	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
 	GetCapsuleComponent()->SetEnableGravity(true);
-	HealthComponent->ResetHealthToMax();
-
-	//
+	//Should call this in BP
 	if (GE_ResetHealth)
 	{
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();

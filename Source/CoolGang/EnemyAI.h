@@ -103,9 +103,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	float AttackRange;
 
-	UPROPERTY(VisibleAnywhere)
-	UHealthComponent* HealthComponent;
-
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
 	
