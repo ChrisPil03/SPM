@@ -10,7 +10,6 @@
 #include "GunBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameMode.h"
-#include "CyberWarriorGameModeBase.h"
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
 
@@ -70,27 +69,10 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Pistol);
-	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	EquippedGun->SetOwner(this);
-	EquippedGun->SetActorHiddenInGame(true);
-	EquippedGun->Initialize();
-	Guns.Add(EquippedGun);
-	
-	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Shotgun);
-	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	EquippedGun->SetOwner(this);
-	EquippedGun->SetActorHiddenInGame(true);
-	EquippedGun->Initialize();
-	Guns.Add(EquippedGun);
-
-	EquippedGun = GetWorld()->SpawnActor<AGunBase>(Rifle);
-	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	EquippedGun->SetOwner(this);
-	EquippedGun->SetActorHiddenInGame(true);
-	EquippedGun->Initialize();
-	Guns.Add(EquippedGun);
+	InitPlayerStats();
+	GiveGun(Pistol);
+	GiveGun(Shotgun);
+	GiveGun(Rifle);
 
 	EquippedGun->SetActorHiddenInGame(false);
 
@@ -242,6 +224,36 @@ void APlayerCharacter::ResetCharacterHealth()
 {
 	bDead = false;
 	HealthComponent->ResetHealthToMax();
+}
+
+void APlayerCharacter::GiveGun(const TSubclassOf<AGunBase>& GunClass)
+{
+	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
+	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	EquippedGun->SetOwner(this);
+	EquippedGun->SetActorHiddenInGame(true);
+	EquippedGun->Initialize();
+	Guns.Add(EquippedGun);
+}
+
+void APlayerCharacter::InitPlayerStats()
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitPlayerStats, 1.f, Context);
+
+		if (Spec.IsValid())
+		{
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MaxHealth"), MaxHealth);
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+			
+		}
+	}	
+
 }
 
 void APlayerCharacter::ResetCharacterPosition()

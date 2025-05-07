@@ -36,7 +36,7 @@ public:
 
 	float GetAttackRange() const;
 
-	UHealthComponent *GetHealthComponent() const;
+	UHealthComponent* GetHealthComponent() const;
 
 	UPROPERTY(EditAnywhere, Category = "Drop")
 	TSubclassOf<AActor> Drop;
@@ -45,10 +45,10 @@ public:
 	float DropRate;
 
 	UPROPERTY(EditAnywhere, Category = "Stats")
-	const class UEnemyAttributeSet *EnemyAttributeSet;
+	const class UEnemyAttributeSet* EnemyAttributeSet;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	UAbilitySystemComponent *AbilitySystemComponent;
+	UAbilitySystemComponent* AbilitySystemComponent;
 
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IAttackable> GetTarget() const;
@@ -102,7 +102,7 @@ private:
 	float AttackRange;
 
 	UPROPERTY(VisibleAnywhere)
-	UHealthComponent *HealthComponent;
+	UHealthComponent* HealthComponent;
 
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
@@ -120,7 +120,12 @@ private:
 	TScriptInterface<IAttackable> CurrentTarget;
 	
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_ResetHealth;
+	
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
+
+	void InitEnemyStats();
 
 	UPROPERTY(VisibleAnywhere)
 	bool bChangedToTargetPlayer;
