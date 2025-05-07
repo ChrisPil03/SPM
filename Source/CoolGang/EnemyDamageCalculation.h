@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameplayEffectExecutionCalculation.h"
-#include "DamageCalculation.generated.h"
+#include "EnemyDamageCalculation.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class COOLGANG_API UDamageCalculation : public UGameplayEffectExecutionCalculation
+class COOLGANG_API UEnemyDamageCalculation : public UGameplayEffectExecutionCalculation
 {
 	GENERATED_BODY()
 	public:
-	UDamageCalculation();
+	UEnemyDamageCalculation();
 	protected:
 	virtual  void Execute_Implementation(
 		const FGameplayEffectCustomExecutionParameters& ExecutionParams,

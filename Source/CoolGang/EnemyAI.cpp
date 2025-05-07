@@ -64,6 +64,11 @@ void AEnemyAI::BeginPlay()
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
+	InitEnemyStats();
+}
+
+void AEnemyAI::InitEnemyStats()
+{
 	if (AbilitySystemComponent)
 	{
 		AbilitySystemComponent->InitAbilityActorInfo(this, this);
@@ -73,7 +78,6 @@ void AEnemyAI::BeginPlay()
 
 		if (Spec.IsValid())
 		{
-
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MaxHealth"), MaxHealth);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), AttackDamage);
@@ -83,6 +87,7 @@ void AEnemyAI::BeginPlay()
 		}
 	}
 }
+
 
 void AEnemyAI::Attack()
 {
@@ -124,6 +129,7 @@ void AEnemyAI::Die()
 		return;
 	}
 	bIsDead = true;
+	DropUpgrade();
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
 	  DeathVFX,
@@ -160,15 +166,14 @@ void AEnemyAI::Die()
 
 void AEnemyAI::DropUpgrade()
 {
+	
 	float RandomValue = FMath::FRand(); // Range: 0.0 to 1.0
-	if (RandomValue >= DropRate)
+	if (RandomValue <= DropRate)
 	{
 		FVector SpawnLocation = GetActorLocation();
 		FRotator SpawnRotation = GetActorRotation();
-		FActorSpawnParameters SpawnParams;
-
 		UE_LOG(LogTemp, Warning, TEXT("Drop"));
-		GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation, SpawnParams);
+		GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation);
 	}
 	
 }
@@ -225,6 +230,14 @@ void AEnemyAI::SetAlive()
 	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
 	GetCapsuleComponent()->SetEnableGravity(true);
 	HealthComponent->ResetHealthToMax();
+
+	//
+	if (GE_ResetHealth)
+	{
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(GE_ResetHealth, 1.f, Context);
+	}
+	
 	bIsDead = false;
 }
 
@@ -254,3 +267,4 @@ void AEnemyAI::ReleaseToPool()
     	EnemySpawnManager->MarkEnemyAsDead(this);
 		SetActorTickEnabled(false);
 }
+

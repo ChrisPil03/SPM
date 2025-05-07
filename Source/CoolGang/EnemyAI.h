@@ -120,7 +120,12 @@ private:
 	TScriptInterface<IAttackable> CurrentTarget;
 	
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_ResetHealth;
+	
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
+
+	void InitEnemyStats();
 
 	UPROPERTY(VisibleAnywhere)
 	bool bChangedToTargetPlayer;
