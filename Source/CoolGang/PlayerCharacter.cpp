@@ -166,10 +166,19 @@ bool APlayerCharacter::IsInRange(FHitResult &HitResult) const
 	PlayerController->GetPlayerViewPoint(Location, Rotation);
 
 	FVector EndPoint = Location + Rotation.Vector() * InteractRange;
-	DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 2);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
-	return GetWorld()->LineTraceSingleByChannel(HitResult, Location, EndPoint, ECC_GameTraceChannel2, Params);
+	
+	return GetWorld()->SweepSingleByChannel(
+	HitResult,
+	Location,
+	EndPoint,
+	FQuat::Identity,
+	ECC_GameTraceChannel2,
+	FCollisionShape::MakeSphere(2),
+	Params
+	);
+	
 }
 
 void APlayerCharacter::Die()

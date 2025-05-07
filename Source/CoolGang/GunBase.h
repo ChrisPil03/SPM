@@ -116,8 +116,6 @@ public:
 	TSubclassOf<UGameplayAbility> ReloadAbilityClass;
 	
 public:	
-	
-	
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartFire();
 	
