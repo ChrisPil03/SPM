@@ -22,9 +22,12 @@ class COOLGANG_API UPlayerAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
-	FGameplayAttributeData Damage;
+	FGameplayAttributeData Health;
+	ATTRIBUTE_ACCESSORS(UPlayerAttributeSet, Health)
 
-	ATTRIBUTE_ACCESSORS(UPlayerAttributeSet, Damage)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData MaxHealth;
+	ATTRIBUTE_ACCESSORS(UPlayerAttributeSet, MaxHealth)
 
-	
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 };
