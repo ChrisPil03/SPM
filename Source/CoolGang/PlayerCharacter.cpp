@@ -37,7 +37,11 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 	UE_LOG(LogTemp, Warning, TEXT("Damage Amount: %f"), DamageAmount);
 	
 	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
+
+	if (OnPlayerTakeDamage.IsBound())
+	{
+		OnPlayerTakeDamage.Broadcast();
+	}
 	
 	DamageToApply = FMath::Min(HealthComponent->GetCurrentHealth(), DamageToApply);
 
@@ -89,6 +93,7 @@ void APlayerCharacter::BeginPlay()
 	Guns.Add(EquippedGun);
 
 	EquippedGun->SetActorHiddenInGame(false);
+
 }
 
 // Called every frame

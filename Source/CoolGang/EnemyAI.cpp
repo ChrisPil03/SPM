@@ -119,6 +119,11 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
+	if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
 	  DeathVFX,
@@ -140,13 +145,34 @@ void AEnemyAI::Die()
 		Controller->StopMovement();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 	}
+
+	
 	
 	GetCapsuleComponent()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
+
+
+	
 }
+
+void AEnemyAI::DropUpgrade()
+{
+	float RandomValue = FMath::FRand(); // Range: 0.0 to 1.0
+	if (RandomValue >= DropRate)
+	{
+		FVector SpawnLocation = GetActorLocation();
+		FRotator SpawnRotation = GetActorRotation();
+		FActorSpawnParameters SpawnParams;
+
+		UE_LOG(LogTemp, Warning, TEXT("Drop"));
+		GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation, SpawnParams);
+	}
+	
+}
+
 
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
@@ -199,6 +225,7 @@ void AEnemyAI::SetAlive()
 	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
 	GetCapsuleComponent()->SetEnableGravity(true);
 	HealthComponent->ResetHealthToMax();
+	bIsDead = false;
 }
 
 void AEnemyAI::OnDeathFXFinished(UNiagaraComponent* PooledNiagaraComp)

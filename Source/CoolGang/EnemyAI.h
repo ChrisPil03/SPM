@@ -36,13 +36,19 @@ public:
 
 	float GetAttackRange() const;
 
-	UHealthComponent *GetHealthComponent() const;
+	UHealthComponent* GetHealthComponent() const;
+
+	UPROPERTY(EditAnywhere, Category = "Drop")
+	TSubclassOf<AActor> Drop;
+	
+	UPROPERTY(EditAnywhere, Category = "Drop")
+	float DropRate;
 
 	UPROPERTY(EditAnywhere, Category = "Stats")
-	const class UEnemyAttributeSet *EnemyAttributeSet;
+	const class UEnemyAttributeSet* EnemyAttributeSet;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	UAbilitySystemComponent *AbilitySystemComponent;
+	UAbilitySystemComponent* AbilitySystemComponent;
 
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IAttackable> GetTarget() const;
@@ -51,6 +57,8 @@ public:
 
 	UFUNCTION()
 	void AttackPlayer(AObjectiveBase*  Objective);
+
+	void DropUpgrade();
 
 private:
 	UFUNCTION()
@@ -78,6 +86,7 @@ private:
 	float FadeDuration = 1.0f;
 
 	bool bFadeComplete = true;
+	bool bIsDead = false;
 
 	bool bDeathVFXComplete = false;
 
@@ -93,7 +102,7 @@ private:
 	float AttackRange;
 
 	UPROPERTY(VisibleAnywhere)
-	UHealthComponent *HealthComponent;
+	UHealthComponent* HealthComponent;
 
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
@@ -116,3 +125,4 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	bool bChangedToTargetPlayer;
 };
+

@@ -8,8 +8,10 @@
 #include "HealthComponent.h"
 #include "PlayerCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
+
 class AGunBase;
-UCLASS()
+UCLASS(BlueprintType)
 class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 {
 	GENERATED_BODY()
@@ -55,6 +57,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AGunBase* GetEquippedGun() const{ return EquippedGun;};
 	void EquipWeapon(AGunBase* NewWeapon);
+
+	UPROPERTY(BlueprintAssignable, Category="Events");
+	FOnPlayerTakeDamage OnPlayerTakeDamage;
 	
 
 private:
@@ -100,7 +105,7 @@ private:
 	UPROPERTY()
 	class UPlayerAttributeSet* PlayerAttributeSet;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	TArray<AGunBase*> Guns;
 
 

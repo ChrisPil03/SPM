@@ -44,7 +44,7 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 	{
 		NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
 		//UE_LOG(LogTemp, Warning, TEXT("Activating random objective"))
-		GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(50, 0.1, 10);
+		GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(ObjectiveMalfunctionTimer, 0.1, 10);
 	
 	}
 }

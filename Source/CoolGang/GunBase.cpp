@@ -27,20 +27,55 @@ AGunBase::AGunBase()
 	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
 	MuzzlePosition->SetupAttachment(Mesh);
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-
 }
 
 // Called when the game starts or when spawned
 void AGunBase::BeginPlay()
 {
 	Super::BeginPlay();
-	TimeBetweenShots = 60.0f / FireRate;
+
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		UWeaponAttributeSet::GetFireRateAttribute()
+	).AddUObject(this, &AGunBase::OnFireRateChanged);
+
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		UWeaponAttributeSet::GetAmmoCountAttribute()
+	).AddUObject(this, &AGunBase::OnAmmoCountChanged);
+	
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		UWeaponAttributeSet::GetMagazineSizeAttribute()
+	).AddUObject(this, &AGunBase::OnMagazineSizeChanged);
+	
 }
 
 void AGunBase::Initialize()
 {
 	GiveAbilities();
 	InitWeaponStats();
+}
+
+void AGunBase::CalculateTimeBetweenShots(float NewFireRate)
+{
+	TimeBetweenShots = 60.0f / NewFireRate;
+}
+
+void AGunBase::OnFireRateChanged(const FOnAttributeChangeData& Data)
+{
+	float NewFireRate = Data.NewValue;
+	CalculateTimeBetweenShots(NewFireRate);
+}
+
+void AGunBase::OnAmmoCountChanged(const FOnAttributeChangeData& Data) const 
+{
+	float NewAmmoCount = Data.NewValue;
+	OnAmmoCountChangedDelegate.Broadcast(NewAmmoCount);
+}
+
+void AGunBase::OnMagazineSizeChanged(const FOnAttributeChangeData& Data) const
+{
+	UE_LOG(LogTemp, Display, TEXT("OnMagazineSizeChanged"));
+	float NewMagazineSize = Data.NewValue;
+	OnMagazineSizeChangedDelegate.Broadcast(NewMagazineSize);
 }
 
 void AGunBase::InitWeaponStats()
@@ -85,31 +120,8 @@ void AGunBase::GiveAbilities()
 
 	if (AbilitySystemComponent && FireAbilityClass)
 	{
-		FireHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, 1, 0, this));
-		ReloadHandle = AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(ReloadAbilityClass, 1, 0, this));
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, 1, 0, this));
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(ReloadAbilityClass, 1, 0, this));
 	}
 	
-}
-
-void AGunBase::StartRecoil()
-{
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetOwnerController()))
-	{
-		PlayerController->PlayerCameraManager->StartCameraShake(CameraShakeClass, 1.0f);
-	}
-}
-
-bool AGunBase::CanFire() const
-{
-	return bCanFire && AmmoCount > 0;
-}
-
-AController* AGunBase::GetOwnerController() const
-{
-	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (OwnerPawn == nullptr)
-	{
-		return nullptr;
-	}
-	return OwnerPawn->GetController();
 }
