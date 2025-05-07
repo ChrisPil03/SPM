@@ -64,6 +64,7 @@ void AEnemyAI::BeginPlay()
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
+	GiveAbilities();
 	InitEnemyStats();
 }
 
@@ -71,8 +72,6 @@ void AEnemyAI::InitEnemyStats()
 {
 	if (AbilitySystemComponent)
 	{
-		AbilitySystemComponent->InitAbilityActorInfo(this, this);
-
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
 		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitEnemyStats, 1.f, Context);
 
@@ -85,6 +84,16 @@ void AEnemyAI::InitEnemyStats()
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 			
 		}
+	}
+}
+
+void AEnemyAI::GiveAbilities()
+{
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	if (AbilitySystemComponent && AttackAbilityClass)
+	{
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AttackAbilityClass, 1, 0, this));
 	}
 }
 
@@ -104,6 +113,8 @@ void AEnemyAI::Attack()
 	}
 	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
 	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+
+	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
 
 
