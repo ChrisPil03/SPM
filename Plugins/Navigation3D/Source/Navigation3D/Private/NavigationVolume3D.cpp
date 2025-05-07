@@ -282,13 +282,13 @@ void ANavigationVolume3D::Tick(float DeltaTime)
 
 // --- Pathfinding Implementation ---
 
-bool ANavigationVolume3D::FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath) const // Marked const
+ENavigationVolumeResult ANavigationVolume3D::FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath) const // Marked const
 {
     OutPath.Empty();
 
     if (Nodes.IsEmpty()) {
         UE_LOG(LogTemp, Error, TEXT("ANavigationVolume3D::FindPath - Node array is empty. Cannot find path."));
-        return false;
+        return ENavigationVolumeResult::ENVR_UnknownError;
     }
 
     // Need non-const access to GetNode because it wasn't marked const. Use const_cast as a workaround.
@@ -299,24 +299,24 @@ bool ANavigationVolume3D::FindPath(const FVector& StartLocation, const FVector& 
     // Validate start and end nodes
     if (!StartNodePtr) {
         UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start location is outside volume bounds or invalid."));
-        return false;
+        return ENavigationVolumeResult::ENVR_StartNodeInvalid;
     }
     if (!EndNodePtr) {
         UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Destination location is outside volume bounds or invalid."));
-        return false;
+        return ENavigationVolumeResult::ENVR_EndNodeBlocked;
     }
     if (!StartNodePtr->bIsTraversable) {
         UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start node %s is blocked."), *StartNodePtr->Coordinates.ToString());
-        return false;
-    }
+        return ENavigationVolumeResult::ENVR_StartNodeBlocked;
+    } 
     if (!EndNodePtr->bIsTraversable) {
         UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Destination node %s is blocked."), *EndNodePtr->Coordinates.ToString());
-        return false;
+        return ENavigationVolumeResult::ENVR_EndNodeBlocked;
     }
     if (StartNodePtr == EndNodePtr) { // Path to self
         OutPath.Add(ConvertCoordinatesToLocation(StartNodePtr->Coordinates));
         UE_LOG(LogTemp, Log, TEXT("ANavigationVolume3D::FindPath - Start and Destination are the same node."));
-        return true;
+        return ENavigationVolumeResult::ENVR_PathToSelf;
     }
 
 
@@ -376,7 +376,7 @@ bool ANavigationVolume3D::FindPath(const FVector& StartLocation, const FVector& 
             Algo::Reverse(TempPath); // Reverse to Start -> End order
             OutPath = TempPath;
             UE_LOG(LogTemp, Log, TEXT("ANavigationVolume3D::FindPath - Path found with %d steps."), OutPath.Num());
-            return true;
+            return ENavigationVolumeResult::ENVR_Success;
         }
 
         // --- Explore Neighbors ---
@@ -404,7 +404,7 @@ bool ANavigationVolume3D::FindPath(const FVector& StartLocation, const FVector& 
 
     // Failed to find path - OpenSet emptied before goal was reached
     UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Failed to find path from node %s to %s."), *StartNodePtr->Coordinates.ToString(), *EndNodePtr->Coordinates.ToString());
-    return false;
+    return ENavigationVolumeResult::ENVR_NoPathExists;
 }
 
 
