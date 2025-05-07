@@ -26,3 +26,8 @@ int32 UScoreManagerComponent::GetScoreValue(EScoreType ScoreType) const
 	return 0;
 }
 
+const TMap<EScoreType, int32>& UScoreDefinition::GetScoreMap()
+{
+	return CachedMap;
+}
+
