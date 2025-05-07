@@ -38,6 +38,12 @@ public:
 
 	UHealthComponent* GetHealthComponent() const;
 
+	UPROPERTY(EditAnywhere, Category = "Drop")
+	TSubclassOf<AActor> Drop;
+	
+	UPROPERTY(EditAnywhere, Category = "Drop")
+	float DropRate;
+
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	const class UEnemyAttributeSet* EnemyAttributeSet;
 
@@ -51,6 +57,8 @@ public:
 
 	UFUNCTION()
 	void AttackPlayer(AObjectiveBase*  Objective);
+
+	void DropUpgrade();
 
 private:
 	UFUNCTION()
@@ -78,6 +86,7 @@ private:
 	float FadeDuration = 1.0f;
 
 	bool bFadeComplete = true;
+	bool bIsDead = false;
 
 	bool bDeathVFXComplete = false;
 
@@ -116,3 +125,4 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	bool bChangedToTargetPlayer;
 };
+

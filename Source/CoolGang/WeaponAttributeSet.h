@@ -17,7 +17,7 @@
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoChanged, float, Ammo);
+
 
 UCLASS()
 class COOLGANG_API UWeaponAttributeSet : public UAttributeSet
@@ -53,7 +53,9 @@ public:
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, BulletSpreadAngle)
 
 	
-	UPROPERTY(BlueprintAssignable, Category="Gameplay")
-	FOnAmmoChanged OnAmmoChanged;
+	
+
+	
+	
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 };

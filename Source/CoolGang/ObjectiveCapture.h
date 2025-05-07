@@ -40,11 +40,13 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void DestroyCaptureZone();
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsPlayerInZone() const { return PlayerInZone != nullptr; }
 	
 private:
 	void ShowInteractableOutline(const bool bNewState);
 	void SetCanInteractWith(const bool bNewState);
-	bool GetIsPlayerInZone() const { return PlayerInZone != nullptr; }
 	
 	UFUNCTION()
 	void OnSphereBeginOverlap(
