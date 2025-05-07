@@ -73,7 +73,6 @@ void AGunBase::OnAmmoCountChanged(const FOnAttributeChangeData& Data) const
 
 void AGunBase::OnMagazineSizeChanged(const FOnAttributeChangeData& Data) const
 {
-	UE_LOG(LogTemp, Display, TEXT("OnMagazineSizeChanged"));
 	float NewMagazineSize = Data.NewValue;
 	OnMagazineSizeChangedDelegate.Broadcast(NewMagazineSize);
 }
