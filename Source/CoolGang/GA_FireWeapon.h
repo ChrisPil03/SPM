@@ -39,6 +39,7 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 
 	UFUNCTION(BlueprintCallable)
 	void Fire();
+	
 	UFUNCTION(BlueprintCallable)
 	void SingleBulletFire();
 	UFUNCTION(BlueprintCallable)

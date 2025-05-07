@@ -60,8 +60,7 @@ public:
 
 	void DropUpgrade();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TScriptInterface<IAttackable> CurrentTarget;
+	AActor* GetCurrentTarget() const;
 
 private:
 	UFUNCTION()
@@ -119,7 +118,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxHealth;
 
-
+	UPROPERTY(VisibleAnywhere)
+	TScriptInterface<IAttackable> CurrentTarget;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> AttackAbilityClass;

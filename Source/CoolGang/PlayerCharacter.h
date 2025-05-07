@@ -9,8 +9,10 @@
 #include "PlayerCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
 
 class AGunBase;
+struct FOnAttributeChangeData;
 UCLASS(BlueprintType)
 class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 {
@@ -119,8 +121,9 @@ private:
 	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
 	void ResetCharacterHealth();
 
+	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const;
 
-	
-
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;
 
 };

@@ -112,7 +112,7 @@ void AEnemyAI::Attack()
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 	}
 	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+	//UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
 
 	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
@@ -187,6 +187,11 @@ void AEnemyAI::DropUpgrade()
 		GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation);
 	}
 	
+}
+
+AActor* AEnemyAI::GetCurrentTarget() const
+{
+	return  Cast<AActor>(CurrentTarget.GetObject());
 }
 
 

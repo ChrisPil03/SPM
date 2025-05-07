@@ -12,6 +12,7 @@
 #include "GameFramework/GameMode.h"
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
+#include "PlayerAttributeSet.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -75,6 +76,10 @@ void APlayerCharacter::BeginPlay()
 	GiveGun(Rifle);
 
 	EquippedGun->SetActorHiddenInGame(false);
+
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		UPlayerAttributeSet::GetHealthAttribute()
+	).AddUObject(this, &APlayerCharacter::OnCurrentHealthChanged);
 
 }
 
@@ -224,6 +229,12 @@ void APlayerCharacter::ResetCharacterHealth()
 {
 	bDead = false;
 	HealthComponent->ResetHealthToMax();
+}
+
+void APlayerCharacter::OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const
+{
+	float NewCurrentHealth = Data.NewValue;
+	OnCurrentHealthChangedDelegate.Broadcast(NewCurrentHealth);
 }
 
 void APlayerCharacter::GiveGun(const TSubclassOf<AGunBase>& GunClass)
