@@ -16,7 +16,7 @@ enum class EScoreType : uint8
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRequestAddScore, EScoreType, bool);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRequestAddScore, EScoreType);
 inline FOnRequestAddScore OnRequestAddScore;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -40,11 +40,11 @@ public:
 	FOnScoreChanged OnScoreChanged;
 
 protected:
-	void BeginPlay() override;
+	virtual void BeginPlay() override;
 	
 private:
 	int32 GetScoreValue(const EScoreType ScoreType) const;
-	void HandleAddScore(const EScoreType ScoreType, const bool bGiveBonus);
+	void HandleAddScore(const EScoreType ScoreType);
 	
 	UPROPERTY(VisibleAnywhere, Category = "Score")
 	int32 TotalScore;

@@ -22,6 +22,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void StartObjective() override;
+	virtual void CompleteObjective() override;
 
 public:
 	virtual void Tick(float DeltaSeconds) override;
