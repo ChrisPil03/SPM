@@ -41,7 +41,7 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if (!bGameHasEnded)
 	{
-		ElapsedTime += DeltaSeconds;
+		HandleElapsedTime(DeltaSeconds);
 		NextObjectiveTimer -= DeltaSeconds;
 		if (NextObjectiveTimer <= 0)
 		{
@@ -71,4 +71,16 @@ float ADiveGameMode::ComputeTimer(int cycleIndex, float T0, float Tmin, float k)
 {
 	float t = T0 - k * std::logf(cycleIndex + 1);
 	return std::max(Tmin, t);
+}
+
+void ADiveGameMode::HandleElapsedTime(const float DeltaTime)
+{
+	int32 PreviousMinute = FMath::FloorToInt32(ElapsedTime / 60.f);
+	ElapsedTime += DeltaTime;
+	int32 CurrentMinute = FMath::FloorToInt32(ElapsedTime / 60.f);
+
+	if (CurrentMinute > PreviousMinute && OnMinutePassed.IsBound())
+	{
+		OnMinutePassed.Broadcast();
+	}
 }

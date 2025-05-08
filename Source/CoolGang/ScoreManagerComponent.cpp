@@ -1,9 +1,13 @@
 #include "ScoreManagerComponent.h"
 
+#include "DiveGameMode.h"
+#include "Kismet/GameplayStatics.h"
+
 UScoreManagerComponent::UScoreManagerComponent() :
 	TotalScore(0),
 	BaseScoreMultiplier(1.f),
 	CurrentScoreMultiplier(1.f),
+	MinuteMultiplierIncrease(0.1f),
 	SpiderKillScore(10),
 	WaspKillScore(10),
 	ObjectiveDownloadScore(10),
@@ -14,10 +18,18 @@ UScoreManagerComponent::UScoreManagerComponent() :
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+void UScoreManagerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	BindOnMinutePassed();
+	OnRequestAddScore.AddUObject(this, &UScoreManagerComponent::HandleAddScore);
+}
+
 void UScoreManagerComponent::AddScore(const EScoreType ScoreType, const int32 Score)
 {
-	TotalScore += Score;
-	ScoreByTypeMap.FindOrAdd(ScoreType) += Score;
+	int32 ScoreToAdd = Score * CurrentScoreMultiplier;
+	TotalScore += ScoreToAdd;
+	ScoreByTypeMap.FindOrAdd(ScoreType) += ScoreToAdd;
 
 	if (OnScoreChanged.IsBound())
 	{
@@ -39,12 +51,6 @@ int32 UScoreManagerComponent::GetScoreByType(const EScoreType ScoreType)
 	return 0;
 }
 
-void UScoreManagerComponent::BeginPlay()
-{
-	Super::BeginPlay();
-	OnRequestAddScore.AddUObject(this, &UScoreManagerComponent::HandleAddScore);
-}
-
 int32 UScoreManagerComponent::GetScoreValue(const EScoreType ScoreType) const
 {
 	switch (ScoreType) {
@@ -61,4 +67,18 @@ int32 UScoreManagerComponent::GetScoreValue(const EScoreType ScoreType) const
 void UScoreManagerComponent::HandleAddScore(const EScoreType ScoreType)
 {
 	AddScore(ScoreType, GetScoreValue(ScoreType));
+}
+
+void UScoreManagerComponent::BindOnMinutePassed()
+{
+	if (ADiveGameMode* GameMode = Cast<ADiveGameMode>(UGameplayStatics::GetGameMode(this)))
+	{
+		GameMode->AddOnMinutePassedFunction(this, &UScoreManagerComponent::IncreaseMultiplierPerMinute);
+	}
+}
+
+void UScoreManagerComponent::IncreaseMultiplierPerMinute()
+{
+	BaseScoreMultiplier += MinuteMultiplierIncrease;
+	CurrentScoreMultiplier += MinuteMultiplierIncrease;
 }

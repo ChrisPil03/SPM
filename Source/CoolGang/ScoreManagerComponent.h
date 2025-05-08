@@ -35,6 +35,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Score")
 	int32 GetScoreByType(const EScoreType ScoreType);
+
+	UFUNCTION(BlueprintPure, Category = "Score")
+	float GetScoreMultiplier() const { return BaseScoreMultiplier; }
 	
 	UPROPERTY(BlueprintAssignable, Category = "Score")
 	FOnScoreChanged OnScoreChanged;
@@ -45,6 +48,10 @@ protected:
 private:
 	int32 GetScoreValue(const EScoreType ScoreType) const;
 	void HandleAddScore(const EScoreType ScoreType);
+	void BindOnMinutePassed();
+	
+	UFUNCTION()
+	void IncreaseMultiplierPerMinute();
 	
 	UPROPERTY(VisibleAnywhere, Category = "Score")
 	int32 TotalScore;
@@ -54,6 +61,9 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Score")
 	float CurrentScoreMultiplier;
+
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"), Category = "Score")
+	float MinuteMultiplierIncrease;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ScoreAmounts")
 	int32 SpiderKillScore;
