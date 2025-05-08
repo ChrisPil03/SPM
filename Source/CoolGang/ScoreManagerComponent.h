@@ -4,8 +4,6 @@
 #include "Components/ActorComponent.h"
 #include "ScoreManagerComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
-
 UENUM(BlueprintType)
 enum class EScoreType : uint8
 {
@@ -17,6 +15,10 @@ enum class EScoreType : uint8
 	ObjectiveGeneratorCompleted UMETA(DisplayName = "Objective Generator Completed")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRequestAddScore, EScoreType, bool);
+inline FOnRequestAddScore OnRequestAddScore;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class COOLGANG_API UScoreManagerComponent : public UActorComponent
 {
@@ -26,7 +28,7 @@ public:
 	UScoreManagerComponent();
 	
 	UFUNCTION(BlueprintCallable, Category = "Score")
-	void AddScore(const EScoreType ScoreType);
+	void AddScore(const EScoreType ScoreType, const int32 Score);
 
 	UFUNCTION(BlueprintCallable, Category = "Score")
 	int32 GetTotalScore() const;
@@ -36,9 +38,13 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Score")
 	FOnScoreChanged OnScoreChanged;
+
+protected:
+	void BeginPlay() override;
 	
 private:
 	int32 GetScoreValue(const EScoreType ScoreType) const;
+	void HandleAddScore(const EScoreType ScoreType, const bool bGiveBonus);
 	
 	UPROPERTY(VisibleAnywhere, Category = "Score")
 	int32 TotalScore;

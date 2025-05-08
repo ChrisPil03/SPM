@@ -11,6 +11,7 @@
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
 #include "PlayerAttributeSet.h"
+#include "ScoreManagerComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -23,7 +24,8 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = true;
 	GunComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun Component"));
 	GunComponent->SetupAttachment(CameraComponent);
-
+	
+	ScoreManagerComponent = CreateDefaultSubobject<UScoreManagerComponent>(TEXT("Score Manager Component"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
@@ -184,6 +186,11 @@ bool APlayerCharacter::IsInRange(FHitResult &HitResult) const
 void APlayerCharacter::Die()
 {
 	bDead = true;
+	ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
+	if (GameMode != nullptr)
+	{
+		GameMode->PlayerKilled(this);
+	}
 }
 
 bool APlayerCharacter::IsDead() const

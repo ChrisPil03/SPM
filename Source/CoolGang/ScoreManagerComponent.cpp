@@ -14,9 +14,8 @@ UScoreManagerComponent::UScoreManagerComponent() :
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UScoreManagerComponent::AddScore(const EScoreType ScoreType)
+void UScoreManagerComponent::AddScore(const EScoreType ScoreType, const int32 Score)
 {
-	const int32 Score = GetScoreValue(ScoreType);
 	TotalScore += Score;
 	ScoreByTypeMap.FindOrAdd(ScoreType) += Score;
 }
@@ -35,6 +34,12 @@ int32 UScoreManagerComponent::GetScoreByType(const EScoreType ScoreType)
 	return 0;
 }
 
+void UScoreManagerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	OnRequestAddScore.AddUObject(this, &UScoreManagerComponent::HandleAddScore);
+}
+
 int32 UScoreManagerComponent::GetScoreValue(const EScoreType ScoreType) const
 {
 	switch (ScoreType) {
@@ -46,4 +51,17 @@ int32 UScoreManagerComponent::GetScoreValue(const EScoreType ScoreType) const
 	case EScoreType::ObjectiveGeneratorCompleted: return ObjectiveGeneratorScore;
 	default: return 0;
 	}
+}
+
+void UScoreManagerComponent::HandleAddScore(const EScoreType ScoreType, const bool bGiveBonus)
+{
+	int32 Score = GetScoreByType(ScoreType);
+	if (!bGiveBonus)
+	{
+		AddScore(ScoreType, Score);
+	}else
+	{
+		
+	}
+	TotalScore += Score;
 }
