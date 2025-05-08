@@ -60,6 +60,8 @@ public:
 
 	void DropUpgrade();
 
+	AActor* GetCurrentTarget() const;
+
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
@@ -101,9 +103,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	float AttackRange;
 
-	UPROPERTY(VisibleAnywhere)
-	UHealthComponent* HealthComponent;
-
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
 	
@@ -118,6 +117,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TScriptInterface<IAttackable> CurrentTarget;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayAbility> AttackAbilityClass;
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> GE_ApplyDamageToPlayer;
 	
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_ResetHealth;
@@ -126,6 +131,8 @@ private:
 	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
 
 	void InitEnemyStats();
+
+	void GiveAbilities();
 
 	UPROPERTY(VisibleAnywhere)
 	bool bChangedToTargetPlayer;

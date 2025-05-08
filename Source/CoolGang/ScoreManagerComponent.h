@@ -4,8 +4,6 @@
 #include "Components/ActorComponent.h"
 #include "ScoreManagerComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
-
 UENUM(BlueprintType)
 enum class EScoreType : uint8
 {
@@ -15,8 +13,11 @@ enum class EScoreType : uint8
 	ObjectiveButtonsCompleted UMETA(DisplayName = "Objective Buttons Completed"),
 	ObjectiveServersCompleted UMETA(DisplayName = "Objective Servers Completed"),
 	ObjectiveGeneratorCompleted UMETA(DisplayName = "Objective Generator Completed")
-	
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRequestAddScore, EScoreType, bool);
+inline FOnRequestAddScore OnRequestAddScore;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class COOLGANG_API UScoreManagerComponent : public UActorComponent
@@ -25,58 +26,52 @@ class COOLGANG_API UScoreManagerComponent : public UActorComponent
 
 public:	
 	UScoreManagerComponent();
-
-protected:
-	virtual void BeginPlay() override;
-
-public:	
+	
 	UFUNCTION(BlueprintCallable, Category = "Score")
-	void AddScore(EScoreType ScoreType);
+	void AddScore(const EScoreType ScoreType, const int32 Score);
 
 	UFUNCTION(BlueprintCallable, Category = "Score")
 	int32 GetTotalScore() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Score")
-	int32 GetScoreValue(EScoreType ScoreType) const;
+	int32 GetScoreByType(const EScoreType ScoreType);
 	
-	UPROPERTY(BlueprintAssignable, Category = "ScoreEvents")
+	UPROPERTY(BlueprintAssignable, Category = "Score")
 	FOnScoreChanged OnScoreChanged;
+
+protected:
+	void BeginPlay() override;
 	
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Score")
-	int32 TotalScore = 0;
-
-	UPROPERTY(VisibleAnywhere, Category = "Score")
-	float BaseScoreMultiplier = 1.f;
+	int32 GetScoreValue(const EScoreType ScoreType) const;
+	void HandleAddScore(const EScoreType ScoreType, const bool bGiveBonus);
 	
 	UPROPERTY(VisibleAnywhere, Category = "Score")
-	float CurrentScoreMultiplier = 1.f;
-};
+	int32 TotalScore;
 
-USTRUCT(BlueprintType)
-struct FScoreEntry
-{
-	GENERATED_BODY()
+	UPROPERTY(VisibleAnywhere, Category = "Score")
+	float BaseScoreMultiplier;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Score")
+	float CurrentScoreMultiplier;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	EScoreType ScoreType;
+	UPROPERTY(EditDefaultsOnly, Category = "ScoreAmounts")
+	int32 SpiderKillScore;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 ScoreValue;
-};
+	UPROPERTY(EditDefaultsOnly, Category = "ScoreAmounts")
+	int32 WaspKillScore;
 
-UCLASS(BlueprintType)
-class UScoreDefinition : public UDataAsset
-{
-	GENERATED_BODY()
+	UPROPERTY(EditDefaultsOnly, Category = "ScoreAmounts")
+	int32 ObjectiveDownloadScore;
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FScoreEntry> ScoreEntries;
+	UPROPERTY(EditDefaultsOnly, Category = "ScoreAmounts")
+	int32 ObjectiveButtonsScore;
 
-	const TMap<EScoreType, int32>& GetScoreMap();
+	UPROPERTY(EditDefaultsOnly, Category = "ScoreAmounts")
+	int32 ObjectiveServersScore;
 
-private:
-	TMap<EScoreType, int32> CachedMap;
-	bool bBuilt = false;
+	UPROPERTY(EditDefaultsOnly, Category = "ScoreAmounts")
+	int32 ObjectiveGeneratorScore;
+
+	TMap<EScoreType, int32> ScoreByTypeMap;
 };

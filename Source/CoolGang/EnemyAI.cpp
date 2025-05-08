@@ -3,7 +3,6 @@
 
 #include "EnemyAI.h"
 
-#include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
@@ -31,7 +30,6 @@ AEnemyAI::AEnemyAI()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
@@ -64,6 +62,7 @@ void AEnemyAI::BeginPlay()
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
+	GiveAbilities();
 	InitEnemyStats();
 }
 
@@ -71,8 +70,6 @@ void AEnemyAI::InitEnemyStats()
 {
 	if (AbilitySystemComponent)
 	{
-		AbilitySystemComponent->InitAbilityActorInfo(this, this);
-
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
 		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitEnemyStats, 1.f, Context);
 
@@ -85,6 +82,16 @@ void AEnemyAI::InitEnemyStats()
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 			
 		}
+	}
+}
+
+void AEnemyAI::GiveAbilities()
+{
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	if (AbilitySystemComponent && AttackAbilityClass)
+	{
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AttackAbilityClass, 1, 0, this));
 	}
 }
 
@@ -103,7 +110,13 @@ void AEnemyAI::Attack()
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 	}
 	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-	UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+	{
+		UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+
+	}
+	
+	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
 
 
@@ -112,10 +125,6 @@ float AEnemyAI::GetAttackRange() const
 	return AttackRange;
 }
 
-UHealthComponent* AEnemyAI::GetHealthComponent() const
-{
-	return HealthComponent;
-}
 
 TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 {
@@ -178,6 +187,11 @@ void AEnemyAI::DropUpgrade()
 	
 }
 
+AActor* AEnemyAI::GetCurrentTarget() const
+{
+	return  Cast<AActor>(CurrentTarget.GetObject());
+}
+
 
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
@@ -229,9 +243,7 @@ void AEnemyAI::SetAlive()
 	AIController->RunBehaviorTree(BehaviorTree);
 	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
 	GetCapsuleComponent()->SetEnableGravity(true);
-	HealthComponent->ResetHealthToMax();
-
-	//
+	//Should call this in BP
 	if (GE_ResetHealth)
 	{
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
