@@ -23,6 +23,9 @@ public:
 
 	void EndGame();
 
+	UFUNCTION(BlueprintPure, Category = "Timer")
+	void GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSeconds) const;
+
 protected:
 	
 	 virtual void BeginPlay() override;
@@ -51,4 +54,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
 	int32 ObjectiveCount = 0;
+
+	UPROPERTY(VisibleAnywhere, Category = "Timer")
+	float ElapsedTime = 0.f;
 };

@@ -39,13 +39,17 @@ ADiveGameMode::ADiveGameMode()
 void ADiveGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	NextObjectiveTimer -= DeltaSeconds;
-	if (NextObjectiveTimer <= 0)
+	if (!bGameHasEnded)
 	{
-		NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
-		//UE_LOG(LogTemp, Warning, TEXT("Activating random objective"))
-		GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(ObjectiveMalfunctionTimer, 0.1, 10);
+		ElapsedTime += DeltaSeconds;
+		NextObjectiveTimer -= DeltaSeconds;
+		if (NextObjectiveTimer <= 0)
+		{
+			NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
+			//UE_LOG(LogTemp, Warning, TEXT("Activating random objective"))
+			GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(ObjectiveMalfunctionTimer, 0.1, 10);
 	
+		}
 	}
 }
 
@@ -56,6 +60,11 @@ void ADiveGameMode::EndGame()
 	Controller->GameHasEnded(Controller->GetPawn(), false);
 }
 
+void ADiveGameMode::GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSeconds) const
+{
+	OutMinutes = static_cast<int32>(ElapsedTime) / 60;
+	OutSeconds = static_cast<int32>(ElapsedTime) % 60;
+}
 
 
 float ADiveGameMode::ComputeTimer(int cycleIndex, float T0, float Tmin, float k)
