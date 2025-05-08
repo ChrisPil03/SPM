@@ -89,6 +89,25 @@ protected: // Changed visibility for components to protected for easier subclass
 
 public:
     /**
+    * Finds a random, traversable grid node center within a specified world radius of an origin point.
+    *
+    * @param Origin The world location to search around.
+    * @param WorldRadius The radius (in world units) of the search sphere.
+    * @param OutValidLocation If a valid location is found, this is set to the world center of the chosen grid node.
+    * @param MaxCandidatesToCollect Limits the number of candidate nodes stored before making a random selection.
+    *                             If 0 or negative, all found candidates up to a reasonable internal limit are considered.
+    * @return True if a valid, traversable location was found, false otherwise.
+    */
+    UFUNCTION(BlueprintCallable, Category = "NavigationVolume3D", meta = (DisplayName = "Find Random Valid Location In Radius"))
+    bool FindRandomValidLocationInRadius(
+        const FVector& Origin,
+        float WorldRadius,
+        FVector& OutValidLocation,
+        const AActor* ActorToIgnoreForLOS = nullptr, // Actor to ignore for Line of Sight checks
+        int32 MaxCandidatesToCollect = 30
+    ) const;
+    
+    /**
     * Called when an instance of this class is placed (in editor) or spawned.
     * Rebuilds the visual representation of the grid.
     * @param Transform The transform the actor was constructed at.
@@ -107,7 +126,7 @@ public:
     * @return ENavigationVolumeResult Enum which describes the result of the operation.
     */
     UFUNCTION(BlueprintCallable, Category = "NavigationVolume3D", meta = (DisplayName = "Find Path"))
-    ENavigationVolumeResult FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath) const; // Mark const
+    ENavigationVolumeResult FindPath(const AActor* Actor, const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath);
 
     /**
     * Converts a world space location to grid coordinates. Clamped to volume bounds.
@@ -161,8 +180,10 @@ private:
     * Returns nullptr if coordinates are invalid or index calculation fails.
     * NOTE: This is non-const because it's used internally by BeginPlay to initialize nodes.
     */
-    NavNode* GetNode(FIntVector Coordinates); // *** NOT CONST ***
+    const NavNode* GetNode(FIntVector Coordinates) const;  // *** NOT CONST ***
 
+    NavNode* GetNode(FIntVector Coordinates);
+    
     /** Helper function to create the geometry for a single line segment for the grid visualization. */
     void CreateLine(const FVector& Start, const FVector& End, const FVector& Normal, TArray<FVector>& Vertices, TArray<int32>& Triangles);
 

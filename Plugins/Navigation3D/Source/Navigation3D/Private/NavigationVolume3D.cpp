@@ -12,6 +12,8 @@
 #include <set>
 #include <unordered_map>
 #include <limits> // For FLT_MAX
+#include "DrawDebugHelpers.h"
+
 
 // Sets default values
 ANavigationVolume3D::ANavigationVolume3D()
@@ -38,6 +40,185 @@ ANavigationVolume3D::ANavigationVolume3D()
     // ObstacleActorClassFilter defaults to nullptr (no class filter)
 
     // GridMaterial is assigned via UPROPERTY in editor, no need for constructor finder
+}
+
+bool ANavigationVolume3D::FindRandomValidLocationInRadius(
+    const FVector& Origin,
+    float WorldRadius,
+    FVector& OutValidLocation,
+    const AActor* ActorToIgnoreForLOS, // New parameter
+    int32 MaxCandidatesToCollect /*= 30*/
+) const
+{
+    // ... (initial checks: Nodes.IsEmpty(), WorldRadius, DivisionSize, radius ~0 logic remains similar) ...
+    // For brevity, I'll skip the identical initial checks here.
+    // Make sure the debug drawing for the radius ~0 case also considers LOS if you want consistency.
+    // For now, I'll focus on the main loop.
+
+    if (Nodes.IsEmpty() || WorldRadius < 0.0f || DivisionSize < KINDA_SMALL_NUMBER)
+    {
+        // Handle error or simple cases
+        if (WorldRadius < KINDA_SMALL_NUMBER && !Nodes.IsEmpty() && DivisionSize > KINDA_SMALL_NUMBER)
+        {
+            const FIntVector OriginCoords = ConvertLocationToCoordinates(Origin);
+            const NavNode* OriginNode = GetNode(OriginCoords);
+            if (OriginNode && OriginNode->bIsTraversable)
+            {
+                OutValidLocation = ConvertCoordinatesToLocation(OriginNode->Coordinates);
+
+                // Perform LOS check even for radius 0 case
+                FHitResult HitResult;
+                FCollisionQueryParams CollisionParams;
+                if (ActorToIgnoreForLOS) { CollisionParams.AddIgnoredActor(ActorToIgnoreForLOS); }
+                // CollisionParams.bTraceComplex = true; // Optional: for more precise traces
+
+                UWorld* World = GetWorld();
+                bool bHasLineOfSight = true;
+                if (World) {
+                    bHasLineOfSight = !World->LineTraceSingleByObjectType(
+                        HitResult,
+                        Origin, // LOS Start
+                        OutValidLocation, // LOS End (center of the node)
+                        FCollisionObjectQueryParams(ObstacleObjectTypes), // Check against same obstacles
+                        CollisionParams
+                    );
+                }
+                
+                // if (World)
+                // {
+                //     DrawDebugLine(World, Origin, OutValidLocation, bHasLineOfSight ? FColor::Green : FColor::Red, false, 5.1f, 0, 2.0f);
+                //     if (bHasLineOfSight) {
+                //         DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
+                //          UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius (Radius~0): Selected origin node %s. LOS Clear."), *OutValidLocation.ToString());
+                //     } else {
+                //          UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius (Radius~0): Origin node %s traversable, but NO LOS."), *OutValidLocation.ToString());
+                //     }
+                // }
+                if (bHasLineOfSight) return true;
+            }
+        }
+        return false;
+    }
+
+
+    TArray<const NavNode*> ValidCandidateNodes;
+    ValidCandidateNodes.Reserve(MaxCandidatesToCollect > 0 ? MaxCandidatesToCollect : 64);
+
+    const FIntVector OriginGridCoords = ConvertLocationToCoordinates(Origin);
+    const int32 SearchRadiusInCells = FMath::CeilToInt(WorldRadius / DivisionSize);
+    const float WorldRadiusSquared = FMath::Square(WorldRadius);
+
+    UWorld* World = GetWorld(); // Get world once
+    
+    if (World)
+    {
+        // Optional: Draw the main search sphere origin
+        // DrawDebugSphere(World, Origin, WorldRadius, 24, FColor::Yellow, false, 5.0f, 0, 2.0f);
+    }
+
+    FCollisionQueryParams LOS_CollisionParams;
+    if (ActorToIgnoreForLOS)
+    {
+        LOS_CollisionParams.AddIgnoredActor(ActorToIgnoreForLOS);
+    }
+    // LOS_CollisionParams.bTraceComplex = true; // Optional: for more precise traces if needed
+
+    // Define object types for LOS trace (should be same as your obstacle types)
+    FCollisionObjectQueryParams LOS_ObjectQueryParams(ObstacleObjectTypes);
+
+
+    for (int32 dz = -SearchRadiusInCells; dz <= SearchRadiusInCells; ++dz)
+    {
+        for (int32 dy = -SearchRadiusInCells; dy <= SearchRadiusInCells; ++dy)
+        {
+            for (int32 dx = -SearchRadiusInCells; dx <= SearchRadiusInCells; ++dx)
+            {
+                const FIntVector CurrentGridCoords = OriginGridCoords + FIntVector(dx, dy, dz);
+
+                if (!AreCoordinatesValid(CurrentGridCoords))
+                {
+                    continue;
+                }
+
+                const NavNode* CandidateNode = GetNode(CurrentGridCoords);
+
+                if (CandidateNode && CandidateNode->bIsTraversable)
+                {
+                    const FVector NodeWorldCenter = ConvertCoordinatesToLocation(CandidateNode->Coordinates);
+                    if (FVector::DistSquared(Origin, NodeWorldCenter) <= WorldRadiusSquared)
+                    {
+                        // Node is traversable and within radius, NOW CHECK LINE OF SIGHT
+                        bool bHasLineOfSight = true;
+                        if (World) // Ensure world is valid for line trace
+                        {
+                            FHitResult HitResult;
+                            // Perform the line trace from the original search Origin to the candidate node's center
+                            bHasLineOfSight = !World->LineTraceSingleByObjectType(
+                                HitResult,
+                                Origin,             // Start of LOS check
+                                NodeWorldCenter,    // End of LOS check
+                                LOS_ObjectQueryParams,
+                                LOS_CollisionParams
+                            );
+                            
+                            // Draw the line trace attempt
+                            // DrawDebugLine(
+                            //     World,
+                            //     Origin,
+                            //     NodeWorldCenter,
+                            //     bHasLineOfSight ? FColor::Blue : FColor::Orange, // Blue if clear, Orange if blocked by LOS
+                            //     false, // Not persistent
+                            //     5.0f,  // Lifetime
+                            //     0,     // Depth priority
+                            //     1.5f   // Thickness
+                            // );
+                        }
+
+                        if (bHasLineOfSight)
+                        {
+                            ValidCandidateNodes.Add(CandidateNode);
+
+                            if (MaxCandidatesToCollect > 0 && ValidCandidateNodes.Num() >= MaxCandidatesToCollect)
+                            {
+                                const int32 RandomIndex = FMath::RandRange(0, ValidCandidateNodes.Num() - 1);
+                                OutValidLocation = ConvertCoordinatesToLocation(ValidCandidateNodes[RandomIndex]->Coordinates);
+
+                                // if (World)
+                                // {
+                                //     DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
+                                //      UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Selected node (early due to MaxCandidates): %s. LOS Clear."), *OutValidLocation.ToString());
+                                // }
+                                return true;
+                            }
+                        }
+                        // else: Node was traversable & in radius, but LOS was blocked.
+                        // UE_LOG for this is optional, might be spammy.
+                        // #if ENABLE_DRAW_DEBUG
+                        // else if (World) {
+                        //     UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Node %s traversable and in radius, but NO LOS from %s."), *NodeWorldCenter.ToString(), *Origin.ToString());
+                        // }
+                        // #endif
+                    }
+                }
+            } // End dx loop
+        } // End dy loop
+    } // End dz loop
+
+    if (ValidCandidateNodes.IsEmpty())
+    {
+        // UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: No valid (traversable + LOS) nodes found within radius %.2f at %s."), WorldRadius, *Origin.ToString());
+        return false;
+    }
+
+    const int32 RandomIndex = FMath::RandRange(0, ValidCandidateNodes.Num() - 1);
+    OutValidLocation = ConvertCoordinatesToLocation(ValidCandidateNodes[RandomIndex]->Coordinates);
+    
+    // if (World)
+    // {
+    //     DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
+    //     UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Selected node (final): %s. Searched from Origin: %s. LOS Clear."), *OutValidLocation.ToString(), *Origin.ToString());
+    // }
+    return true;
 }
 
 void ANavigationVolume3D::OnConstruction(const FTransform& Transform)
@@ -282,7 +463,7 @@ void ANavigationVolume3D::Tick(float DeltaTime)
 
 // --- Pathfinding Implementation ---
 
-ENavigationVolumeResult ANavigationVolume3D::FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath) const // Marked const
+ENavigationVolumeResult ANavigationVolume3D::FindPath(const AActor* Actor, const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath)
 {
     OutPath.Empty();
 
@@ -293,25 +474,51 @@ ENavigationVolumeResult ANavigationVolume3D::FindPath(const FVector& StartLocati
 
     // Need non-const access to GetNode because it wasn't marked const. Use const_cast as a workaround.
     // A better solution might involve const/non-const versions of GetNode.
-    NavNode* StartNodePtr = const_cast<ANavigationVolume3D*>(this)->GetNode(ConvertLocationToCoordinates(StartLocation));
-    NavNode* EndNodePtr   = const_cast<ANavigationVolume3D*>(this)->GetNode(ConvertLocationToCoordinates(DestinationLocation));
+    NavNode* StartNodePtr = GetNode(ConvertLocationToCoordinates(StartLocation));
+    NavNode* EndNodePtr   = GetNode(ConvertLocationToCoordinates(DestinationLocation));
 
     // Validate start and end nodes
     if (!StartNodePtr) {
-        // UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start location is outside volume bounds or invalid."));
         return ENavigationVolumeResult::ENVR_StartNodeInvalid;
+        // UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start location is outside volume bounds or invalid."));
     }
     if (!EndNodePtr) {
         //UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Destination location is outside volume bounds or invalid."));
         return ENavigationVolumeResult::ENVR_EndNodeBlocked;
     }
     if (!StartNodePtr->bIsTraversable) {
-        //UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start node %s is blocked."), *StartNodePtr->Coordinates.ToString());
-        return ENavigationVolumeResult::ENVR_StartNodeBlocked;
+        float SearchRadius = 300.f;
+        FVector FoundLocation;
+        if (FindRandomValidLocationInRadius(StartLocation, SearchRadius, FoundLocation))
+        {
+            StartNodePtr = GetNode(ConvertLocationToCoordinates(FoundLocation));
+            if (!StartNodePtr) { // Defensive check: Should not happen if FindRandomValidLocationInRadius works correctly
+                UE_LOG(LogTemp, Error, TEXT("ANavigationVolume3D::FindPath - Found alternative start location but GetNode returned null. This is unexpected."));
+                return ENavigationVolumeResult::ENVR_UnknownError; 
+            }
+        }
+        else
+        {
+            return ENavigationVolumeResult::ENVR_StartNodeBlocked;
+        }
     } 
     if (!EndNodePtr->bIsTraversable) {
-        //UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Destination node %s is blocked."), *EndNodePtr->Coordinates.ToString());
-        return ENavigationVolumeResult::ENVR_EndNodeBlocked;
+        float SearchRadius = 300.f;
+        FVector FoundLocation;
+        if (FindRandomValidLocationInRadius(DestinationLocation, SearchRadius, FoundLocation))
+        {
+            EndNodePtr = GetNode(ConvertLocationToCoordinates(FoundLocation));
+            if (!EndNodePtr)
+            {
+                // Defensive check
+                UE_LOG(LogTemp, Error, TEXT("ANavigationVolume3D::FindPath - Found alternative end location but GetNode returned null. This is unexpected."));
+                return ENavigationVolumeResult::ENVR_UnknownError;
+            }
+        }
+        else
+        {
+            return ENavigationVolumeResult::ENVR_EndNodeBlocked;
+        }
     }
     if (StartNodePtr == EndNodePtr) { // Path to self
         OutPath.Add(ConvertCoordinatesToLocation(StartNodePtr->Coordinates));
@@ -496,7 +703,7 @@ void ANavigationVolume3D::CreateLine(const FVector& Start, const FVector& End, c
 
 // --- Node Accessor ---
 
-NavNode* ANavigationVolume3D::GetNode(FIntVector Coordinates) // Not const
+const NavNode* ANavigationVolume3D::GetNode(FIntVector Coordinates) const // Not const
 {
     // Clamp coordinates first to attempt to bring potentially invalid input into range
     ClampCoordinates(Coordinates); // Use const version (modifies parameter)
@@ -518,6 +725,31 @@ NavNode* ANavigationVolume3D::GetNode(FIntVector Coordinates) // Not const
     else {
         // This indicates a serious logic error if coordinates were clamped but index is still bad
         UE_LOG(LogTemp, Error, TEXT("ANavigationVolume3D (%s): GetNode calculated invalid index %d for Nodes array (Size: %d) even after clamping Coords: %s"), *GetName(), Index, Nodes.Num(), *Coordinates.ToString());
+        return nullptr;
+    }
+}
+
+NavNode* ANavigationVolume3D::GetNode(FIntVector Coordinates) // Not const
+{
+    FIntVector ClampedCoords = Coordinates; // Create a local copy to clamp
+    ClampCoordinates(ClampedCoords); // ClampCoordinates is const, fine to call here
+
+    // Check for invalid grid dimensions before index calculation
+    if (DivisionsX <= 0 || DivisionsY <= 0 || DivisionsZ <= 0) {
+        return nullptr;
+    }
+
+    // Calculate 1D index
+    const int32 DivisionPerLevel = DivisionsX * DivisionsY;
+    const int32 Index = (ClampedCoords.Z * DivisionPerLevel) + (ClampedCoords.Y * DivisionsX) + ClampedCoords.X;
+
+    // Check if calculated index is valid for the Nodes array
+    if (Nodes.IsValidIndex(Index)) {
+        return &Nodes[Index]; // 'this' is non-const, 'Nodes' is TArray<NavNode>, so &Nodes[Index] is NavNode*
+    }
+    else {
+        UE_LOG(LogTemp, Error, TEXT("ANavigationVolume3D (%s): GetNode (non-const) calculated invalid index %d for Nodes array (Size: %d) from Coords: %s, Clamped: %s"),
+               *GetName(), Index, Nodes.Num(), *Coordinates.ToString(), *ClampedCoords.ToString());
         return nullptr;
     }
 }
