@@ -2,6 +2,7 @@
 
 #include "ObjectiveCapture.h"
 #include "PlayerCharacter.h"
+#include "ScoreManagerComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -89,6 +90,7 @@ void AObjectiveCapture::CompleteObjective()
 	Super::CompleteObjective();
 	GetWorld()->GetTimerManager().SetTimer(
 		DelayTimerHandle, this, &AObjectiveCapture::DestroyCaptureZone, DestroyZoneDelay, false);
+	OnRequestAddScore.Broadcast(EScoreType::ObjectiveDownloadCompleted);
 }
 
 void AObjectiveCapture::ResetObjective()

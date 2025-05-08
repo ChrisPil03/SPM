@@ -1,6 +1,7 @@
 
 #include "ObjectiveRestoreServers.h"
 #include "ObjectiveServer.h"
+#include "ScoreManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AObjectiveRestoreServers::AObjectiveRestoreServers() :
@@ -239,6 +240,7 @@ void AObjectiveRestoreServers::CompleteObjective()
 	Super::CompleteObjective();
 	ResetHeatBuildup();
 	SetObjectiveProgress(1.f);
+	OnRequestAddScore.Broadcast(EScoreType::ObjectiveServersCompleted);
 
 	if (ControlPanel)
 	{

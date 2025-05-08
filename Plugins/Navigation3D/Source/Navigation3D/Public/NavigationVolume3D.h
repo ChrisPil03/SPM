@@ -10,6 +10,20 @@
 class UProceduralMeshComponent;
 class UMaterialInterface;
 
+UENUM(BlueprintType)
+enum class ENavigationVolumeResult : uint8
+{
+    ENVR_Success                 UMETA(DisplayName = "Success"),
+    ENVR_StartNodeInvalid        UMETA(DisplayName = "Start Node Invalid (Out of Bounds)"),
+    ENVR_StartNodeBlocked        UMETA(DisplayName = "Start Node Blocked"),
+    ENVR_EndNodeInvalid          UMETA(DisplayName = "End Node Invalid (Out of Bounds)"),
+    ENVR_EndNodeBlocked          UMETA(DisplayName = "End Node Blocked"),
+    ENVR_NoPathExists            UMETA(DisplayName = "No Path Found Between Valid Nodes"),
+    ENVR_PathToSelf              UMETA(DisplayName = "Path to self"),
+    ENVR_UnknownError            UMETA(DisplayName = "Unknown Error")
+    
+};
+
 UCLASS()
 class NAVIGATION3D_API ANavigationVolume3D : public AActor // Replace NAVIGATION3D_API if your module API is different
 {
@@ -90,10 +104,10 @@ public:
     * @param StartLocation World location to start the path from.
     * @param DestinationLocation World location to end the path at.
     * @param OutPath Output array filled with world locations representing the path steps (including start and end if found). Cleared if path not found.
-    * @return True if a path was successfully found, false otherwise.
+    * @return ENavigationVolumeResult Enum which describes the result of the operation.
     */
     UFUNCTION(BlueprintCallable, Category = "NavigationVolume3D", meta = (DisplayName = "Find Path"))
-    bool FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath) const; // Mark const
+    ENavigationVolumeResult FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath) const; // Mark const
 
     /**
     * Converts a world space location to grid coordinates. Clamped to volume bounds.

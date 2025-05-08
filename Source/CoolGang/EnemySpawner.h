@@ -20,6 +20,7 @@ public:
 	AEnemySpawner();
 
 	AEnemyAI* SpawnEnemy() const;
+	
 	void RelocateEnemy(AEnemyAI* Enemy) const;
 	
 protected:

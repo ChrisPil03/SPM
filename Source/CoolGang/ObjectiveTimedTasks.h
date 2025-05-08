@@ -20,6 +20,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void ResetObjective() override;
+	virtual void CompleteObjective() override;
 	virtual void IncreaseObjectiveProgress(float const DeltaTime) override;
 
 public:
