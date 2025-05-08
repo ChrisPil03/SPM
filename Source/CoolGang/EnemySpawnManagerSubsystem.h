@@ -48,7 +48,7 @@ protected:
     double SpawnIntervalIncreaseTimer = 30.0;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    int MaximumEnemies = 1;
+    int MaximumEnemies = 20;
     
     TMap<APlayerLocationDetection*, TArray<AEnemySpawner*>> SpawnersByLocation;
     TArray<AEnemySpawner*> CurrentEnemySpawners;
