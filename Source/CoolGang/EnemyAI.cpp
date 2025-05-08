@@ -23,6 +23,7 @@
 #include "EnemyAIController.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "ScoreManagerComponent.h"
 
 
 // Sets default values
@@ -166,6 +167,7 @@ void AEnemyAI::Die()
 
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
+	GiveScore();
 }
 
 void AEnemyAI::DropUpgrade()
@@ -194,6 +196,15 @@ void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 	{
 		CurrentTarget = Objective;
 		bChangedToTargetPlayer = true;
+	}
+}
+
+void AEnemyAI::GiveScore()
+{
+	switch (EnemyType) {
+	case EEnemyType::Spider: OnRequestAddScore.Broadcast(EScoreType::SpiderKill); break;
+	case EEnemyType::Wasp: OnRequestAddScore.Broadcast(EScoreType::WaspKill); break;
+	default: break;
 	}
 }
 
