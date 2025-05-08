@@ -18,6 +18,11 @@ void UScoreManagerComponent::AddScore(const EScoreType ScoreType, const int32 Sc
 {
 	TotalScore += Score;
 	ScoreByTypeMap.FindOrAdd(ScoreType) += Score;
+
+	if (OnScoreChanged.IsBound())
+	{
+		OnScoreChanged.Broadcast(TotalScore);
+	}
 }
 
 int32 UScoreManagerComponent::GetTotalScore() const
@@ -53,15 +58,7 @@ int32 UScoreManagerComponent::GetScoreValue(const EScoreType ScoreType) const
 	}
 }
 
-void UScoreManagerComponent::HandleAddScore(const EScoreType ScoreType, const bool bGiveBonus)
+void UScoreManagerComponent::HandleAddScore(const EScoreType ScoreType)
 {
-	int32 Score = GetScoreByType(ScoreType);
-	if (!bGiveBonus)
-	{
-		AddScore(ScoreType, Score);
-	}else
-	{
-		
-	}
-	TotalScore += Score;
+	AddScore(ScoreType, GetScoreValue(ScoreType));
 }

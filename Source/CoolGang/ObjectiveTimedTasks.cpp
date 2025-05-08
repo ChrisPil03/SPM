@@ -2,6 +2,7 @@
 
 #include "ObjectiveTimedTasks.h"
 #include "InteractableObject.h"
+#include "ScoreManagerComponent.h"
 
 AObjectiveTimedTasks::AObjectiveTimedTasks()
 {
@@ -34,6 +35,12 @@ void AObjectiveTimedTasks::ResetObjective()
 		Interactable->ResetInteractable();
 	}
 	InteractedTasks = 0;
+}
+
+void AObjectiveTimedTasks::CompleteObjective()
+{
+	Super::CompleteObjective();
+	OnRequestAddScore.Broadcast(EScoreType::ObjectiveButtonsCompleted);
 }
 
 void AObjectiveTimedTasks::IncreaseObjectiveProgress(float const DeltaTime)
