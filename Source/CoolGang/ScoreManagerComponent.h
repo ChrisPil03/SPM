@@ -33,7 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Score")
 	int32 GetTotalScore() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Score")
+	UFUNCTION(BlueprintPure, Category = "Score")
 	int32 GetScoreByType(const EScoreType ScoreType);
 	
 	UPROPERTY(BlueprintAssignable, Category = "Score")
