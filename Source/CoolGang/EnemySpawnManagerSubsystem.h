@@ -69,12 +69,14 @@ protected:
     float RangeCheckTimerInterval = 1.f;
 
 private:
+    UFUNCTION(BlueprintCallable, meta = (AllowPrivateAccess = "true"))
+    void RelocateToRandomSpawner(AEnemyAI* Enemy);
+    
     AEnemySpawner* ChooseRandomSpawner();
-
+    
     UFUNCTION()
     void CheckOutOfRange();
-    
-    void RelocateEnemy(AEnemyAI* Enemy);
+
     void BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params);
     
     void OnEnterTriggerBox(APlayerLocationDetection* SpawnBox);
