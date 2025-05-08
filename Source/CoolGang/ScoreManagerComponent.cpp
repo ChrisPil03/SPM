@@ -1,33 +1,67 @@
 #include "ScoreManagerComponent.h"
 
-UScoreManagerComponent::UScoreManagerComponent()
+UScoreManagerComponent::UScoreManagerComponent() :
+	TotalScore(0),
+	BaseScoreMultiplier(1.f),
+	CurrentScoreMultiplier(1.f),
+	SpiderKillScore(10),
+	WaspKillScore(10),
+	ObjectiveDownloadScore(10),
+	ObjectiveButtonsScore(10),
+	ObjectiveServersScore(10),
+	ObjectiveGeneratorScore(10)
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
+}
 
+void UScoreManagerComponent::AddScore(const EScoreType ScoreType, const int32 Score)
+{
+	TotalScore += Score;
+	ScoreByTypeMap.FindOrAdd(ScoreType) += Score;
+}
+
+int32 UScoreManagerComponent::GetTotalScore() const
+{
+	return TotalScore;
+}
+
+int32 UScoreManagerComponent::GetScoreByType(const EScoreType ScoreType)
+{
+	if (ScoreByTypeMap.Contains(ScoreType))
+	{
+		return *ScoreByTypeMap.Find(ScoreType);
+	}
+	return 0;
 }
 
 void UScoreManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	OnRequestAddScore.AddUObject(this, &UScoreManagerComponent::HandleAddScore);
 }
 
-void UScoreManagerComponent::AddScore(EScoreType ScoreType)
+int32 UScoreManagerComponent::GetScoreValue(const EScoreType ScoreType) const
 {
+	switch (ScoreType) {
+	case EScoreType::SpiderKill: return SpiderKillScore;
+	case EScoreType::WaspKill: return WaspKillScore;
+	case EScoreType::ObjectiveDownloadCompleted: return ObjectiveDownloadScore;
+	case EScoreType::ObjectiveButtonsCompleted: return ObjectiveButtonsScore;
+	case EScoreType::ObjectiveServersCompleted: return ObjectiveServersScore;
+	case EScoreType::ObjectiveGeneratorCompleted: return ObjectiveGeneratorScore;
+	default: return 0;
+	}
 }
 
-int32 UScoreManagerComponent::GetTotalScore() const
+void UScoreManagerComponent::HandleAddScore(const EScoreType ScoreType, const bool bGiveBonus)
 {
-	return 0;
+	int32 Score = GetScoreByType(ScoreType);
+	if (!bGiveBonus)
+	{
+		AddScore(ScoreType, Score);
+	}else
+	{
+		
+	}
+	TotalScore += Score;
 }
-
-int32 UScoreManagerComponent::GetScoreValue(EScoreType ScoreType) const
-{
-	return 0;
-}
-
-const TMap<EScoreType, int32>& UScoreDefinition::GetScoreMap()
-{
-	return CachedMap;
-}
-

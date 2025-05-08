@@ -160,17 +160,12 @@ void AEnemyAI::Die()
 		Controller->StopMovement();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 	}
-
-	
 	
 	GetCapsuleComponent()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
-
-
-	
 }
 
 void AEnemyAI::DropUpgrade()

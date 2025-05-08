@@ -8,6 +8,7 @@
 #include "HealthComponent.h"
 #include "PlayerCharacter.generated.h"
 
+class UScoreManagerComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
 
@@ -120,4 +121,6 @@ private:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite ,meta = (AllowPrivateAccess = "true"), Category = "Component")
+	UScoreManagerComponent* ScoreManagerComponent;
 };

@@ -34,6 +34,7 @@ protected:
 public:
 	void Attack();
 
+	UFUNCTION(BlueprintCallable)
 	float GetAttackRange() const;
 
 	UHealthComponent* GetHealthComponent() const;
