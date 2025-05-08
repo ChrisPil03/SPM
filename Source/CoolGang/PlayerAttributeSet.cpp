@@ -16,8 +16,9 @@ void UPlayerAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 		float Magnitude = Data.EvaluatedData.Magnitude;
 		
 		const UGameplayEffect* AppliedEffect = Data.EffectSpec.Def;
-		
-		if (AppliedEffect->GetName() == TEXT("Default__GE_Damage_C"))
+
+		UE_LOG(LogTemp, Error, TEXT("Player health being subtract by %f"), Magnitude);
+		if (AppliedEffect->GetName() == TEXT("Default__GE_ApplyDamageToPlayer_C"))
 		{
 			if (CurrentHealth <= 0.0f)
 			{
@@ -25,7 +26,7 @@ void UPlayerAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 			
 				if (APlayerCharacter* Player = Cast<APlayerCharacter>(OwnerActor))
 				{
-					//Player->Die(); 
+					Player->Die(); 
 				}
 			}
 		}

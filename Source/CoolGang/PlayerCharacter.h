@@ -8,9 +8,12 @@
 #include "HealthComponent.h"
 #include "PlayerCharacter.generated.h"
 
+class UScoreManagerComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
 
 class AGunBase;
+struct FOnAttributeChangeData;
 UCLASS(BlueprintType)
 class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 {
@@ -19,8 +22,6 @@ class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
-
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const &DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -96,9 +97,7 @@ private:
 
 	UPROPERTY()
 	AGunBase* EquippedGun;
-
-	UPROPERTY(VisibleAnywhere)
-	UHealthComponent* HealthComponent;
+	
 
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	UStaticMeshComponent* GunComponent;
@@ -115,12 +114,13 @@ private:
 	
 	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
 	void ResetCharacterPosition();
-
-	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
-	void ResetCharacterHealth();
-
-
 	
 
+	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const;
 
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite ,meta = (AllowPrivateAccess = "true"), Category = "Component")
+	UScoreManagerComponent* ScoreManagerComponent;
 };

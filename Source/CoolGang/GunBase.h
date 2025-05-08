@@ -16,9 +16,9 @@ enum class EWeaponType : uint8
 	// Add other weapon types as needed
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoCountChangedDelegate, float, Ammo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoCountChangedDelegate, float, AmmoCount);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagazineSizeChangedDelegate, float, Ammo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagazineSizeChangedDelegate, float, MagazineSize);
 
 class UGameplayAbility;
 class UGameplayEffect;
@@ -116,8 +116,6 @@ public:
 	TSubclassOf<UGameplayAbility> ReloadAbilityClass;
 	
 public:	
-	
-	
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartFire();
 	
