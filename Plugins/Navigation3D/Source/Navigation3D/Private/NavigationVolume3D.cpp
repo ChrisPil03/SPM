@@ -298,24 +298,24 @@ ENavigationVolumeResult ANavigationVolume3D::FindPath(const FVector& StartLocati
 
     // Validate start and end nodes
     if (!StartNodePtr) {
-        UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start location is outside volume bounds or invalid."));
+        // UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start location is outside volume bounds or invalid."));
         return ENavigationVolumeResult::ENVR_StartNodeInvalid;
     }
     if (!EndNodePtr) {
-        UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Destination location is outside volume bounds or invalid."));
+        //UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Destination location is outside volume bounds or invalid."));
         return ENavigationVolumeResult::ENVR_EndNodeBlocked;
     }
     if (!StartNodePtr->bIsTraversable) {
-        UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start node %s is blocked."), *StartNodePtr->Coordinates.ToString());
+        //UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Start node %s is blocked."), *StartNodePtr->Coordinates.ToString());
         return ENavigationVolumeResult::ENVR_StartNodeBlocked;
     } 
     if (!EndNodePtr->bIsTraversable) {
-        UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Destination node %s is blocked."), *EndNodePtr->Coordinates.ToString());
+        //UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Destination node %s is blocked."), *EndNodePtr->Coordinates.ToString());
         return ENavigationVolumeResult::ENVR_EndNodeBlocked;
     }
     if (StartNodePtr == EndNodePtr) { // Path to self
         OutPath.Add(ConvertCoordinatesToLocation(StartNodePtr->Coordinates));
-        UE_LOG(LogTemp, Log, TEXT("ANavigationVolume3D::FindPath - Start and Destination are the same node."));
+        // UE_LOG(LogTemp, Log, TEXT("ANavigationVolume3D::FindPath - Start and Destination are the same node."));
         return ENavigationVolumeResult::ENVR_PathToSelf;
     }
 

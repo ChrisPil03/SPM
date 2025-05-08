@@ -19,7 +19,6 @@ enum class ENavigationVolumeResult : uint8
     ENVR_EndNodeInvalid          UMETA(DisplayName = "End Node Invalid (Out of Bounds)"),
     ENVR_EndNodeBlocked          UMETA(DisplayName = "End Node Blocked"),
     ENVR_NoPathExists            UMETA(DisplayName = "No Path Found Between Valid Nodes"),
-    ENVR_VolumeNotInitialized    UMETA(DisplayName = "Navigation Volume Not Initialized"),
     ENVR_PathToSelf              UMETA(DisplayName = "Path to self"),
     ENVR_UnknownError            UMETA(DisplayName = "Unknown Error")
     
@@ -105,7 +104,7 @@ public:
     * @param StartLocation World location to start the path from.
     * @param DestinationLocation World location to end the path at.
     * @param OutPath Output array filled with world locations representing the path steps (including start and end if found). Cleared if path not found.
-    * @return True if a path was successfully found, false otherwise.
+    * @return ENavigationVolumeResult Enum which describes the result of the operation.
     */
     UFUNCTION(BlueprintCallable, Category = "NavigationVolume3D", meta = (DisplayName = "Find Path"))
     ENavigationVolumeResult FindPath(const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath) const; // Mark const
