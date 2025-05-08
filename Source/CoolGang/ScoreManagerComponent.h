@@ -16,7 +16,7 @@ enum class EScoreType : uint8
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnRequestAddScore, EScoreType, bool);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRequestAddScore, EScoreType);
 inline FOnRequestAddScore OnRequestAddScore;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -33,18 +33,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Score")
 	int32 GetTotalScore() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Score")
+	UFUNCTION(BlueprintPure, Category = "Score")
 	int32 GetScoreByType(const EScoreType ScoreType);
+
+	UFUNCTION(BlueprintPure, Category = "Score")
+	float GetScoreMultiplier() const { return BaseScoreMultiplier; }
 	
 	UPROPERTY(BlueprintAssignable, Category = "Score")
 	FOnScoreChanged OnScoreChanged;
 
 protected:
-	void BeginPlay() override;
+	virtual void BeginPlay() override;
 	
 private:
 	int32 GetScoreValue(const EScoreType ScoreType) const;
-	void HandleAddScore(const EScoreType ScoreType, const bool bGiveBonus);
+	void HandleAddScore(const EScoreType ScoreType);
+	void BindOnMinutePassed();
+	
+	UFUNCTION()
+	void IncreaseMultiplierPerMinute();
 	
 	UPROPERTY(VisibleAnywhere, Category = "Score")
 	int32 TotalScore;
@@ -54,6 +61,9 @@ private:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Score")
 	float CurrentScoreMultiplier;
+
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"), Category = "Score")
+	float MinuteMultiplierIncrease;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ScoreAmounts")
 	int32 SpiderKillScore;

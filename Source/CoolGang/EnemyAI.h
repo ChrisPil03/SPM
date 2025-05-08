@@ -15,6 +15,13 @@ class UCapsuleComponent;
 class UStaticMeshComponent;
 class AEnemyAIController;
 
+UENUM(BlueprintType)
+enum class EEnemyType : uint8
+{
+	Spider UMETA(DisplayName = "Spider"),
+	Wasp UMETA(DisplayName = "Wasp")
+};
+
 UCLASS()
 class COOLGANG_API AEnemyAI : public ACharacter
 {
@@ -66,6 +73,7 @@ public:
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
+	void GiveScore();
 
 	ECollisionEnabled::Type CollisionType;
 
@@ -137,5 +145,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	bool bChangedToTargetPlayer;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
+	EEnemyType EnemyType;
 };
 
