@@ -110,8 +110,12 @@ void AEnemyAI::Attack()
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 	}
 	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-	//UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
+	{
+		UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
 
+	}
+	
 	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
 
