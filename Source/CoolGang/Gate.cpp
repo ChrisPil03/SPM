@@ -44,7 +44,8 @@ void AGate::OpenGate() const
 	RightMover->SetShouldMove(true);
 	LeftMover->ReverseDirection(false);
 	RightMover->ReverseDirection(false);
-	BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//Commenting out for now as it locks the player inside the room otherwise
+	//BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGate::CloseGate() const
@@ -53,5 +54,7 @@ void AGate::CloseGate() const
 	RightMover->SetShouldMove(true);
 	LeftMover->ReverseDirection(true);
 	RightMover->ReverseDirection(true);
-	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	//Commenting out for now as it locks the player inside the room otherwise
+	//BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }

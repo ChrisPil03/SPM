@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-
+#include "Sound/SoundCue.h" 
 #include "GunBase.generated.h"
 
 UENUM(BlueprintType)
@@ -23,6 +23,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagazineSizeChangedDelegate, floa
 class UGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
+
 struct FOnAttributeChangeData;
 UCLASS()
 class COOLGANG_API AGunBase : public AActor

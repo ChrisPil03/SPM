@@ -3,6 +3,7 @@
 #include "AIController.h"
 #include "EnemySpawner.h"
 #include "EnemyAI.h"
+#include "ObjectiveBase.h"
 #include "PlayerLocationDetection.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
@@ -126,6 +127,8 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
     {
         return;
     }
+
+    
     
     if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner())
     {
@@ -141,6 +144,10 @@ void UEnemySpawnManagerSubsystem::CheckOutOfRange()
     }
     for (AEnemyAI* Enemy : AliveEnemies)
     {
+        if (Cast<APlayerCharacter>(Enemy->GetTarget().GetObject()) == nullptr)
+        {
+            return;
+        }
         FName DistanceSqKey = "DistanceToTargetSquared";
         AAIController* EnemyController = Cast<AAIController>(Enemy->GetController());
         if (EnemyController)
