@@ -44,13 +44,13 @@ private:
 	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float BaselineObjectiveTimer = 20.f;
+	float BaselineObjectiveTimer = 30.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float MinimumObjectiveTimer = 20.f;
+	float MinimumObjectiveTimer = 15.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float TimeScalingValue = 30.f;
+	float TimeScalingValue = 2.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	float NextObjectiveTimer = 10.f;
