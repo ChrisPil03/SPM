@@ -168,16 +168,24 @@ bool APlayerCharacter::IsInRange(FHitResult &HitResult) const
 	FVector EndPoint = Location + Rotation.Vector() * InteractRange;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
-	
-	return GetWorld()->SweepSingleByChannel(
+
+	bool bHit = GetWorld()->SweepSingleByChannel(
 	HitResult,
 	Location,
 	EndPoint,
 	FQuat::Identity,
 	ECC_GameTraceChannel2,
-	FCollisionShape::MakeSphere(5),
+	FCollisionShape::MakeSphere(InteractSphereRadius),
 	Params
 	);
+
+	if (bHit)
+	{
+		DrawDebugSphere(GetWorld(), HitResult.Location, InteractSphereRadius, 12, FColor::Red, false, 1);
+	}
+		
+	
+	return bHit;
 	
 }
 
