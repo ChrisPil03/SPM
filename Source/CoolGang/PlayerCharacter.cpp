@@ -159,7 +159,21 @@ bool APlayerCharacter::IsInRange(FHitResult &HitResult) const
 	DrawDebugLine(GetWorld(), Location, EndPoint, FColor::Red, false, 2);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
+<<<<<<< Updated upstream
 	return GetWorld()->LineTraceSingleByChannel(HitResult, Location, EndPoint, ECC_GameTraceChannel2, Params);
+=======
+	
+	return GetWorld()->SweepSingleByChannel(
+	HitResult,
+	Location,
+	EndPoint,
+	FQuat::Identity,
+	ECC_GameTraceChannel2,
+	FCollisionShape::MakeSphere(100),
+	Params
+	);
+	
+>>>>>>> Stashed changes
 }
 
 void APlayerCharacter::Die()
