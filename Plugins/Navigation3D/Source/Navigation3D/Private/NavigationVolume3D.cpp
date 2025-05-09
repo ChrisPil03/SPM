@@ -173,7 +173,6 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
                             );
                             
 <<<<<<< Updated upstream
-<<<<<<< Updated upstream
                             // Draw the line trace attempt
                             // DrawDebugLine(
                             //     World,
@@ -186,8 +185,6 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
                             //     1.5f   // Thickness
                             // );
 =======
-=======
->>>>>>> Stashed changes
                             DrawDebugLine(
                                 World,
                                 Origin,
@@ -205,7 +202,6 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
 
                             if (World)
                             {
-<<<<<<< Updated upstream
 <<<<<<< Updated upstream
                                 const int32 RandomIndex = FMath::RandRange(0, ValidCandidateNodes.Num() - 1);
                                 OutValidLocation = ConvertCoordinatesToLocation(ValidCandidateNodes[RandomIndex]->Coordinates);
@@ -233,20 +229,12 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
                         // #endif
 =======
 >>>>>>> Stashed changes
-=======
-                                DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
-                                UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Found first valid node: %s at offset (%d,%d,%d). LOS Clear."), *OutValidLocation.ToString(), dx, dy, dz);
-                            }
-                            return true; // Immediately return since we found a valid spot.
-                        }
->>>>>>> Stashed changes
                     }
                 }
             } // End dx loop
         } // End dy loop
     } // End dz loop
 
-<<<<<<< Updated upstream
 <<<<<<< Updated upstream
     if (ValidCandidateNodes.IsEmpty())
     {
@@ -263,11 +251,6 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
     //     UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Selected node (final): %s. Searched from Origin: %s. LOS Clear."), *OutValidLocation.ToString(), *Origin.ToString());
     // }
     return true;
-=======
-    // If the loops complete without returning, no valid node was found.
-    // UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: No valid (traversable + LOS + within original radius) nodes found with expanded search cube."), WorldRadius, *Origin.ToString());
-    return false;
->>>>>>> Stashed changes
 =======
     // If the loops complete without returning, no valid node was found.
     // UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: No valid (traversable + LOS + within original radius) nodes found with expanded search cube."), WorldRadius, *Origin.ToString());
