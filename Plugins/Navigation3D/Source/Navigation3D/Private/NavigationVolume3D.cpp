@@ -54,6 +54,7 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
     // Consider removing it from the function signature in the .h and .cpp if it's not used by other callers
     // for a different purpose, or if this function is its only use case.
 
+
     if (Nodes.IsEmpty() || WorldRadius < 0.0f || DivisionSize < KINDA_SMALL_NUMBER)
     {
         // Handle error or simple cases (radius ~0)
@@ -65,9 +66,11 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
             {
                 OutValidLocation = ConvertCoordinatesToLocation(OriginNode->Coordinates);
 
+
                 FHitResult HitResult;
                 FCollisionQueryParams CollisionParams;
                 if (ActorToIgnoreForLOS) { CollisionParams.AddIgnoredActor(ActorToIgnoreForLOS); }
+
 
                 UWorld* World = GetWorld();
                 bool bHasLineOfSight = true;
@@ -81,18 +84,6 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
                     );
                 }
                 
-<<<<<<< Updated upstream
-                // if (World)
-                // {
-                //     DrawDebugLine(World, Origin, OutValidLocation, bHasLineOfSight ? FColor::Green : FColor::Red, false, 5.1f, 0, 2.0f);
-                //     if (bHasLineOfSight) {
-                //         DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
-                //          UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius (Radius~0): Selected origin node %s. LOS Clear."), *OutValidLocation.ToString());
-                //     } else {
-                //          UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius (Radius~0): Origin node %s traversable, but NO LOS."), *OutValidLocation.ToString());
-                //     }
-                // }
-=======
                 if (World)
                 {
                     DrawDebugLine(World, Origin, OutValidLocation, bHasLineOfSight ? FColor::Green : FColor::Red, false, 5.1f, 0, 2.0f);
@@ -103,7 +94,6 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
                         UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius (Radius~0): Origin node %s traversable, but NO LOS."), *OutValidLocation.ToString());
                     }
                 }
->>>>>>> Stashed changes
                 if (bHasLineOfSight) return true;
             }
         }
@@ -134,6 +124,7 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
     {
         LOS_CollisionParams.AddIgnoredActor(ActorToIgnoreForLOS);
     }
+
     FCollisionObjectQueryParams LOS_ObjectQueryParams(ObstacleObjectTypes);
 
     // The order of these loops determines which "first" node is found.
@@ -160,10 +151,12 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
                     // Still ensure the node is within the *original spherical WorldRadius*
                     if (FVector::DistSquared(Origin, NodeWorldCenter) <= WorldRadiusSquared)
                     {
+
                         bool bHasLineOfSight = true;
                         if (World)
                         {
                             FHitResult HitResult;
+
                             bHasLineOfSight = !World->LineTraceSingleByObjectType(
                                 HitResult,
                                 Origin,
@@ -172,22 +165,6 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
                                 LOS_CollisionParams
                             );
                             
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                            // Draw the line trace attempt
-                            // DrawDebugLine(
-                            //     World,
-                            //     Origin,
-                            //     NodeWorldCenter,
-                            //     bHasLineOfSight ? FColor::Blue : FColor::Orange, // Blue if clear, Orange if blocked by LOS
-                            //     false, // Not persistent
-                            //     5.0f,  // Lifetime
-                            //     0,     // Depth priority
-                            //     1.5f   // Thickness
-                            // );
-=======
-=======
->>>>>>> Stashed changes
                             DrawDebugLine(
                                 World,
                                 Origin,
@@ -195,7 +172,6 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
                                 bHasLineOfSight ? FColor::Blue : FColor::Orange,
                                 false, 5.0f, 0, 1.5f
                             );
->>>>>>> Stashed changes
                         }
 
                         if (bHasLineOfSight)
@@ -205,74 +181,20 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
 
                             if (World)
                             {
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-                                const int32 RandomIndex = FMath::RandRange(0, ValidCandidateNodes.Num() - 1);
-                                OutValidLocation = ConvertCoordinatesToLocation(ValidCandidateNodes[RandomIndex]->Coordinates);
-
-                                // if (World)
-                                // {
-                                //     DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
-                                //      UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Selected node (early due to MaxCandidates): %s. LOS Clear."), *OutValidLocation.ToString());
-                                // }
-                                return true;
-=======
-                                DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
-                                UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Found first valid node: %s at offset (%d,%d,%d). LOS Clear."), *OutValidLocation.ToString(), dx, dy, dz);
->>>>>>> Stashed changes
-                            }
-                            return true; // Immediately return since we found a valid spot.
-                        }
-<<<<<<< Updated upstream
-                        // else: Node was traversable & in radius, but LOS was blocked.
-                        // UE_LOG for this is optional, might be spammy.
-                        // #if ENABLE_DRAW_DEBUG
-                        // else if (World) {
-                        //     UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Node %s traversable and in radius, but NO LOS from %s."), *NodeWorldCenter.ToString(), *Origin.ToString());
-                        // }
-                        // #endif
-=======
->>>>>>> Stashed changes
-=======
                                 DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
                                 UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Found first valid node: %s at offset (%d,%d,%d). LOS Clear."), *OutValidLocation.ToString(), dx, dy, dz);
                             }
                             return true; // Immediately return since we found a valid spot.
                         }
->>>>>>> Stashed changes
                     }
                 }
             } // End dx loop
         } // End dy loop
     } // End dz loop
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    if (ValidCandidateNodes.IsEmpty())
-    {
-        // UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: No valid (traversable + LOS) nodes found within radius %.2f at %s."), WorldRadius, *Origin.ToString());
-        return false;
-    }
-
-    const int32 RandomIndex = FMath::RandRange(0, ValidCandidateNodes.Num() - 1);
-    OutValidLocation = ConvertCoordinatesToLocation(ValidCandidateNodes[RandomIndex]->Coordinates);
-    
-    // if (World)
-    // {
-    //     DrawDebugSphere(World, OutValidLocation, DivisionSize * 0.3f, 16, FColor::Magenta, false, 5.1f, 0, 3.0f);
-    //     UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: Selected node (final): %s. Searched from Origin: %s. LOS Clear."), *OutValidLocation.ToString(), *Origin.ToString());
-    // }
-    return true;
-=======
     // If the loops complete without returning, no valid node was found.
     // UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: No valid (traversable + LOS + within original radius) nodes found with expanded search cube."), WorldRadius, *Origin.ToString());
     return false;
->>>>>>> Stashed changes
-=======
-    // If the loops complete without returning, no valid node was found.
-    // UE_LOG(LogTemp, Log, TEXT("FindRandomValidLocationInRadius: No valid (traversable + LOS + within original radius) nodes found with expanded search cube."), WorldRadius, *Origin.ToString());
-    return false;
->>>>>>> Stashed changes
 }
 
 void ANavigationVolume3D::OnConstruction(const FTransform& Transform)
