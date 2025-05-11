@@ -84,15 +84,13 @@ void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		
 		NewVelocity.Z = OwnerCharacter->GetVelocity().Z;
 		CharacterMovement->Velocity = NewVelocity;
-		float DistSqToTarget = (NewVelocity - TargetVelocity).SizeSquared();
 		
-		if (DistSqToTarget < 100.f || CurrentVelocity.SizeSquared() <= (CharacterMovement->MaxWalkSpeed * CharacterMovement->MaxWalkSpeed))
+		if (CurrentVelocity.SizeSquared() <= (CharacterMovement->MaxWalkSpeed * CharacterMovement->MaxWalkSpeed))
 		{
 			bShouldDecelerate = false; // Stop decelerating
 			CharacterMovement->GroundFriction = OriginalGroundFriction;
 			UE_LOG(LogTemp, Warning, TEXT(" Stop decelerating"));
 		}
-		UE_LOG(LogTemp, Warning, TEXT("(NewVelocity - TargetVelocity).SizeSquared(): %f"), (NewVelocity - TargetVelocity).SizeSquared());
 	}
 }
 
