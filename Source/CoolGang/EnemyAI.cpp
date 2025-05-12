@@ -113,7 +113,7 @@ void AEnemyAI::Attack()
 	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
 	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 	{
-		UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+		//UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
 
 	}
 	
