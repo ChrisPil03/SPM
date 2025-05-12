@@ -46,9 +46,11 @@ public:
 	float GetAttackRange() const;
 
 	UHealthComponent* GetHealthComponent() const;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Drop")
 	TSubclassOf<AActor> Drop;
+
+	static bool IsPlayerShieldActive(AActor* Player);
 	
 	UPROPERTY(EditAnywhere, Category = "Drop")
 	float DropRate;

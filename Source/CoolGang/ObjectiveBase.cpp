@@ -57,8 +57,8 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		{
 			RoomGate->OpenGate();
 		}
-		DisplayMessageForSeconds(ActivatedMessage, 3.f);
-		//EnqueueVoiceLineWithMessage(ObjectiveActivatedVoiceLine, ActivatedMessage);
+		//DisplayMessageForSeconds(ActivatedMessage, 3.f);
+		EnqueueVoiceLineWithMessage(ObjectiveActivatedVoiceLine, ActivatedMessage);
 		
 		// 	if (OnObjectiveActivated.IsBound())
 		// 	{
@@ -126,8 +126,8 @@ void AObjectiveBase::StartObjective()
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
 		DisplayMessageForSeconds(StartedMessage, 3.f);
-		StopMalfunctioning();
-		//EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
+		//StopMalfunctioning();
+		EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
 	}
 }
 
@@ -141,8 +141,8 @@ void AObjectiveBase::ResetObjective()
 void AObjectiveBase::CompleteObjective()
 {
 	SetObjectiveState(EObjectiveState::Complete);
-	DisplayMessageForSeconds(CompletedMessage, 3.f);
-	//EnqueueVoiceLineWithMessage(ObjectiveCompletedVoiceLine, CompletedMessage);
+	//DisplayMessageForSeconds(CompletedMessage, 3.f);
+	EnqueueVoiceLineWithMessage(ObjectiveCompletedVoiceLine, CompletedMessage);
 	if (OnObjectiveCompleted.IsBound())
 	{
 		OnObjectiveCompleted.Broadcast();
@@ -167,8 +167,8 @@ void AObjectiveBase::FailObjective()
 	{
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
-		DisplayMessageForSeconds(FailedMessage, 3.f);
-		//EnqueueVoiceLineWithMessage(ObjectiveFailedVoiceLine, FailedMessage);
+		//DisplayMessageForSeconds(FailedMessage, 3.f);
+		EnqueueVoiceLineWithMessage(ObjectiveFailedVoiceLine, FailedMessage);
 		WeakenSystemIntegrity(ObjectiveFailedIntegrityChunkDamage);
 
 		if (!bPlayerInRoom && RoomGate)

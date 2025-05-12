@@ -114,13 +114,31 @@ void AEnemyAI::Attack()
 	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
 	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 	{
-		UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+		//UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
 
 	}
-	
+	AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
+	if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
+	{
+		//Reduce damage here ???
+	}
 	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
 
+bool AEnemyAI::IsPlayerShieldActive(AActor* PlayerActor)
+{
+	if (PlayerActor)
+	{
+		UAbilitySystemComponent* PlayerASC = PlayerActor->FindComponentByClass<UAbilitySystemComponent>();
+		if (PlayerASC)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Found PlayerActor"));
+			FGameplayTag ShieldTag = FGameplayTag::RequestGameplayTag(TEXT("State.ShieldActive"));
+			return PlayerASC->HasMatchingGameplayTag(ShieldTag);
+		}
+	}
+	return false;
+}
 
 float AEnemyAI::GetAttackRange() const
 {

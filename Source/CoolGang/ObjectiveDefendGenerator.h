@@ -11,7 +11,10 @@ class AInteractableObject;
 class AObjectiveDefendGenerator;
 class UHealthComponent;
 
+struct FOnAttributeChangeData;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGeneratorHealthChangedDelegate, float, Health);
 UCLASS()
+
 class COOLGANG_API AObjectiveDefendGenerator : public AObjectiveBase, public IAttackable
 {
 	GENERATED_BODY()
@@ -36,6 +39,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	float GetHealthPercentage() const;
+
+	UPROPERTY(EditAnywhere)
+	float Health;
+
+	UPROPERTY(EditAnywhere)
+	float MaxHealth;
 
 private:
 	// void BindControlPanel();
@@ -68,6 +77,21 @@ private:
 
 	FTimerHandle StartWaitTimerHandle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	class UAbilitySystemComponent *AbilitySystemComponent;
+	
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_InitGeneratorStats;
+	void InitStats();
+
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_ResetGeneratorHealth;
+
+	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data);
+
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnGeneratorHealthChangedDelegate OnGeneratorHealthChangedDelegate;
+	
 	// UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess))
 	// AInteractableObject* ControlPanel;
 };
