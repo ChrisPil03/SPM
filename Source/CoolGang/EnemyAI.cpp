@@ -24,6 +24,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "ScoreManagerComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 
 // Sets default values
@@ -178,6 +179,7 @@ void AEnemyAI::Die()
 	{
 		Controller->StopMovement();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
 	}
 	
 	GetCapsuleComponent()->SetEnableGravity(false);
