@@ -15,6 +15,13 @@ class UCapsuleComponent;
 class UStaticMeshComponent;
 class AEnemyAIController;
 
+UENUM(BlueprintType)
+enum class EEnemyType : uint8
+{
+	Spider UMETA(DisplayName = "Spider"),
+	Wasp UMETA(DisplayName = "Wasp")
+};
+
 UCLASS()
 class COOLGANG_API AEnemyAI : public ACharacter
 {
@@ -30,20 +37,26 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
 public:
 	void Attack();
-	static bool IsPlayerShieldActive(AActor* PlayerActor);
-	
+
+	UFUNCTION(BlueprintCallable)
 	float GetAttackRange() const;
 
-	UHealthComponent *GetHealthComponent() const;
+	UHealthComponent* GetHealthComponent() const;
+
+	UPROPERTY(EditAnywhere, Category = "Drop")
+	TSubclassOf<AActor> Drop;
+	
+	UPROPERTY(EditAnywhere, Category = "Drop")
+	float DropRate;
 
 	UPROPERTY(EditAnywhere, Category = "Stats")
-	const class UEnemyAttributeSet *EnemyAttributeSet;
+	const class UEnemyAttributeSet* EnemyAttributeSet;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	UAbilitySystemComponent *AbilitySystemComponent;
+	UAbilitySystemComponent* AbilitySystemComponent;
 
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IAttackable> GetTarget() const;
@@ -53,9 +66,14 @@ public:
 	UFUNCTION()
 	void AttackPlayer(AObjectiveBase*  Objective);
 
+	void DropUpgrade();
+
+	AActor* GetCurrentTarget() const;
+
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
+	void GiveScore();
 
 	ECollisionEnabled::Type CollisionType;
 
@@ -79,6 +97,7 @@ private:
 	float FadeDuration = 1.0f;
 
 	bool bFadeComplete = true;
+	bool bIsDead = false;
 
 	bool bDeathVFXComplete = false;
 
@@ -92,9 +111,6 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float AttackRange;
-
-	UPROPERTY(VisibleAnywhere)
-	UHealthComponent *HealthComponent;
 
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
@@ -110,10 +126,27 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TScriptInterface<IAttackable> CurrentTarget;
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayAbility> AttackAbilityClass;
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> GE_ApplyDamageToPlayer;
+	
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_ResetHealth;
 	
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_InitEnemyStats;
 
+	void InitEnemyStats();
+
+	void GiveAbilities();
+
 	UPROPERTY(VisibleAnywhere)
 	bool bChangedToTargetPlayer;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Enemy")
+	EEnemyType EnemyType;
 };
+

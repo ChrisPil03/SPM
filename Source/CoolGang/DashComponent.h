@@ -27,18 +27,22 @@ public:
 private:
 
 	UPROPERTY(EditAnywhere)
-	float DashForce = 0.0f;
+	float DashForce = 2000.0f;
 
 	UPROPERTY(EditAnywhere)
-	float Cooldown = 0.0f;
+	float Cooldown = 1.0f;
 
 	UPROPERTY(EditAnywhere)
-	float DashDistance = 0.0f;
+	float DashDistance = 200.0f;
 
 	UPROPERTY(EditAnywhere)
-	float StopTime = 0.0f;
+	float DashDuration = 1.0f;
+
 	UPROPERTY(EditAnywhere)
-	float DecelerationSpeed{0};
+	float StopTime = 1.0f;
+
+	UPROPERTY(EditAnywhere)
+	float DecelerationSpeed = 1.0f;
 	
 	UPROPERTY()
 	 ACharacter* OwnerCharacter;
@@ -53,8 +57,10 @@ private:
 	FVector StartLocation;
 	FVector DashDirection;
 	float OriginalGroundFriction;
-	
-	
+	FVector TargetVelocity;
+	FVector CurrentVelocity;
+	FVector NewVelocity;
+	float DashSpeed;
 	bool CheckToReset();
 
 	void Reset();

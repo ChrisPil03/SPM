@@ -6,6 +6,8 @@
 #include "CyberWarriorGameModeBase.h"
 #include "DiveGameMode.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnMinutePassed);
+
 class ASystemIntegrity;
 
 UCLASS()
@@ -23,22 +25,32 @@ public:
 
 	void EndGame();
 
+	UFUNCTION(BlueprintPure, Category = "Timer")
+	void GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSeconds) const;
+
+	template <typename T>
+	void AddOnMinutePassedFunction(T* Object, void (T::*Func)())
+	{
+		OnMinutePassed.AddUObject(Object, Func);
+	}
+
 protected:
 	
 	 virtual void BeginPlay() override;
 	
 private:
 	static float ComputeTimer(int cycleIndex, float T0 = 180.0f, float Tmin = 50.0f, float k  = 20.0f);
+	void HandleElapsedTime(const float DeltaTime);
 	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float BaselineObjectiveTimer = 20.f;
+	float BaselineObjectiveTimer = 30.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float MinimumObjectiveTimer = 20.f;
+	float MinimumObjectiveTimer = 15.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	float TimeScalingValue = 30.f;
+	float TimeScalingValue = 2.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	float NextObjectiveTimer = 10.f;
@@ -51,4 +63,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
 	int32 ObjectiveCount = 0;
+
+	UPROPERTY(VisibleAnywhere, Category = "Timer")
+	float ElapsedTime = 0.f;
+
+	FOnMinutePassed OnMinutePassed;
 };

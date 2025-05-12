@@ -8,9 +8,12 @@
 #include "HealthComponent.h"
 #include "PlayerCharacter.generated.h"
 
+class UScoreManagerComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
 
 class AGunBase;
+struct FOnAttributeChangeData;
 UCLASS(BlueprintType)
 class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 {
@@ -19,8 +22,6 @@ class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
-
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const &DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -60,18 +61,28 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="Events");
 	FOnPlayerTakeDamage OnPlayerTakeDamage;
-	
+
+	void Die();
 
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
-	UPROPERTY(EditAnywhere, Category=Gameplay)
+	UPROPERTY(EditAnywhere, Category=Interact)
 	float InteractRange = 200;
+
+	UPROPERTY(EditAnywhere, Category=Interact)
+	float InteractSphereRadius = 10;
 
 	bool IsInRange(FHitResult& HitResult) const;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess))
 	bool bDead;
+
+	UPROPERTY(EditAnywhere)
+	float Health;
+
+	UPROPERTY(EditAnywhere)
+	float MaxHealth;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	TSubclassOf<AGunBase> Pistol;
@@ -82,11 +93,14 @@ private:
 	UPROPERTY(EditAnywhere, Category=Gameplay)
 	TSubclassOf<AGunBase> Shotgun;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
+	TArray<AGunBase*> Guns;
+
+	void GiveGun(const TSubclassOf<AGunBase>& GunClass);
+
 	UPROPERTY()
 	AGunBase* EquippedGun;
-
-	UPROPERTY(VisibleAnywhere)
-	UHealthComponent* HealthComponent;
+	
 
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	UStaticMeshComponent* GunComponent;
@@ -94,19 +108,22 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	class UAbilitySystemComponent *AbilitySystemComponent;
 
-	void Die();
+	UPROPERTY()
+	const class UPlayerAttributeSet* PlayerAttributeSet;
 
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_InitPlayerStats;
+	void InitPlayerStats();
+	
 	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
 	void ResetCharacterPosition();
+	
 
-	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
-	void ResetCharacterHealth();
+	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const;
 
-	UPROPERTY()
-	class UPlayerAttributeSet* PlayerAttributeSet;
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;
 
-	UPROPERTY()
-	TArray<AGunBase*> Guns;
-
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite ,meta = (AllowPrivateAccess = "true"), Category = "Component")
+	UScoreManagerComponent* ScoreManagerComponent;
 };

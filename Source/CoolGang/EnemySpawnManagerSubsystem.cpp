@@ -3,6 +3,7 @@
 #include "AIController.h"
 #include "EnemySpawner.h"
 #include "EnemyAI.h"
+#include "ObjectiveBase.h"
 #include "PlayerLocationDetection.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
@@ -69,7 +70,13 @@ void UEnemySpawnManagerSubsystem::SpawnEnemy()
         return;
     }
 
-    AEnemyAI* Enemy = ChooseRandomSpawner()->SpawnEnemy();
+    AEnemySpawner* RandomSpawner = ChooseRandomSpawner();
+    if (RandomSpawner == nullptr)
+    {
+        return;
+    }
+    
+    AEnemyAI* Enemy = RandomSpawner->SpawnEnemy();
     if (Enemy == nullptr)
     {
         return;
@@ -104,19 +111,29 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
     }
  }
 
-
 AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
 {
-    UE_LOG(LogTemp, Warning, TEXT("Trying to choose a spawner"))
     if (CurrentEnemySpawners.Num() > 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Amount of spawners in CurrentEnemySpawners: %d"), CurrentEnemySpawners.Num())
         int32 RandomIndex = FMath::RandRange(0, CurrentEnemySpawners.Num() - 1);
-        AEnemySpawner* ChosenSpawner = CurrentEnemySpawners[RandomIndex];
-        return ChosenSpawner;
+        return CurrentEnemySpawners[RandomIndex];
     }
-    UE_LOG(LogTemp, Warning, TEXT("No spawner found"))
     return nullptr;
+}
+
+void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
+{
+    if (Enemy == nullptr)
+    {
+        return;
+    }
+
+    
+    
+    if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner())
+    {
+        ChosenSpawner->RelocateEnemy(Enemy);
+    }
 }
 
 void UEnemySpawnManagerSubsystem::CheckOutOfRange()
@@ -127,6 +144,10 @@ void UEnemySpawnManagerSubsystem::CheckOutOfRange()
     }
     for (AEnemyAI* Enemy : AliveEnemies)
     {
+        if (Cast<APlayerCharacter>(Enemy->GetTarget().GetObject()) == nullptr)
+        {
+            return;
+        }
         FName DistanceSqKey = "DistanceToTargetSquared";
         AAIController* EnemyController = Cast<AAIController>(Enemy->GetController());
         if (EnemyController)
@@ -135,29 +156,18 @@ void UEnemySpawnManagerSubsystem::CheckOutOfRange()
 
             if (Blackboard)
             {
-               float DistanceSq =  Blackboard->GetValueAsFloat(DistanceSqKey);
+                float DistanceSq =  Blackboard->GetValueAsFloat(DistanceSqKey);
 
                 if (DistanceSq > RelocateDistanceThreshold)
                 {
                     UE_LOG(LogTemp, Warning, TEXT("Distance is: %f"), DistanceSq)
-                    RelocateEnemy(Enemy);
+                    RelocateToRandomSpawner(Enemy);
                 }
             }
         }
-        
-
-        
     }
 }
 
-void UEnemySpawnManagerSubsystem::RelocateEnemy(AEnemyAI* Enemy)
-{
-    AEnemySpawner* ChosenSpawner = ChooseRandomSpawner();
-    if (ChosenSpawner)
-    {
-        ChosenSpawner->RelocateEnemy(Enemy);
-    }
-}
 
 void UEnemySpawnManagerSubsystem::BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params)
 {

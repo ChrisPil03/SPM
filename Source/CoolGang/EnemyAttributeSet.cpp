@@ -32,7 +32,7 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 		
 		const UGameplayEffect* AppliedEffect = Data.EffectSpec.Def;
 		
-		if (AppliedEffect->GetName() == TEXT("Default__GE_Damage_C"))
+		if (AppliedEffect->GetName() == TEXT("Default__GE_ApplyDamageToEnemy_C"))
 		{
 			if (Health.GetCurrentValue() <= MaxHealth.GetBaseValue() / 3)
 			{
@@ -58,8 +58,7 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 			
 			if (AEnemyAI* enemy = Cast<AEnemyAI>(OwnerActor))
 			{
-				
-					enemy->Die(); 
+				enemy->Die(); 
 			}
 		}
 	}

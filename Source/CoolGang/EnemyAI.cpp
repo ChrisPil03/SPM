@@ -3,7 +3,6 @@
 
 #include "EnemyAI.h"
 
-#include "HealthComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
@@ -24,14 +23,14 @@
 #include "EnemyAIController.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "ScoreManagerComponent.h"
 
 
 // Sets default values
 AEnemyAI::AEnemyAI()
 {
-	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+ 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
@@ -40,7 +39,7 @@ void AEnemyAI::BeginPlay()
 	Super::BeginPlay();
 	CollisionType = GetCapsuleComponent()->GetCollisionEnabled();
 	AIController = Cast<AEnemyAIController>(Controller);
-
+	
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
@@ -53,7 +52,7 @@ void AEnemyAI::BeginPlay()
 			FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), 0.0f);
 		}
 	}
-
+		
 	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
 	for (AObjectiveBase* Objective : AllObjectives)
 	{
@@ -64,10 +63,14 @@ void AEnemyAI::BeginPlay()
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
+	GiveAbilities();
+	InitEnemyStats();
+}
+
+void AEnemyAI::InitEnemyStats()
+{
 	if (AbilitySystemComponent)
 	{
-		AbilitySystemComponent->InitAbilityActorInfo(this, this);
-
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
 		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitEnemyStats, 1.f, Context);
 
@@ -76,12 +79,23 @@ void AEnemyAI::BeginPlay()
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MaxHealth"), MaxHealth);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Damage"), AttackDamage);
-			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.PlayerDamage"), AttackDamage);
 			EnemyAttributeSet = AbilitySystemComponent->GetSet<UEnemyAttributeSet>();
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+			
 		}
 	}
 }
+
+void AEnemyAI::GiveAbilities()
+{
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	if (AbilitySystemComponent && AttackAbilityClass)
+	{
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AttackAbilityClass, 1, 0, this));
+	}
+}
+
 
 void AEnemyAI::Attack()
 {
@@ -89,32 +103,25 @@ void AEnemyAI::Attack()
 	{
 		return;
 	}
-
-	UClass* DamageTypeClass = UDamageType::StaticClass();
+	
+	UClass* DamageTypeClass = UDamageType::StaticClass();	
 	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
 	if (EnemyAttributeSet != nullptr)
 	{
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
-
-		AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
-		float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-		if (DamagedActor->ActorHasTag("Player"))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit Player"));
-			if (IsPlayerShieldActive(DamagedActor))
-			{
-				//TODO: Fetch shield damage reduction.
-				Damage *= 0.5f;
-				UE_LOG(LogTemp, Warning, TEXT("Damage reduced to: %f"), Damage);
-			}
-		}
-
-		UGameplayStatics::ApplyDamage(DamagedActor, Damage, MyOwnerInstigator, this, DamageTypeClass);
 	}
-	else
+	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
+	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't deal damage! :("));
+		UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+
 	}
+	AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
+	if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
+	{
+		//Reduce damage here ???
+	}
+	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
 
 bool AEnemyAI::IsPlayerShieldActive(AActor* PlayerActor)
@@ -137,10 +144,6 @@ float AEnemyAI::GetAttackRange() const
 	return AttackRange;
 }
 
-UHealthComponent* AEnemyAI::GetHealthComponent() const
-{
-	return HealthComponent;
-}
 
 TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 {
@@ -149,18 +152,24 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
+	if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
+	DropUpgrade();
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		GetWorld(),
-		DeathVFX,
-		GetActorLocation(),
-		GetActorRotation(),
-		FVector(1.f, 1.f, 1.f),
-		true,
-		true,
-		ENCPoolMethod::None,
-		false
+	  GetWorld(),
+	  DeathVFX,
+	  GetActorLocation(),
+	  GetActorRotation(),
+	  FVector(1.f,1.f,1.f),
+	  true,
+	  true,
+	  ENCPoolMethod::None,
+	  false
 	);
-
+	
 	if (NiComp)
 	{
 		NiComp->OnSystemFinished.AddDynamic(this, &AEnemyAI::OnDeathFXFinished);
@@ -170,13 +179,34 @@ void AEnemyAI::Die()
 		Controller->StopMovement();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 	}
-
+	
 	GetCapsuleComponent()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
+	GiveScore();
 }
+
+void AEnemyAI::DropUpgrade()
+{
+	
+	float RandomValue = FMath::FRand(); // Range: 0.0 to 1.0
+	if (RandomValue <= DropRate)
+	{
+		FVector SpawnLocation = GetActorLocation();
+		FRotator SpawnRotation = GetActorRotation();
+		UE_LOG(LogTemp, Warning, TEXT("Drop"));
+		GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation);
+	}
+	
+}
+
+AActor* AEnemyAI::GetCurrentTarget() const
+{
+	return  Cast<AActor>(CurrentTarget.GetObject());
+}
+
 
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
@@ -184,6 +214,15 @@ void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 	{
 		CurrentTarget = Objective;
 		bChangedToTargetPlayer = true;
+	}
+}
+
+void AEnemyAI::GiveScore()
+{
+	switch (EnemyType) {
+	case EEnemyType::Spider: OnRequestAddScore.Broadcast(EScoreType::SpiderKill); break;
+	case EEnemyType::Wasp: OnRequestAddScore.Broadcast(EScoreType::WaspKill); break;
+	default: break;
 	}
 }
 
@@ -199,14 +238,14 @@ void AEnemyAI::Tick(float DeltaTime)
 	{
 		return;
 	}
-
+	
 	if (bFadeComplete)
 	{
 		return;
 	}
-
+	
 	float Elapsed = GetWorld()->GetTimeSeconds() - DeathStartTime;
-	float Alpha = FMath::Clamp(Elapsed / FadeDuration, 0.f, 1.f);
+	float Alpha   = FMath::Clamp(Elapsed / FadeDuration, 0.f, 1.f);
 
 	FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), Alpha);
 
@@ -228,7 +267,14 @@ void AEnemyAI::SetAlive()
 	AIController->RunBehaviorTree(BehaviorTree);
 	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
 	GetCapsuleComponent()->SetEnableGravity(true);
-	HealthComponent->ResetHealthToMax();
+	//Should call this in BP
+	if (GE_ResetHealth)
+	{
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(GE_ResetHealth, 1.f, Context);
+	}
+	
+	bIsDead = false;
 }
 
 void AEnemyAI::OnDeathFXFinished(UNiagaraComponent* PooledNiagaraComp)
@@ -250,10 +296,11 @@ void AEnemyAI::OnFadeFinished()
 
 void AEnemyAI::ReleaseToPool()
 {
-	FVector Location = FVector(10000, 10000, 10000);
-	SetActorHiddenInGame(true);
-	SetActorLocation(Location);
-	bChangedToTargetPlayer = false;
-	EnemySpawnManager->MarkEnemyAsDead(this);
-	SetActorTickEnabled(false);
+		FVector Location = FVector(10000, 10000, 10000);
+		SetActorHiddenInGame(true);
+    	SetActorLocation(Location);
+    	bChangedToTargetPlayer = false;
+    	EnemySpawnManager->MarkEnemyAsDead(this);
+		SetActorTickEnabled(false);
 }
+

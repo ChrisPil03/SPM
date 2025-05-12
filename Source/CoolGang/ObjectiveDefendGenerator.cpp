@@ -1,6 +1,7 @@
 #include "ObjectiveDefendGenerator.h"
 #include "HealthComponent.h"
 // #include "InteractableObject.h"
+#include "ScoreManagerComponent.h"
 #include "Components/CapsuleComponent.h"
 
 AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
@@ -29,6 +30,12 @@ void AObjectiveDefendGenerator::BeginPlay()
 void AObjectiveDefendGenerator::StartObjective()
 {
 	Super::StartObjective();
+}
+
+void AObjectiveDefendGenerator::CompleteObjective()
+{
+	Super::CompleteObjective();
+	OnRequestAddScore.Broadcast(EScoreType::ObjectiveGeneratorCompleted);
 }
 
 void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
