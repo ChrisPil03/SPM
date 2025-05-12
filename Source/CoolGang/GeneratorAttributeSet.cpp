@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PlayerAttributeSet.h"
+#include "GeneratorAttributeSet.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayEffectExtension.h"
-#include "PlayerCharacter.h"
+#include "ObjectiveDefendGenerator.h"
 
-void UPlayerAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+void UGeneratorAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
 	
@@ -17,16 +17,18 @@ void UPlayerAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 		
 		const UGameplayEffect* AppliedEffect = Data.EffectSpec.Def;
 
-		UE_LOG(LogTemp, Error, TEXT("Player health being subtract by %f"), Magnitude);
-		if (AppliedEffect->GetName() == TEXT("Default__GE_ApplyDamageToPlayer_C"))
+		if (AppliedEffect->GetName() == TEXT("Default__GE_ApplyDamageToGenerator_C"))
 		{
+			UE_LOG(LogTemp, Error, TEXT("Generator health being subtract by %f"), Magnitude);
+			
 			if (CurrentHealth <= 0.0f)
 			{
 				AActor* OwnerActor = GetOwningActor();
 			
-				if (APlayerCharacter* Player = Cast<APlayerCharacter>(OwnerActor))
+				if (AObjectiveDefendGenerator* Generator = Cast<AObjectiveDefendGenerator>(OwnerActor))
 				{
-					Player->Die(); 
+					Generator->FailObjective();
+					
 				}
 			}
 		}
