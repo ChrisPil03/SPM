@@ -49,6 +49,7 @@ private:
 	//for debug
 	void BlinkDebug(FHitResult& h);
 	FTimerHandle BlinkTimerHandle;
+	
 };
 
 

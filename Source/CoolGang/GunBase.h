@@ -125,6 +125,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Fire();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void ActivateAbility();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void Reload();
