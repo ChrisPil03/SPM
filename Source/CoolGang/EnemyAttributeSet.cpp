@@ -12,13 +12,12 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 	Super::PostGameplayEffectExecute(Data);
 	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
 	{
-		
-		float Magnitude = Data.EvaluatedData.Magnitude;
 	    const UGameplayEffect* AppliedEffect = Data.EffectSpec.Def;
+		
 		if (AppliedEffect->GetName() == TEXT("Default__GE_DamageReduction_C"))
 
 	    {
-	        float DamageReduction = Magnitude;
+	        float DamageReduction = Data.EvaluatedData.Magnitude;
 	        // Apply the damage reduction
 
 			Damage = Damage.GetCurrentValue() * DamageReduction;
