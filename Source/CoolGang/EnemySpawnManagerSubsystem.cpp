@@ -3,6 +3,7 @@
 #include "AIController.h"
 #include "EnemySpawner.h"
 #include "EnemyAI.h"
+#include "EnemyAIController.h"
 #include "ObjectiveBase.h"
 #include "PlayerLocationDetection.h"
 #include "Kismet/GameplayStatics.h"
@@ -132,7 +133,11 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
     
     if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner())
     {
+        AEnemyAIController* AIController = Cast<AEnemyAIController>(Enemy->GetController());
+        AIController->BrainComponent->StopLogic("Relocating");
         ChosenSpawner->RelocateEnemy(Enemy);
+        AIController->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(Enemy->GetBehaviorTree()->BlackboardAsset));
+        AIController->BrainComponent->StartLogic();
     }
 }
 
