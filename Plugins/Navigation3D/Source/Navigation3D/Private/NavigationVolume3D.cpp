@@ -129,7 +129,7 @@ bool ANavigationVolume3D::FindRandomValidLocationInRadius(
 
     // The order of these loops determines which "first" node is found.
     // This scans layer by layer in Z, then row by row in Y, then across X.
-    for (int32 dz = -ExpandedSearchRadiusInCells; dz <= ExpandedSearchRadiusInCells; ++dz)
+    for (int32 dz = ExpandedSearchRadiusInCells; dz >= -ExpandedSearchRadiusInCells; --dz)
     {
         for (int32 dy = -ExpandedSearchRadiusInCells; dy <= ExpandedSearchRadiusInCells; ++dy)
         {

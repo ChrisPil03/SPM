@@ -8,6 +8,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "EnemyAI.generated.h"
 
+class AObjectiveBase;
 class UNiagaraComponent;
 class UNiagaraSystem;
 class UEnemySpawnManagerSubsystem;
@@ -69,6 +70,10 @@ public:
 	void DropUpgrade();
 
 	AActor* GetCurrentTarget() const;
+
+	void SetCurrentTarget(AActor* Target) {CurrentTarget = Target;}
+
+	UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 
 private:
 	UFUNCTION()
