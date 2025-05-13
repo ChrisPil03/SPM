@@ -116,7 +116,7 @@ private:
 
 	void ReleaseToPool();
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float AttackRange;
 
 	UPROPERTY()
@@ -131,6 +131,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxHealth;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* AttackMontage;
+	
 	UPROPERTY(VisibleAnywhere)
 	TScriptInterface<IAttackable> CurrentTarget;
 
