@@ -1,12 +1,14 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "InteractableObject.h"
+
+#include "PlayerCharacter.h"
+#include "PlayerLocationDetection.h"
+#include "Kismet/GameplayStatics.h"
 
 AInteractableObject::AInteractableObject()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	bCanInteractWith = false;
+	bPlayerInProximity = false;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Component"));
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -16,6 +18,8 @@ AInteractableObject::AInteractableObject()
 void AInteractableObject::BeginPlay()
 {
 	Super::BeginPlay();
+	FindInteractTrigger();
+	BindInteractTrigger();
 }
 
 void AInteractableObject::Tick(float DeltaTime)
@@ -25,13 +29,10 @@ void AInteractableObject::Tick(float DeltaTime)
 
 void AInteractableObject::Interact(AActor* Interactor)
 {
-	if (bCanInteractWith)
+	if (GetCanInteractWith())
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Interacted with object: %s"), *GetName());
-		
 		if (!PerformDelegate.IsBound())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("No function bound to perform on interact!"));
 			return;
 		}
 		PerformDelegate.Broadcast(this);
@@ -41,6 +42,10 @@ void AInteractableObject::Interact(AActor* Interactor)
 
 void AInteractableObject::SetCanInteractWith(bool const bNewState)
 {
+	if (!bNewState)
+	{
+		InteractionNotAvailable(nullptr);
+	}
 	bCanInteractWith = bNewState;
 	ShowInteractableOutline(bNewState);
 }
@@ -49,4 +54,56 @@ void AInteractableObject::ShowInteractableOutline(const bool bNewState)
 {
 	Mesh->bRenderCustomDepth = bNewState;
 	Mesh->MarkRenderStateDirty();
+}
+
+void AInteractableObject::BindInteractTrigger()
+{
+	if (InteractTrigger)
+	{
+		InteractTrigger->AddOnTriggerEnterFunction(this, &AInteractableObject::InteractionAvailable);
+		InteractTrigger->AddOnTriggerExitFunction(this, &AInteractableObject::InteractionNotAvailable);
+	}
+}
+
+void AInteractableObject::InteractionAvailable(APlayerLocationDetection* Trigger)
+{
+	if (bCanInteractWith)
+	{
+		bPlayerInProximity = true;
+
+		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
+			UGameplayStatics::GetPlayerCharacter(this, 0)))
+		{
+			Player->SetAvailableInteractable(this);
+		}
+	}
+}
+
+void AInteractableObject::InteractionNotAvailable(APlayerLocationDetection* Trigger)
+{
+	if (bCanInteractWith)
+	{
+		bPlayerInProximity = false;
+		
+		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
+			UGameplayStatics::GetPlayerCharacter(this, 0)))
+		{
+			Player->ClearAvailableInteractable(this);
+		}
+	}
+}
+
+void AInteractableObject::FindInteractTrigger()
+{
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+
+	for (AActor* Actor : AttachedActors)
+	{
+		if (APlayerLocationDetection* Trigger = Cast<APlayerLocationDetection>(Actor))
+		{
+			InteractTrigger = Trigger;
+			break;
+		}
+	}
 }

@@ -256,7 +256,6 @@ void AObjectiveBase::BroadcastObjectiveInProgress()
 {
 	if (OnObjectiveInProgress.IsBound())
 	{
-		UE_LOG(LogEngine, Warning, TEXT("Broadcasting InProgress."));
 		OnObjectiveInProgress.Broadcast(this);
 	}
 }

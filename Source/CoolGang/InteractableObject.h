@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "InteractableObject.generated.h"
 
+class APlayerCharacter;
+class APlayerLocationDetection;
 DECLARE_MULTICAST_DELEGATE_OneParam(FPerformDelegate, AInteractableObject*)
 
 UCLASS()
@@ -28,8 +30,8 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Interact(AActor* Interactor) override;
-	virtual void ResetInteractable() { bCanInteractWith = true; }
-	bool GetCanInteractWith() const { return bCanInteractWith; }
+	virtual void ResetInteractable() { bCanInteractWith = false; }
+	bool GetCanInteractWith() const { return bCanInteractWith && bPlayerInProximity; }
 	void SetCanInteractWith(bool const bNewState);
 	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
 
@@ -41,10 +43,20 @@ public:
 
 private:
 	void ShowInteractableOutline(const bool bNewState);
+	void BindInteractTrigger();
+	void InteractionAvailable(APlayerLocationDetection* Trigger);
+	void InteractionNotAvailable(APlayerLocationDetection* Trigger);
+	void FindInteractTrigger();
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Interact")
 	bool bCanInteractWith;
+
+	UPROPERTY(VisibleAnywhere, Category = "Interact")
+	bool bPlayerInProximity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
+
+	UPROPERTY(EditAnywhere, Category = "Interact")
+	APlayerLocationDetection* InteractTrigger;
 };

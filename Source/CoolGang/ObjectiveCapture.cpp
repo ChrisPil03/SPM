@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ObjectiveCapture.h"
+
+#include "InteractableObject.h"
 #include "PlayerCharacter.h"
 #include "ScoreManagerComponent.h"
 #include "Components/SphereComponent.h"
@@ -19,8 +21,6 @@ AObjectiveCapture::AObjectiveCapture()
 	SphereTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Trigger Component"));
 	SphereTrigger->InitSphereRadius(CaptureRadius);
 	RootComponent = SphereTrigger;
-	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
-	BaseMesh->SetupAttachment(SphereTrigger);
 }
 
 void AObjectiveCapture::BeginPlay()
@@ -30,6 +30,9 @@ void AObjectiveCapture::BeginPlay()
 	FailDelayProgressTimer->SetCompletionFunction(this, &AObjectiveCapture::FailObjective);
 	SphereTrigger->OnComponentBeginOverlap.AddDynamic(this, &AObjectiveCapture::OnSphereBeginOverlap);
 	SphereTrigger->OnComponentEndOverlap.AddDynamic(this, &AObjectiveCapture::OnSphereEndOverlap);
+
+	FindInteractable();
+	BindInteractable();
 }
 
 void AObjectiveCapture::Tick(float DeltaTime)
@@ -60,23 +63,13 @@ void AObjectiveCapture::Tick(float DeltaTime)
 	}
 }
 
-void AObjectiveCapture::Interact(AActor* Interactor)
-{
-	if (!bCanInteractWith || !GetIsActive())
-	{
-		return;
-	}
-	if (GetIsNotStarted())
-	{
-		StartObjective();
-	}
-	SetCanInteractWith(false);
-}
-
 void AObjectiveCapture::SetIsActive(const bool bNewState)
 {
 	Super::SetIsActive(bNewState);
-	SetCanInteractWith(bNewState);
+	if (ControlPanel)
+	{
+		ControlPanel->SetCanInteractWith(bNewState);	
+	}
 }
 
 void AObjectiveCapture::StartObjective()
@@ -96,8 +89,6 @@ void AObjectiveCapture::CompleteObjective()
 void AObjectiveCapture::ResetObjective()
 {
 	Super::ResetObjective();
-	//DestroyCaptureZone();
-	//SetCanInteractWith(true);
 }
 
 void AObjectiveCapture::IncreaseObjectiveProgress(float const DeltaTime)
@@ -129,16 +120,33 @@ void AObjectiveCapture::FailObjective()
 	}
 }
 
-void AObjectiveCapture::ShowInteractableOutline(const bool bNewState)
+void AObjectiveCapture::FindInteractable()
 {
-	BaseMesh->bRenderCustomDepth = bNewState;
-	BaseMesh->MarkRenderStateDirty();
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+
+	for (AActor* Actor : AttachedActors)
+	{
+		if (AInteractableObject* Interactable = Cast<AInteractableObject>(Actor))
+		{
+			ControlPanel = Interactable;
+			break;
+		}
+	}
 }
 
-void AObjectiveCapture::SetCanInteractWith(const bool bNewState)
+void AObjectiveCapture::BindInteractable()
 {
-	bCanInteractWith = bNewState;
-	ShowInteractableOutline(bNewState);
+	if (ControlPanel)
+	{
+		ControlPanel->SetOnInteractFunction(this, &AObjectiveCapture::RegisterControlPanelInteraction);	
+	}
+}
+
+void AObjectiveCapture::RegisterControlPanelInteraction(AInteractableObject* Interactable)
+{
+	StartObjective();
+	// ControlPanel->SetCanInteractWith(false);
 }
 
 void AObjectiveCapture::OnSphereBeginOverlap(

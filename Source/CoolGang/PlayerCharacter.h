@@ -8,6 +8,7 @@
 #include "HealthComponent.h"
 #include "PlayerCharacter.generated.h"
 
+class IInteractInterface;
 class UScoreManagerComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
@@ -67,6 +68,9 @@ public:
 
 	void Die();
 
+	void SetAvailableInteractable(IInteractInterface* Interactable);
+	void ClearAvailableInteractable(const IInteractInterface* Interactable);
+
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
@@ -75,8 +79,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category=Interact)
 	float InteractSphereRadius = 10;
-
-	bool IsInRange(FHitResult& HitResult) const;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess))
 	bool bDead;
@@ -129,4 +131,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite ,meta = (AllowPrivateAccess = "true"), Category = "Component")
 	UScoreManagerComponent* ScoreManagerComponent;
+	
+	IInteractInterface* AvailableInteractable;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UUserWidget* InteractWidget;
 };
