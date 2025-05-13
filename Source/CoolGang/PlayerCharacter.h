@@ -47,6 +47,9 @@ public:
 	void ReleasedTrigger();
 
 	UFUNCTION(BlueprintCallable)
+	void ActivateGunAbility();
+
+	UFUNCTION(BlueprintCallable)
 	void ReloadCurrentGun();
 	
 	UFUNCTION(BlueprintCallable)

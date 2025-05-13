@@ -101,6 +101,11 @@ void APlayerCharacter::ReleasedTrigger()
 	EquippedGun->StopFire();
 }
 
+void APlayerCharacter::ActivateGunAbility()
+{
+	EquippedGun->ActivateAbility();
+}
+
 void APlayerCharacter::ReloadCurrentGun()
 {
 	if (!EquippedGun)
