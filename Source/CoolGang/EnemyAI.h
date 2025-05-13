@@ -8,6 +8,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "EnemyAI.generated.h"
 
+class AObjectiveBase;
 class UNiagaraComponent;
 class UNiagaraSystem;
 class UEnemySpawnManagerSubsystem;
@@ -45,9 +46,11 @@ public:
 	float GetAttackRange() const;
 
 	UHealthComponent* GetHealthComponent() const;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Drop")
 	TSubclassOf<AActor> Drop;
+
+	static bool IsPlayerShieldActive(AActor* Player);
 	
 	UPROPERTY(EditAnywhere, Category = "Drop")
 	float DropRate;
@@ -69,6 +72,10 @@ public:
 	void DropUpgrade();
 
 	AActor* GetCurrentTarget() const;
+
+	void SetCurrentTarget(AActor* Target) {CurrentTarget = Target;}
+
+	UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 
 private:
 	UFUNCTION()

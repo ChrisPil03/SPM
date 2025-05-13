@@ -35,6 +35,10 @@ public:
 	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, Damage)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData PlayerDamage;
+	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, PlayerDamage)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
 	FGameplayAttributeData MovementSpeed;
 	ATTRIBUTE_ACCESSORS(UEnemyAttributeSet, MovementSpeed)
 	

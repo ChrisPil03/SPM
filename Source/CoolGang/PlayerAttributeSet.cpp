@@ -30,6 +30,5 @@ void UPlayerAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCall
 				}
 			}
 		}
-		
 	}
 }

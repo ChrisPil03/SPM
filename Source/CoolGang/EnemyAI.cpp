@@ -24,6 +24,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "ScoreManagerComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 
 // Sets default values
@@ -113,13 +114,31 @@ void AEnemyAI::Attack()
 	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
 	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
 	{
-		UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
+		//UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
 
 	}
-	
+	AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
+	if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
+	{
+		//Reduce damage here ???
+	}
 	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
 
+bool AEnemyAI::IsPlayerShieldActive(AActor* PlayerActor)
+{
+	if (PlayerActor)
+	{
+		UAbilitySystemComponent* PlayerASC = PlayerActor->FindComponentByClass<UAbilitySystemComponent>();
+		if (PlayerASC)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Found PlayerActor"));
+			FGameplayTag ShieldTag = FGameplayTag::RequestGameplayTag(TEXT("State.ShieldActive"));
+			return PlayerASC->HasMatchingGameplayTag(ShieldTag);
+		}
+	}
+	return false;
+}
 
 float AEnemyAI::GetAttackRange() const
 {
@@ -160,6 +179,7 @@ void AEnemyAI::Die()
 	{
 		Controller->StopMovement();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
 	}
 	
 	GetCapsuleComponent()->SetEnableGravity(false);

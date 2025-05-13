@@ -2,7 +2,9 @@
 #include "HealthComponent.h"
 // #include "InteractableObject.h"
 #include "ScoreManagerComponent.h"
+#include "AbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GeneratorAttributeSet.h"
 
 AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 	StartDelay(3.f),
@@ -17,6 +19,9 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	MeshComponent->SetupAttachment(RootComponent);
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	
 }
 
 void AObjectiveDefendGenerator::BeginPlay()
@@ -25,6 +30,29 @@ void AObjectiveDefendGenerator::BeginPlay()
 	// BindControlPanel();
 	BindDeathFunction();
 	BindCompletionFunction();
+	InitStats();
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		UGeneratorAttributeSet::GetHealthAttribute()
+	).AddUObject(this, &AObjectiveDefendGenerator::OnCurrentHealthChanged);
+	
+}
+
+void AObjectiveDefendGenerator::OnCurrentHealthChanged(const FOnAttributeChangeData& Data)
+{
+	float NewCurrentHealth = Data.NewValue;
+	OnGeneratorHealthChangedDelegate.Broadcast(NewCurrentHealth);
+	
+	if (!bHalfHealthVoiceLinePlayed && (NewCurrentHealth/ MaxHealth <= 0.5f))
+	{
+		EnqueueVoiceLineWithMessage(DownToHalfHealthVoiceLine, "");
+		bHalfHealthVoiceLinePlayed = true;
+	}
+	if (!bLowHealthVoiceLinePlayed &&
+		HealthComponent->GetCurrentHealth() - (NewCurrentHealth/ MaxHealth <= 0.1f))
+	{
+		EnqueueVoiceLineWithMessage(LowHealthVoiceLine, "");
+		bLowHealthVoiceLinePlayed = true;
+	}
 }
 
 void AObjectiveDefendGenerator::StartObjective()
@@ -68,12 +96,38 @@ bool AObjectiveDefendGenerator::CannotTakeDamage() const
 	return !GetIsActive() || GetIsComplete() || GetIsFailed();
 }
 
+void AObjectiveDefendGenerator::InitStats()
+{
+	if (AbilitySystemComponent)
+	{
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_InitGeneratorStats, 1.f, Context);
+
+		if (Spec.IsValid())
+		{
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MaxHealth"), MaxHealth);
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+			
+		}
+	}	
+}
+
 void AObjectiveDefendGenerator::ResetObjective()
 {
 	Super::ResetObjective();
 	bHalfHealthVoiceLinePlayed = false;
 	bLowHealthVoiceLinePlayed = false;
-	HealthComponent->ResetHealthToMax();
+	
+	//HealthComponent->ResetHealthToMax();
+	
+	if (GE_ResetGeneratorHealth)
+	{
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(GE_ResetGeneratorHealth, 1.f, Context);
+	}
 	//ControlPanel->SetCanInteractWith(true);
 }
 
@@ -86,19 +140,7 @@ float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent con
 		return 0;
 	}
 	//UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
-	DamageAmount = FMath::Min(DamageAmount, HealthComponent->GetCurrentHealth());
-	if (!bHalfHealthVoiceLinePlayed &&
-		HealthComponent->GetCurrentHealth() - DamageAmount <= HealthComponent->GetMaxHealth() / 2)
-	{
-		EnqueueVoiceLineWithMessage(DownToHalfHealthVoiceLine, "");
-		bHalfHealthVoiceLinePlayed = true;
-	}
-	if (!bLowHealthVoiceLinePlayed &&
-		HealthComponent->GetCurrentHealth() - DamageAmount <= HealthComponent->GetMaxHealth() / 10)
-	{
-		EnqueueVoiceLineWithMessage(LowHealthVoiceLine, "");
-		bLowHealthVoiceLinePlayed = true;
-	}
+	
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
@@ -117,11 +159,9 @@ void AObjectiveDefendGenerator::SetIsActive(const bool bNewState)
 
 float AObjectiveDefendGenerator::GetHealthPercentage() const
 {
-	if (!HealthComponent)
-	{
-		return 0;
-	}
-	return HealthComponent->GetCurrentHealth() / HealthComponent->GetMaxHealth();
+	const UGeneratorAttributeSet* MyAttributes = AbilitySystemComponent->GetSet<UGeneratorAttributeSet>();
+	
+	return MyAttributes->GetHealth() / MyAttributes->GetMaxHealth();
 }
 
 // void AObjectiveDefendGenerator::BindControlPanel()
