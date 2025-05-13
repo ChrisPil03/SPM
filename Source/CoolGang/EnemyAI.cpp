@@ -24,6 +24,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "ScoreManagerComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 
 // Sets default values
@@ -58,8 +59,8 @@ void AEnemyAI::BeginPlay()
 	{
 		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
 		{
-			//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
-			Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+			// Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
@@ -178,6 +179,7 @@ void AEnemyAI::Die()
 	{
 		Controller->StopMovement();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
 	}
 	
 	GetCapsuleComponent()->SetEnableGravity(false);
