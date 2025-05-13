@@ -17,7 +17,7 @@ AObjectiveBase::AObjectiveBase() :
 	Progress(0.f),
 	SystemIntegrity(nullptr),
 	BaseIntegrityDamage(100.f),
-	ObjectiveFailedIntegrityChunkDamage(25000.f),
+	ObjectiveFailedIntegrityChunkDamage(20000.f),
 	ActivatedMessage("MALFUNCTION DETECTED"),
 	StartedMessage("OBJECTIVE STARTED"),
 	CompletedMessage("OBJECTIVE COMPLETED"),
