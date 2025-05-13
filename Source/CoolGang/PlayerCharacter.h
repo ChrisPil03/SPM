@@ -118,10 +118,6 @@ private:
 	TSubclassOf<class UGameplayEffect> GE_InitPlayerStats;
 	void InitPlayerStats();
 	
-	UFUNCTION(BlueprintCallable, meta=(AllowPrivateAccess="true"))
-	void ResetCharacterPosition();
-	
-
 	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")

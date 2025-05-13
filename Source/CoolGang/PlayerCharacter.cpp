@@ -247,14 +247,3 @@ void APlayerCharacter::InitPlayerStats()
 	}	
 
 }
-
-void APlayerCharacter::ResetCharacterPosition()
-{
-	AGameModeBase *GameMode = GetWorld()->GetAuthGameMode();
-	if (GameMode)
-	{
-		APlayerController *PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		AActor *PlayerStartActor = GameMode->FindPlayerStart(PC);
-		SetActorLocationAndRotation(PlayerStartActor->GetActorLocation(), PlayerStartActor->GetActorRotation());
-	}
-}
