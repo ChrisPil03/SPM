@@ -138,7 +138,10 @@ void AObjectiveDefendGenerator::ResetObjective()
 void AObjectiveDefendGenerator::SetIsActive(const bool bNewState)
 {
 	Super::SetIsActive(bNewState);
-	ControlPanel->SetCanInteractWith(bNewState);
+	if (ControlPanel)
+	{
+		ControlPanel->SetCanInteractWith(bNewState);
+	}
 }
 
 float AObjectiveDefendGenerator::GetHealthPercentage() const
