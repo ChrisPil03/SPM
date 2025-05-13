@@ -59,8 +59,8 @@ void AEnemyAI::BeginPlay()
 	{
 		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
 		{
-			//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
-			Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+			// Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
 			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 		}
 	}
