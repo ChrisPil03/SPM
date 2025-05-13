@@ -110,7 +110,10 @@ bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
 	FRotator Rotation;
 	GetTraceStartLocationAndRotation(StartPoint, Rotation);
 	const FVector BulletDirection = Rotation.Vector();
-	FVector EndPoint = StartPoint + (BulletDirection * 20000000);  // range 
+	const UAbilitySystemComponent* ASC = GetActorInfo().AbilitySystemComponent.Get();
+	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
+	float MaxRange = Attributes->GetMaxRange();
+	FVector EndPoint = StartPoint + (BulletDirection * MaxRange);  // range 
 	
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
@@ -138,11 +141,11 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
 	float NumPellets = Attributes->GetPellets();
 	const float ConeHalfAngleDegrees = Attributes->GetBulletSpreadAngle();
-
+	float MaxRange = Attributes->GetMaxRange();
 	for (int32 i = 0; i < NumPellets; ++i)
 	{
 		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
-		FVector EndPoint = StartPoint + (ShootDirection * 10000.0f); // Trace distance
+		FVector EndPoint = StartPoint + (ShootDirection * MaxRange); // Trace distance
 		FHitResult Hit;
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());

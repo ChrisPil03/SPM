@@ -52,6 +52,11 @@ public:
 	FGameplayAttributeData BulletSpreadAngle;
 	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, BulletSpreadAngle)
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes")
+	FGameplayAttributeData MaxRange;
+	ATTRIBUTE_ACCESSORS(UWeaponAttributeSet, MaxRange)
+
+
 	
 	
 
