@@ -60,11 +60,11 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		//DisplayMessageForSeconds(ActivatedMessage, 3.f);
 		EnqueueVoiceLineWithMessage(ObjectiveActivatedVoiceLine, ActivatedMessage);
 		
-		// 	if (OnObjectiveActivated.IsBound())
-		// 	{
-		// 		UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
-		// 		OnObjectiveActivated.Broadcast(this);
-		// 	}
+		if (OnObjectiveActivated.IsBound())
+		{
+			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
+			OnObjectiveActivated.Broadcast(this);
+		}
 	} else
 	{
 		if (OnObjectiveDeactivated.IsBound())
@@ -111,13 +111,11 @@ void AObjectiveBase::Tick(float DeltaTime)
 	{
 		BroadcastObjectiveIsActive();
 	}
-
-	
-	// if (bIsTimeBased && GetIsInProgress())
-	// {
-	// 	IncreaseObjectiveProgress(DeltaTime);
-	// 	//BroadcastObjectiveInProgress();
-	// }
+	if (bIsTimeBased && GetIsInProgress())
+	{
+		// IncreaseObjectiveProgress(DeltaTime);
+		BroadcastObjectiveInProgress();
+	}
 }
 
 void AObjectiveBase::StartObjective()
@@ -125,8 +123,8 @@ void AObjectiveBase::StartObjective()
 	if (GetIsNotStarted())
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
-		DisplayMessageForSeconds(StartedMessage, 3.f);
-		//StopMalfunctioning();
+		StopMalfunctioning();
+		//DisplayMessageForSeconds(StartedMessage, 3.f);
 		EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
 	}
 }

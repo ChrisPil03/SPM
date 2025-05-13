@@ -7,7 +7,8 @@
 #include "WeaponAttributeSet.h"
 
 #include "PlayerCharacter.h"
-
+#define PIERCING_TRACE ECC_GameTraceChannel6
+#define NORMAL_TRACE ECC_GameTraceChannel1
 UGA_FireWeapon::UGA_FireWeapon()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
@@ -33,58 +34,25 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 
 void UGA_FireWeapon::Fire()
 {
-	APlayerCharacter* OwningPlayerCharacter = Cast<APlayerCharacter>(GetOwningActorFromActorInfo()->GetOwner());
-	AGunBase*  EquippedWeapon = OwningPlayerCharacter->GetEquippedGun();
-	if (EquippedWeapon)
-	{
-		EWeaponType WeaponType = EquippedWeapon->GetWeaponType();
-		switch (WeaponType)
-		{
-		case EWeaponType::Shotgun:
-			PelletsFire();
-			break;
-		case EWeaponType::Rifle:
-			SingleBulletFire();
-			break;
-		case EWeaponType::Pistol:
-			SingleBulletFire();
-			break;
-		default:
-			UE_LOG(LogTemp, Warning, TEXT("Unknown Weapon Type!"));
-			break;
-		}
-	}
-}
-
-void UGA_FireWeapon::SingleBulletFire()
-{
-	FHitResult HitResult;
-	SingleTrace(HitResult);
-	
-	FGameplayAbilityTargetDataHandle TargetData;
-	FGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FGameplayAbilityTargetData_SingleTargetHit();
-	NewTargetData->HitResult = HitResult;
-	TargetData.Add(NewTargetData);
-	
-	OnTargetDataReady(TargetData);
-}
-
-void UGA_FireWeapon::PelletsFire()
-{
 	TArray<FHitResult> HitResults;
-	MultiTrace(HitResults);
+	BulletTrace(HitResults);
 	
 	FGameplayAbilityTargetDataHandle TargetData;
-	for (int32 i = 0; i < HitResults.Num(); i++)
+
+	for (const FHitResult& Hit : HitResults)
 	{
-		FGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FGameplayAbilityTargetData_SingleTargetHit();
-		NewTargetData->HitResult = HitResults[i];
+		// Create a new target data for this individual hit
+		FGameplayAbilityTargetData_SingleTargetHit* NewTargetData =
+			new FGameplayAbilityTargetData_SingleTargetHit(Hit);
+    
+		// Add it to the handle (this builds an array internally)
 		TargetData.Add(NewTargetData);
 	}
-	
-	OnTargetDataReady(TargetData);
-}
 
+	// Pass it to your ability logic
+	OnTargetDataReady(TargetData);
+
+}
 
 bool UGA_FireWeapon::GetTraceStartLocationAndRotation(FVector& OutStartPoint, FRotator& OutRotation) const
 {
@@ -104,30 +72,7 @@ bool UGA_FireWeapon::GetTraceStartLocationAndRotation(FVector& OutStartPoint, FR
 	return true;
 }
 
-bool UGA_FireWeapon::SingleTrace(FHitResult& Hit)
-{
-	FVector StartPoint;
-	FRotator Rotation;
-	GetTraceStartLocationAndRotation(StartPoint, Rotation);
-	const FVector BulletDirection = Rotation.Vector();
-	FVector EndPoint = StartPoint + (BulletDirection * 20000000);  // range 
-	
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
-	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
-
-	if ( GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, QueryParams))
-	{
-		DrawDebugSphere(GetWorld(), Hit.Location, 2.0f, 12,FColor::Red, false, 2.0f);
-		
-		//BlinkDebug(Hit);
-		return true;
-	}
-		return false;
-
-}
-
-bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
+bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 {
 	bool bHasTarget = false;
 	FVector StartPoint;
@@ -138,21 +83,38 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
 	float NumPellets = Attributes->GetPellets();
 	const float ConeHalfAngleDegrees = Attributes->GetBulletSpreadAngle();
+	float MaxRange = Attributes->GetMaxRange();
+	ECollisionChannel TraceChannel = NORMAL_TRACE;
 
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
+	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
+	TArray<FHitResult> PiercingHitResults;
+	if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive")))
+	{
+		TraceChannel = PIERCING_TRACE;
+		UE_LOG(LogTemp, Warning, TEXT("Weapon.PiercingActive"));
+	}
 	for (int32 i = 0; i < NumPellets; ++i)
 	{
 		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
-		FVector EndPoint = StartPoint + (ShootDirection * 10000.0f); // Trace distance
-		FHitResult Hit;
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
-		QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner()); // Ignore self
-		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, StartPoint, EndPoint, ECC_GameTraceChannel1, QueryParams);
+		FVector EndPoint = StartPoint + (ShootDirection * MaxRange); // Trace distance
+		
+		bool bHit = GetWorld()->LineTraceMultiByChannel(PiercingHitResults, StartPoint, EndPoint, TraceChannel, QueryParams);
 		
 		if (bHit)
 		{
-			HitResults.Add(Hit);
-			DrawDebugSphere(GetWorld(), Hit.Location, 2.0f, 12,FColor::Red, false, 2.0f);
+			for (const FHitResult& HitResult : PiercingHitResults)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+				
+				if (!IsDuplicateHit(HitResults, HitResult.GetActor()))
+				{
+					HitResults.Add(HitResult);
+				}
+			}
+			
+			DrawDebugLine(GetWorld(), StartPoint, EndPoint,FColor::Red, false, 2.0f);
 			//BlinkDebug(Hit);
 			bHasTarget = true;
 		}
@@ -162,41 +124,14 @@ bool UGA_FireWeapon::MultiTrace(TArray<FHitResult>& HitResults)
 }
 
 
-void UGA_FireWeapon::BlinkDebug(FHitResult& HitResult)
+bool UGA_FireWeapon::IsDuplicateHit(const TArray<FHitResult>& ExistingHits, const AActor* Actor)
 {
-	AActor* HitActor = HitResult.GetActor();
-	if (HitActor == nullptr)
+	for (const FHitResult& Hit : ExistingHits)
 	{
-		return;
-	}
-
-	UStaticMeshComponent* MeshComponent = HitActor->FindComponentByClass<UStaticMeshComponent>();
-
-	if (MeshComponent == nullptr)
-	{
-		return;		
-	}
-		// Save original material
-		UMaterialInterface* OriginalMaterialInterface = MeshComponent->GetMaterial(0);
-		FString AssetPath = OriginalMaterialInterface->GetPathName();
-	if (AssetPath.Equals(TEXT("/Game/Assets/Materials/M_Debug.M_Debug")))
-	{
-		return;
-	}
-		// Load red material
-		if (UMaterialInterface* RedMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Assets/Materials/M_Debug.M_Debug")))
+		if (Hit.GetActor() == Actor)
 		{
-			MeshComponent->SetMaterial(0, RedMaterial);
-			
-			// Start a timer to revert the material after InRate seconds
-			FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this, AssetPath, MeshComponent]()
-			{
-				UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, *AssetPath );
-				MeshComponent->SetMaterial(0, Material);
-			});
-	
-			GetWorld()->GetTimerManager().SetTimer(BlinkTimerHandle, TimerDelegate, 0.1, false);
+			return true;
 		}
-	
+	}
+	return false;
 }
-

@@ -27,28 +27,20 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 					   const FGameplayAbilityActorInfo* ActorInfo,
 					   FGameplayTagContainer* OptionalRelevantTags) const override;
 	
-	
-	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
-	bool SingleTrace(FHitResult& Hit);
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
-	bool MultiTrace(TArray<FHitResult>& Hits);
+	bool BulletTrace(TArray<FHitResult>& Hits);
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetData);
 
 	UFUNCTION(BlueprintCallable)
 	void Fire();
-	
-	UFUNCTION(BlueprintCallable)
-	void SingleBulletFire();
-	UFUNCTION(BlueprintCallable)
-	void PelletsFire();
+
 private:
 	bool GetTraceStartLocationAndRotation(FVector& OutStartPoint, FRotator& OutRotation) const;
-	//for debug
-	void BlinkDebug(FHitResult& h);
-	FTimerHandle BlinkTimerHandle;
+	bool IsDuplicateHit(const TArray<FHitResult>& ExistingHits, const AActor* Actor);
+
 };
 
 
