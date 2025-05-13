@@ -30,11 +30,11 @@ protected:
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ResetObjective() override;
-	virtual float TakeDamage(
-		float DamageAmount,
-		FDamageEvent const& DamageEvent,
-		AController* EventInstigator,
-		AActor* DamageCauser) override;
+	// virtual float TakeDamage(
+	// 	float DamageAmount,
+	// 	FDamageEvent const& DamageEvent,
+	// 	AController* EventInstigator,
+	// 	AActor* DamageCauser) override;
 	virtual void SetIsActive(const bool bNewState) override;
 	
 	UFUNCTION(BlueprintCallable)
@@ -47,11 +47,10 @@ public:
 	float MaxHealth;
 
 private:
-	// void BindControlPanel();
+	void BindControlPanel();
 	void BindDeathFunction();
 	void BindCompletionFunction();
-	// void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
-	// void InitiateQuarantine();
+	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
 	bool CannotTakeDamage() const;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
@@ -92,6 +91,6 @@ private:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnGeneratorHealthChangedDelegate OnGeneratorHealthChangedDelegate;
 	
-	// UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess))
-	// AInteractableObject* ControlPanel;
+	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess))
+	AInteractableObject* ControlPanel;
 };
