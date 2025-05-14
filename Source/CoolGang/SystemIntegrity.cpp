@@ -4,7 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 
 ASystemIntegrity::ASystemIntegrity() :
-	MaxIntegrity(100000.f), CurrentIntegrity(MaxIntegrity)
+	MaxIntegrity(50000.f)
 {
 	PrimaryActorTick.bCanEverTick = false;
 }
@@ -12,6 +12,7 @@ ASystemIntegrity::ASystemIntegrity() :
 void ASystemIntegrity::BeginPlay()
 {
 	Super::BeginPlay();
+	CurrentIntegrity = MaxIntegrity;
 	bIsDestroyed = false;
 }
 
