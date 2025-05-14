@@ -58,8 +58,9 @@ public:
 	void PauseRestoration();
 	void ResetServer();
 	void SetSmokeEffectActive(const bool bNewState) const;
+	void StartRestoration();
 
-	void SetHeatUpFunction(const FServerHeatUpDelegate& NewDelegate) { HeatUpDelegate = NewDelegate; }
+	// void SetHeatUpFunction(const FServerHeatUpDelegate& NewDelegate) { HeatUpDelegate = NewDelegate; }
 	
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FCompleteDelegate CompleteDelegate;
@@ -72,31 +73,33 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UMaterialInterface* StandardMaterial;
 	
-	void StartRestoration();
 	void IncreaseRestorationProgress(float DeltaTime);
-	void GenerateHeat(float DeltaTime);
+	// void GenerateHeat(float DeltaTime);
 
 	UFUNCTION()
 	void CompleteRestoration();
 	
 	UPROPERTY(EditAnywhere, Category = "Server")
-	float RestoreTime;
+	int32 RestoreTime;
 
 	UPROPERTY(VisibleAnywhere, Category = "Server")
 	float RestoreProgress;
 
 	UPROPERTY(VisibleAnywhere, Category = "Server")
 	EServerState ServerState;
+
+	UPROPERTY(EditAnywhere, Category = "Server")
+	UNiagaraComponent* SmokeNiagaraComponent;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 
-	bool bInstantRestoration;
+	FTimerHandle MalfunctionTimerHandle;
 
-	UPROPERTY(EditAnywhere, Category = "Overheat")
-	float HeatGeneration;
-
-	UPROPERTY(EditAnywhere, Category = "Overheat")
-	UNiagaraComponent* SmokeNiagaraComponent;
-
-	FServerHeatUpDelegate HeatUpDelegate;
+	// bool bInstantRestoration;
+	//
+	// UPROPERTY(EditAnywhere, Category = "Overheat")
+	// float HeatGeneration;
+	//
+	//
+	// FServerHeatUpDelegate HeatUpDelegate;
 };

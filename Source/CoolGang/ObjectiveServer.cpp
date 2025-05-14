@@ -3,12 +3,12 @@
 #include "NiagaraComponent.h"
 
 AObjectiveServer::AObjectiveServer() :
-	RestoreTime(0.f),
+	RestoreTime(40),
 	RestoreProgress(FProgressTimer::ZeroCompletion),
 	ServerState(EServerState::Idle),
-	ProgressTimer(nullptr),
-	bInstantRestoration(true),
-	HeatGeneration(3)
+	ProgressTimer(nullptr)
+	// bInstantRestoration(true),
+	// HeatGeneration(3)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SmokeNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("Smoke Niagara Component");
@@ -20,11 +20,12 @@ void AObjectiveServer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (RestoreTime > 0.f)
-	{
-		bInstantRestoration = false;
-	}
+	// if (RestoreTime > 0.f)
+	// {
+	// 	bInstantRestoration = false;
+	// }
 	ProgressTimer = MakeUnique<FProgressTimer>(RestoreTime);
+	SetCanInteractWith(false);
 }
 
 void AObjectiveServer::Tick(float DeltaTime)
@@ -46,11 +47,13 @@ void AObjectiveServer::Interact(AActor* Interactor)
 {
 	if (GetCanInteractWith())
 	{
-		if (GetNeedsRestoring())
-		{
-			StartRestoration();
-		}
+		// if (GetNeedsRestoring())
+		// {
+		// 	StartRestoration();
+		// }
 		SetCanInteractWith(false);
+		ResumeRestoration();
+		ResetMaterial();
 
 		if (PerformDelegate.IsBound())
 		{
@@ -73,19 +76,26 @@ void AObjectiveServer::StartRestoration()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Restoration Started"));
 
-	if (bInstantRestoration)
-	{
-		CompleteRestoration();
-		return;
-	}
+	// if (bInstantRestoration)
+	// {
+	// 	CompleteRestoration();
+	// 	return;
+	// }
 	SetServerState(EServerState::Restoring);
+	
+	GetWorld()->GetTimerManager().SetTimer(
+		MalfunctionTimerHandle,
+		this,
+		&AObjectiveServer::PauseRestoration,
+		FMath::RandRange(1, RestoreTime),
+		false);
 }
 
 void AObjectiveServer::IncreaseRestorationProgress(float DeltaTime)
 {
 	ProgressTimer->IncreaseProgress(DeltaTime);
 	RestoreProgress = ProgressTimer->GetProgress();
-	GenerateHeat(DeltaTime);
+	// GenerateHeat(DeltaTime);
 		
 	if (RestoreProgress == FProgressTimer::FullCompletion)
 	{
@@ -93,17 +103,17 @@ void AObjectiveServer::IncreaseRestorationProgress(float DeltaTime)
 	}
 }
 
-void AObjectiveServer::GenerateHeat(float DeltaTime)
-{
-	if (HeatUpDelegate.IsBound())
-	{
-		HeatUpDelegate.Execute(HeatGeneration * DeltaTime);
-	}
-}
+// void AObjectiveServer::GenerateHeat(float DeltaTime)
+// {
+// 	if (HeatUpDelegate.IsBound())
+// 	{
+// 		HeatUpDelegate.Execute(HeatGeneration * DeltaTime);
+// 	}
+// }
 
 void AObjectiveServer::CompleteRestoration()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Restoration Complete"));
+	// UE_LOG(LogTemp, Warning, TEXT("Restoration Complete"));
 	SetServerState(EServerState::Restored);
 	RestoreProgress = FProgressTimer::FullCompletion;
 	
@@ -120,7 +130,9 @@ void AObjectiveServer::PauseRestoration()
 	{
 		SetServerState(EServerState::Paused);
 		ProgressTimer->SetIsPaused(true);
-		UE_LOG(LogTemp, Warning, TEXT("Pause Restoration"));
+		SetCanInteractWith(true);
+		SetDebugMaterial();
+		// UE_LOG(LogTemp, Warning, TEXT("Pause Restoration"));
 	}
 }
 
@@ -130,7 +142,7 @@ void AObjectiveServer::ResumeRestoration()
 	{
 		SetServerState(EServerState::Restoring);
 		ProgressTimer->SetIsPaused(false);
-		UE_LOG(LogTemp, Warning, TEXT("Resume Restoration"));
+		// UE_LOG(LogTemp, Warning, TEXT("Resume Restoration"));
 	}
 }
 

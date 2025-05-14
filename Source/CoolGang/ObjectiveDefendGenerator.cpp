@@ -155,9 +155,7 @@ void AObjectiveDefendGenerator::BindControlPanel()
 {
 	if (ControlPanel)
 	{
-		FPerformDelegate Delegate;
-		Delegate.AddUObject(this, &AObjectiveDefendGenerator::RegisterControlPanelInteraction);
-		ControlPanel->SetInteractFunction(Delegate);
+		ControlPanel->SetOnInteractFunction(this, &AObjectiveDefendGenerator::RegisterControlPanelInteraction);
 	}
 }
 
