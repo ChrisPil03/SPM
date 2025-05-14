@@ -17,6 +17,9 @@ class COOLGANG_API ACyberWarriorPlayerController : public APlayerController
 public:
 	virtual void BeginPlay() override;
 	virtual void GameHasEnded(AActor* EndGameFocus, bool bIsWinner) override;
+
+	UFUNCTION(BlueprintCallable)
+	UUserWidget* GetHUDWidget() const {return HUD;}
 	
 private:
 	UPROPERTY(EditAnywhere)

@@ -124,6 +124,7 @@ AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
 
 void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("UEnemySpawnManagerSubsystem::RelocateToRandomSpawner"));
     if (Enemy == nullptr)
     {
         return;
@@ -143,6 +144,7 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
 
 void UEnemySpawnManagerSubsystem::CheckOutOfRange()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("UEnemySpawnManagerSubsystem::CheckOutOfRange"));
     if (AliveEnemies.Num() == 0)
     {
         return;
