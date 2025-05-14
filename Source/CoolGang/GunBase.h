@@ -173,25 +173,26 @@ protected:
 
 	void OnFireRateChanged(const FOnAttributeChangeData& Data);
 
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	UPROPERTY(BlueprintAssignable, Category = "Weapon Stats")
 	FOnFireRateChangedDelegate OnFireRateChangedDelegate;
 
 	void OnAmmoCountChanged(const FOnAttributeChangeData& Data) const;
 
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	UPROPERTY(BlueprintAssignable, Category = "Weapon Stats")
 	FOnAmmoCountChangedDelegate OnAmmoCountChangedDelegate;
 
 	void OnMagazineSizeChanged(const FOnAttributeChangeData& Data) const;
 
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	UPROPERTY(BlueprintAssignable, Category = "Weapon Stats")
 	FOnMagazineSizeChangedDelegate OnMagazineSizeChangedDelegate;
 
 	void OnDamageChanged(const FOnAttributeChangeData& Data) const;
 	
-	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	UPROPERTY(BlueprintAssignable, Category = "Weapon Stats")
 	FOnDamageChangedDelegate OnDamageChangedDelegate;
 
 	void OnReloadTimeChanged(const FOnAttributeChangeData& Data) const;
+	UPROPERTY(BlueprintAssignable, Category = "Weapon Stats")
 	FOnReloadTimeChangedDelegate OnReloadTimeChangedDelegate;
 	
 };
