@@ -7,6 +7,7 @@
 #include "WeaponAttributeSet.h"
 
 #include "PlayerCharacter.h"
+#include "Engine/OverlapResult.h"
 #define PIERCING_TRACE ECC_GameTraceChannel6
 #define NORMAL_TRACE ECC_GameTraceChannel1
 UGA_FireWeapon::UGA_FireWeapon()
@@ -74,7 +75,7 @@ bool UGA_FireWeapon::GetTraceStartLocationAndRotation(FVector& OutStartPoint, FR
 
 bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 {
-	bool bHasTarget = false;
+	bool bHasTarget;
 	FVector StartPoint;
 	FRotator Rotation;
 	GetTraceStartLocationAndRotation(StartPoint, Rotation);
@@ -89,13 +90,18 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
 	
-	bool bPiercingMode = ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive"));
+
     
-	if (bPiercingMode)
+	if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive")))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Weapon.PiercingActive"));
 		bHasTarget = PiercingBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
 										 ConeHalfAngleDegrees, MaxRange, QueryParams);
+	}
+	else if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.ChainingActive")))
+	{
+		bHasTarget = ChainingBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
+									 ConeHalfAngleDegrees, MaxRange, QueryParams);
 	}
 	else
 	{
@@ -166,6 +172,62 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 	return bHasTarget;
 }
 
+bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
+	const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
+	const FCollisionQueryParams& QueryParams)
+{
+	bool bHasTarget = false;
+	float SphereRadius = 100.0f;
+	
+	for (int32 i = 0; i < NumPellets; ++i)
+	{
+		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
+		FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
+        
+		FHitResult HitResult;
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
+        
+		if (bHit)
+		{
+			TArray<FHitResult> ValidHits;
+			for (int32 j = 0; i < 5; ++i)
+			{
+				
+				TArray<FOverlapResult> OverlapResults;
+				bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
+				OverlapResults,
+				HitResult.Location,               // FVector center
+				FQuat::Identity, // No rotation
+				NORMAL_TRACE,
+				FCollisionShape::MakeSphere(SphereRadius),
+				QueryParams);
+				for (const FOverlapResult& OverlapResult : OverlapResults)
+				{
+					bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(HitResult, HitResult.Location, OverlapResult.GetActor()->GetActorLocation(), NORMAL_TRACE, QueryParams);
+					if (bIsTargetable)
+					{
+						if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
+						{
+							UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+							DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+							ValidHits.Add(HitResult);
+						}
+					}
+				}
+				
+				
+			}
+			
+			for (const FHitResult& ValidHit : ValidHits)
+			{
+				HitResults.Add(ValidHit);
+			}
+			bHasTarget = true;
+		}
+	}
+	return bHasTarget;
+	
+}
 
 
 bool UGA_FireWeapon::IsDuplicateHit(const TArray<FHitResult>& ExistingHits, const AActor* Actor)
