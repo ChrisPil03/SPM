@@ -29,14 +29,21 @@ void AInteractableObject::Tick(float DeltaTime)
 
 void AInteractableObject::Interact(AActor* Interactor)
 {
+	if (InteractDelegate.IsBound())
+	{
+		InteractDelegate.Broadcast(this);
+	}
 	if (GetCanInteractWith())
 	{
+		
 		if (!PerformDelegate.IsBound())
 		{
 			return;
 		}
 		PerformDelegate.Broadcast(this);
 		SetCanInteractWith(false);
+
+		
 	}
 }
 

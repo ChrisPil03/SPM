@@ -115,6 +115,9 @@ public:
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> ReloadAbilityClass;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGameplayEffect> UltimateEffectClass;
 	
 public:	
 	UFUNCTION(BlueprintImplementableEvent)

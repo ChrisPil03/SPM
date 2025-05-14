@@ -27,8 +27,8 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 {
 	const UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
-	float CurrentAmmo = Attributes->GetAmmoCount();
 	// Check that at least 1 bullet is available
+	int32 CurrentAmmo = FMath::TruncToInt(Attributes->GetAmmoCount());
 	return CurrentAmmo >= 1;
 }
 
@@ -99,19 +99,23 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 	{
 		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
 		FVector EndPoint = StartPoint + (ShootDirection * MaxRange); // Trace distance
-		
 		bool bHit = GetWorld()->LineTraceMultiByChannel(PiercingHitResults, StartPoint, EndPoint, TraceChannel, QueryParams);
-		
 		if (bHit)
 		{
+			
+			TArray<FHitResult> ValidHits;
 			for (const FHitResult& HitResult : PiercingHitResults)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
 				DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
-				if (!IsDuplicateHit(HitResults, HitResult.GetActor()))
+				if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
 				{
-					HitResults.Add(HitResult);
+					ValidHits.Add(HitResult);
 				}
+			}
+			for (const FHitResult& HitResult : ValidHits)
+			{
+				HitResults.Add(HitResult);
 			}
 			
 			//DrawDebugLine(GetWorld(), StartPoint, EndPoint,FColor::Red, false, 2.0f);
