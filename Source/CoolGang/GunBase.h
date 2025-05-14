@@ -118,6 +118,9 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> UltimateEffectClass;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly )
+	UMaterial* PickupMat;
 	
 public:	
 	UFUNCTION(BlueprintImplementableEvent)

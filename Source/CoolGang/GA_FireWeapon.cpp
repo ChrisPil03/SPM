@@ -190,14 +190,15 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
         
 		FHitResult HitResult;
 		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
-        
+		DrawDebugSphere(GetWorld(), HitResult.Location, SphereRadius, 30, FColor::Red, false, 10.0f);
+		
 		if (bHit)
 		{
+			DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+			
 			OverlapQueryParams.AddIgnoredActor(HitResult.GetActor());
 			TArray<FHitResult> ValidHits;
-			for (int32 j = 0; i < 5; ++i)
-			{
-				DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+			
 				TArray<FOverlapResult> OverlapResults;
 				bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
 				OverlapResults,
@@ -206,29 +207,38 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
 				NORMAL_TRACE,
 				FCollisionShape::MakeSphere(SphereRadius),
 				OverlapQueryParams);
-
-				DrawDebugSphere(GetWorld(), HitResult.Location, SphereRadius, 30, FColor::Red, false, 10.0f);
-				
+				float ClosestDistanceSq = FLT_MAX;
+				AActor* ClosestActor = nullptr;
+			
+				FHitResult NextHitResult;
+			
 				for (const FOverlapResult& OverlapResult : OverlapResults)
 				{
 					if  (AEnemyAI* enemy = Cast<AEnemyAI>(OverlapResult.GetActor()))
-					if (OverlapResult.GetActor() != HitResult.GetActor())
 					{
-						bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(HitResult, HitResult.Location, OverlapResult.GetActor()->GetActorLocation(), NORMAL_TRACE, QueryParams);
-						if (bIsTargetable)
+
+						float DistanceSq = FVector::DistSquared(HitResult.Location, enemy->GetActorLocation());
+						bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(NextHitResult, HitResult.Location, enemy->GetActorLocation(), NORMAL_TRACE, QueryParams);
+						UE_LOG(LogTemp, Warning, TEXT("NExt target: %s"), *NextHitResult.GetActor()->GetActorNameOrLabel());
+						if (DistanceSq < ClosestDistanceSq && bIsTargetable)
 						{
-							if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
-							{
-								UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
-								DrawDebugLine(GetWorld(), HitResult.Location, OverlapResult.GetActor()->GetActorLocation(), FColor::Red, false, 2.0f);
-								DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, true);
-								ValidHits.Add(HitResult);
-							}
+							ClosestDistanceSq = DistanceSq;
+							ClosestActor = enemy;
 						}
+						
 					}
-					
 				}
-			}
+			
+						
+				if (!IsDuplicateHit(ValidHits, NextHitResult.GetActor()))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+					DrawDebugLine(GetWorld(), HitResult.Location, ClosestActor->GetActorLocation(), FColor::Green, false, 2.0f);
+					ValidHits.Add(NextHitResult);
+				}
+							
+			
+
 			
 			for (const FHitResult& ValidHit : ValidHits)
 			{
