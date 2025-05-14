@@ -7,11 +7,12 @@
 #include "ObjectiveBase.h"
 #include "ObjectiveCapture.generated.h"
 
+class AInteractableObject;
 class APlayerCharacter;
 class USphereComponent;
 
 UCLASS()
-class COOLGANG_API AObjectiveCapture : public AObjectiveBase, public IInteractInterface
+class COOLGANG_API AObjectiveCapture : public AObjectiveBase
 {
 	GENERATED_BODY()
 
@@ -28,7 +29,6 @@ protected:
 	
 public:
 	virtual void Tick(float DeltaTime) override;
-	virtual void Interact(AActor* Interactor) override;
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual void FailObjective() override;
 
@@ -45,8 +45,9 @@ public:
 	bool GetIsPlayerInZone() const { return PlayerInZone != nullptr; }
 	
 private:
-	void ShowInteractableOutline(const bool bNewState);
-	void SetCanInteractWith(const bool bNewState);
+	void FindInteractable();
+	void BindInteractable();
+	void RegisterControlPanelInteraction(AInteractableObject* Interactable);
 	
 	UFUNCTION()
 	void OnSphereBeginOverlap(
@@ -69,9 +70,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Trigger")
 	USphereComponent* SphereTrigger;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	UStaticMeshComponent* BaseMesh;
-
 	UPROPERTY(EditAnywhere)
 	FName PlayerTag;
 
@@ -93,4 +91,7 @@ private:
 	FTimerHandle DelayTimerHandle;
 
 	TUniquePtr<FProgressTimer> FailDelayProgressTimer;
+
+	UPROPERTY(EditAnywhere, Category = "Interact")
+	AInteractableObject* ControlPanel;
 };

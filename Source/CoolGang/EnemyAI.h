@@ -116,7 +116,7 @@ private:
 
 	void ReleaseToPool();
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float AttackRange;
 
 	UPROPERTY()

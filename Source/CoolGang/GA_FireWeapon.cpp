@@ -107,14 +107,15 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 			for (const FHitResult& HitResult : PiercingHitResults)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
-				
+				DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
 				if (!IsDuplicateHit(HitResults, HitResult.GetActor()))
 				{
 					HitResults.Add(HitResult);
 				}
 			}
 			
-			DrawDebugLine(GetWorld(), StartPoint, EndPoint,FColor::Red, false, 2.0f);
+			//DrawDebugLine(GetWorld(), StartPoint, EndPoint,FColor::Red, false, 2.0f);
+			
 			//BlinkDebug(Hit);
 			bHasTarget = true;
 		}
