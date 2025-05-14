@@ -30,22 +30,22 @@ public:
 protected:
 
     UPROPERTY(EditDefaultsOnly, Category="Spawning")
-    double BaselineSpawnInterval = 4.2;
+    double BaselineSpawnInterval = 4.0;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    double MinimumSpawnInterval = 0.5;
+    double MinimumSpawnInterval = 0.4;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    int32 MaxSpawnIntervalIncreaseCount = 12;
+    int32 MaxSpawnIntervalIncreaseCount = 15;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
     double SpawnIntervalScale = 2.5;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    double SpawnAccelerationRate = 4.0;
+    double SpawnAccelerationRate = 3.4;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    double SpawnIntervalIncreaseTimer = 30.0;
+    double SpawnIntervalIncreaseTimer = 20.0;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
     int MaximumEnemies = 20;
