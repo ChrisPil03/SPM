@@ -65,6 +65,10 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
 			OnObjectiveActivated.Broadcast(this);
 		}
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, true);
+		}
 	} else
 	{
 		if (OnObjectiveDeactivated.IsBound())
@@ -126,6 +130,11 @@ void AObjectiveBase::StartObjective()
 		StopMalfunctioning();
 		//DisplayMessageForSeconds(StartedMessage, 3.f);
 		EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
+
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, false);
+		}
 	}
 }
 
@@ -172,6 +181,11 @@ void AObjectiveBase::FailObjective()
 		if (!bPlayerInRoom && RoomGate)
 		{
 			RoomGate->CloseGate();
+		}
+
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, false);
 		}
 	}
 }
@@ -285,6 +299,14 @@ void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
 	{
 		//EnqueueVoiceLineWithMessage(EnterRoomVoiceLine, "");
 	}
+
+	if (GetIsInProgress())
+	{
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, false);
+		}
+	}
 }
 
 void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
@@ -296,6 +318,13 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 		if (RoomGate)
 		{
 			RoomGate->CloseGate();	
+		}
+	}
+	if (GetIsInProgress())
+	{
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, true);
 		}
 	}
 }

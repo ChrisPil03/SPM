@@ -23,6 +23,7 @@ enum class EObjectiveState : uint8
 	Failed
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWaypointEvent, AObjectiveBase*, Objective, bool, NewState);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveActivated, AObjectiveBase*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveDeactivated, AObjectiveBase*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnObjectiveInProgress, AObjectiveBase*);
@@ -58,7 +59,9 @@ protected:
 
 
 public:
-
+	UPROPERTY(BlueprintAssignable)
+	FOnWaypointEvent EnableWaypoint;
+	
 	template <typename T>
 	void AddOnObjectiveActivatedFunction(T* Object, void (T::*Func)(AObjectiveBase*))
 	{
@@ -81,6 +84,7 @@ public:
 	virtual void ResetObjective();
 	virtual void FailObjective();
 
+	UFUNCTION(BlueprintCallable)
 	FString GetObjectiveName() const { return ObjectiveDescription; }
 	
 	void SetObjectiveState(EObjectiveState const NewObjectiveState) { ObjectiveState = NewObjectiveState; }
@@ -211,7 +215,7 @@ private:
 	UDisplayTextMessageSubsystem* DisplayTextMessageSubsystem;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
-	
+
 	FOnObjectiveActivated OnObjectiveActivated;
 	FOnObjectiveDeactivated OnObjectiveDeactivated;
 	FOnObjectiveInProgress OnObjectiveInProgress;

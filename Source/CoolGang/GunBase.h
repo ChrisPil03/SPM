@@ -15,10 +15,14 @@ enum class EWeaponType : uint8
 	Pistol UMETA(DisplayName = "Pistol"),
 	// Add other weapon types as needed
 };
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamageChangedDelegate, float, Damage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoCountChangedDelegate, float, AmmoCount);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagazineSizeChangedDelegate, float, MagazineSize);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireRateChangedDelegate, float, FireRate);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadTimeChangedDelegate, float, ReloadTime);
 
 class UGameplayAbility;
 class UGameplayEffect;
@@ -55,8 +59,8 @@ public:
 	
 
 	///   Effect   ///
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactEffect;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	class UNiagaraSystem* ImpactEffect;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
 	class UNiagaraSystem* MuzzleFlashEffect;
@@ -118,6 +122,9 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> UltimateEffectClass;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly )
+	UMaterial* PickupMat;
 	
 public:	
 	UFUNCTION(BlueprintImplementableEvent)
@@ -166,6 +173,9 @@ protected:
 
 	void OnFireRateChanged(const FOnAttributeChangeData& Data);
 
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnFireRateChangedDelegate OnFireRateChangedDelegate;
+
 	void OnAmmoCountChanged(const FOnAttributeChangeData& Data) const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
@@ -175,8 +185,15 @@ protected:
 
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnMagazineSizeChangedDelegate OnMagazineSizeChangedDelegate;
+
+	void OnDamageChanged(const FOnAttributeChangeData& Data) const;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnDamageChangedDelegate OnDamageChangedDelegate;
+
+	void OnReloadTimeChanged(const FOnAttributeChangeData& Data) const;
+	FOnReloadTimeChangedDelegate OnReloadTimeChangedDelegate;
 	
 };
-
 
 

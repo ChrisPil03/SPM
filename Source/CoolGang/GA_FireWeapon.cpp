@@ -5,8 +5,10 @@
 #include "AbilitySystemComponent.h"
 #include "GunBase.h"
 #include "WeaponAttributeSet.h"
+#include "EnemyAI.h"
 
 #include "PlayerCharacter.h"
+#include "Engine/OverlapResult.h"
 #define PIERCING_TRACE ECC_GameTraceChannel6
 #define NORMAL_TRACE ECC_GameTraceChannel1
 UGA_FireWeapon::UGA_FireWeapon()
@@ -74,7 +76,7 @@ bool UGA_FireWeapon::GetTraceStartLocationAndRotation(FVector& OutStartPoint, FR
 
 bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 {
-	bool bHasTarget = false;
+	bool bHasTarget;
 	FVector StartPoint;
 	FRotator Rotation;
 	GetTraceStartLocationAndRotation(StartPoint, Rotation);
@@ -84,25 +86,71 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 	float NumPellets = Attributes->GetPellets();
 	const float ConeHalfAngleDegrees = Attributes->GetBulletSpreadAngle();
 	float MaxRange = Attributes->GetMaxRange();
-	ECollisionChannel TraceChannel = NORMAL_TRACE;
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
-	TArray<FHitResult> PiercingHitResults;
+	
+
+    
 	if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive")))
 	{
-		TraceChannel = PIERCING_TRACE;
 		UE_LOG(LogTemp, Warning, TEXT("Weapon.PiercingActive"));
+		bHasTarget = PiercingBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
+										 ConeHalfAngleDegrees, MaxRange, QueryParams);
 	}
+	else if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.ChainingActive")))
+	{
+		bHasTarget = ChainingBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
+									 ConeHalfAngleDegrees, MaxRange, QueryParams);
+	}
+	else
+	{
+		bHasTarget = NormalBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
+									   ConeHalfAngleDegrees, MaxRange, QueryParams);
+	}
+    
+	return bHasTarget;
+}
+
+bool UGA_FireWeapon::NormalBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
+	const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
+	const FCollisionQueryParams& QueryParams)
+{
+	bool bHasTarget = false;
+	for (int32 i = 0; i < NumPellets; ++i)
+	{
+		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
+		FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
+        
+		FHitResult HitResult;
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
+        
+		if (bHit)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+			DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+            
+			HitResults.Add(HitResult);
+			bHasTarget = true;
+		}
+	}
+	return bHasTarget;
+}
+
+bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
+	const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
+	const FCollisionQueryParams& QueryParams)
+{
+	bool bHasTarget = false;
 	for (int32 i = 0; i < NumPellets; ++i)
 	{
 		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
 		FVector EndPoint = StartPoint + (ShootDirection * MaxRange); // Trace distance
-		bool bHit = GetWorld()->LineTraceMultiByChannel(PiercingHitResults, StartPoint, EndPoint, TraceChannel, QueryParams);
+		TArray<FHitResult> PiercingHitResults;
+		bool bHit = GetWorld()->LineTraceMultiByChannel(PiercingHitResults, StartPoint, EndPoint, PIERCING_TRACE, QueryParams);
 		if (bHit)
 		{
-			
 			TArray<FHitResult> ValidHits;
 			for (const FHitResult& HitResult : PiercingHitResults)
 			{
@@ -118,14 +166,90 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 				HitResults.Add(HitResult);
 			}
 			
-			//DrawDebugLine(GetWorld(), StartPoint, EndPoint,FColor::Red, false, 2.0f);
-			
-			//BlinkDebug(Hit);
 			bHasTarget = true;
 		}
 	}
 
 	return bHasTarget;
+}
+
+bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
+	const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
+	const FCollisionQueryParams& QueryParams)
+{
+	bool bHasTarget = false;
+	float SphereRadius = 1000.0f;
+	FCollisionQueryParams OverlapQueryParams;
+	OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
+	OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
+	
+	for (int32 i = 0; i < NumPellets; ++i)
+	{
+		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
+		FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
+        
+		FHitResult HitResult;
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
+		DrawDebugSphere(GetWorld(), HitResult.Location, SphereRadius, 30, FColor::Red, false, 10.0f);
+		
+		if (bHit)
+		{
+			DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+			
+			OverlapQueryParams.AddIgnoredActor(HitResult.GetActor());
+			TArray<FHitResult> ValidHits;
+			
+				TArray<FOverlapResult> OverlapResults;
+				bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
+				OverlapResults,
+				HitResult.Location,               // FVector center
+				FQuat::Identity, // No rotation
+				NORMAL_TRACE,
+				FCollisionShape::MakeSphere(SphereRadius),
+				OverlapQueryParams);
+				float ClosestDistanceSq = FLT_MAX;
+				AActor* ClosestActor = nullptr;
+			
+				FHitResult NextHitResult;
+			
+				for (const FOverlapResult& OverlapResult : OverlapResults)
+				{
+					if  (AEnemyAI* enemy = Cast<AEnemyAI>(OverlapResult.GetActor()))
+					{
+
+						float DistanceSq = FVector::DistSquared(HitResult.Location, enemy->GetActorLocation());
+						bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(NextHitResult, HitResult.Location, enemy->GetActorLocation(), NORMAL_TRACE, QueryParams);
+						UE_LOG(LogTemp, Warning, TEXT("NExt target: %s"), *NextHitResult.GetActor()->GetActorNameOrLabel());
+						if (DistanceSq < ClosestDistanceSq && bIsTargetable)
+						{
+							ClosestDistanceSq = DistanceSq;
+							ClosestActor = enemy;
+						}
+						
+					}
+				}
+			
+						
+				if (!IsDuplicateHit(ValidHits, NextHitResult.GetActor()))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+					DrawDebugLine(GetWorld(), HitResult.Location, ClosestActor->GetActorLocation(), FColor::Green, false, 2.0f);
+					ValidHits.Add(NextHitResult);
+				}
+							
+			
+
+			
+			for (const FHitResult& ValidHit : ValidHits)
+			{
+				HitResults.Add(ValidHit);
+			}
+			bHasTarget = true;
+		}
+	}
+	OverlapQueryParams.ClearIgnoredSourceObjects();
+	return bHasTarget;
+	
 }
 
 
