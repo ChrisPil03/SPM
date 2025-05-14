@@ -30,19 +30,19 @@ public:
 protected:
 
     UPROPERTY(EditDefaultsOnly, Category="Spawning")
-    double BaselineSpawnInterval = 5.0;
+    double BaselineSpawnInterval = 4.2;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
     double MinimumSpawnInterval = 0.5;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    int32 MaxSpawnIntervalIncreaseCount = 10;
+    int32 MaxSpawnIntervalIncreaseCount = 12;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    double SpawnIntervalScale = 4.5;
+    double SpawnIntervalScale = 2.5;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    double SpawnAccelerationRate = 2.0;
+    double SpawnAccelerationRate = 4.0;
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
     double SpawnIntervalIncreaseTimer = 30.0;
