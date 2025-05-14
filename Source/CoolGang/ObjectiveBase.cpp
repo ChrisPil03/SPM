@@ -17,7 +17,7 @@ AObjectiveBase::AObjectiveBase() :
 	Progress(0.f),
 	SystemIntegrity(nullptr),
 	BaseIntegrityDamage(100.f),
-	ObjectiveFailedIntegrityChunkDamage(25000.f),
+	ObjectiveFailedIntegrityChunkDamage(20000.f),
 	ActivatedMessage("MALFUNCTION DETECTED"),
 	StartedMessage("OBJECTIVE STARTED"),
 	CompletedMessage("OBJECTIVE COMPLETED"),
@@ -64,6 +64,10 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		{
 			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
 			OnObjectiveActivated.Broadcast(this);
+		}
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, true);
 		}
 	} else
 	{
@@ -126,6 +130,11 @@ void AObjectiveBase::StartObjective()
 		StopMalfunctioning();
 		//DisplayMessageForSeconds(StartedMessage, 3.f);
 		EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
+
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, false);
+		}
 	}
 }
 
@@ -144,6 +153,10 @@ void AObjectiveBase::CompleteObjective()
 	if (OnObjectiveCompleted.IsBound())
 	{
 		OnObjectiveCompleted.Broadcast();
+	}
+	if (EnableWaypoint.IsBound())
+	{
+		EnableWaypoint.Broadcast(this, false);
 	}
 
 	if (ObjectiveManager == nullptr)
@@ -172,6 +185,11 @@ void AObjectiveBase::FailObjective()
 		if (!bPlayerInRoom && RoomGate)
 		{
 			RoomGate->CloseGate();
+		}
+
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, false);
 		}
 	}
 }
@@ -256,7 +274,6 @@ void AObjectiveBase::BroadcastObjectiveInProgress()
 {
 	if (OnObjectiveInProgress.IsBound())
 	{
-		UE_LOG(LogEngine, Warning, TEXT("Broadcasting InProgress."));
 		OnObjectiveInProgress.Broadcast(this);
 	}
 }
@@ -286,6 +303,14 @@ void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
 	{
 		//EnqueueVoiceLineWithMessage(EnterRoomVoiceLine, "");
 	}
+
+	if (GetIsInProgress())
+	{
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, false);
+		}
+	}
 }
 
 void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
@@ -297,6 +322,13 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 		if (RoomGate)
 		{
 			RoomGate->CloseGate();	
+		}
+	}
+	if (GetIsInProgress())
+	{
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, true);
 		}
 	}
 }

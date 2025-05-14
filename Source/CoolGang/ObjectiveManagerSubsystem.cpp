@@ -37,7 +37,7 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 	TArray<AObjectiveBase*> AvailableObjectives;
 	for (AObjectiveBase* Objective : ObjectivesInLevel)
 	{
-		if (Objective && !Objective->GetIsActive() && !Objective->GetIsFailed())
+		if (Objective && !Objective->GetIsActive())
 		{
 			AvailableObjectives.Add(Objective);
 		}

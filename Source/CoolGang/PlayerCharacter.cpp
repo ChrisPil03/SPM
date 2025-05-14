@@ -12,6 +12,7 @@
 #include "DiveGameMode.h"
 #include "PlayerAttributeSet.h"
 #include "ScoreManagerComponent.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -56,31 +57,6 @@ void APlayerCharacter::Tick(float DeltaTime)
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-void APlayerCharacter::Interact()
-{
-	FHitResult HitResult;
-
-	if (!IsInRange(HitResult))
-	{
-		return;
-	}
-	// Make sure the actor was hit and implements the interact interface
-	AActor *HitActor = HitResult.GetActor();
-
-	if (!HitActor && !HitActor->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
-	{
-		return;
-	}
-	// Cast to the interface and check if it's valid
-	IInteractInterface *Interface = Cast<IInteractInterface>(HitActor);
-
-	if (Interface == nullptr)
-	{
-		return;
-	}
-
-	Interface->Interact(this);
 }
 
 void APlayerCharacter::PullTrigger()
@@ -158,42 +134,6 @@ void APlayerCharacter::ChangeEquippedGun(int32 WeaponSlot)
 	
 }
 
-bool APlayerCharacter::IsInRange(FHitResult &HitResult) const
-{
-	AController *PlayerController = GetController();
-	if (PlayerController == nullptr)
-	{
-		return false;
-	}
-	FVector Location;
-	FRotator Rotation;
-
-	PlayerController->GetPlayerViewPoint(Location, Rotation);
-
-	FVector EndPoint = Location + Rotation.Vector() * InteractRange;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-
-	bool bHit = GetWorld()->SweepSingleByChannel(
-	HitResult,
-	Location,
-	EndPoint,
-	FQuat::Identity,
-	ECC_GameTraceChannel2,
-	FCollisionShape::MakeSphere(InteractSphereRadius),
-	Params
-	);
-
-	if (bHit)
-	{
-		DrawDebugSphere(GetWorld(), HitResult.Location, InteractSphereRadius, 12, FColor::Red, false, 1);
-	}
-		
-	
-	return bHit;
-	
-}
-
 void APlayerCharacter::Die()
 {
 	if (!IsDead())
@@ -246,4 +186,50 @@ void APlayerCharacter::InitPlayerStats()
 		}
 	}	
 
+}
+
+void APlayerCharacter::ResetCharacterPosition()
+{
+	AGameModeBase *GameMode = GetWorld()->GetAuthGameMode();
+	if (GameMode)
+	{
+		APlayerController *PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		AActor *PlayerStartActor = GameMode->FindPlayerStart(PC);
+		SetActorLocationAndRotation(PlayerStartActor->GetActorLocation(), PlayerStartActor->GetActorRotation());
+	}
+}
+
+
+// ----------------- Interact ----------------- //
+// -------------------------------------------- //
+
+void APlayerCharacter::SetAvailableInteractable(IInteractInterface* Interactable)
+{
+	AvailableInteractable = Interactable;
+	
+	if (InteractWidget)
+	{
+		InteractWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void APlayerCharacter::ClearAvailableInteractable(const IInteractInterface* Interactable)
+{
+	if (AvailableInteractable == Interactable)
+	{
+		AvailableInteractable = nullptr;
+
+		if (InteractWidget)
+		{
+			InteractWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void APlayerCharacter::Interact()
+{
+	if (AvailableInteractable)
+	{
+		AvailableInteractable->Interact(this);
+	}
 }
