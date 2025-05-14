@@ -15,10 +15,14 @@ enum class EWeaponType : uint8
 	Pistol UMETA(DisplayName = "Pistol"),
 	// Add other weapon types as needed
 };
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDamageChangedDelegate, float, Damage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoCountChangedDelegate, float, AmmoCount);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagazineSizeChangedDelegate, float, MagazineSize);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireRateChangedDelegate, float, FireRate);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadTimeChangedDelegate, float, FireRate);
 
 class UGameplayAbility;
 class UGameplayEffect;
@@ -169,6 +173,9 @@ protected:
 
 	void OnFireRateChanged(const FOnAttributeChangeData& Data);
 
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnFireRateChangedDelegate OnFireRateChangedDelegate;
+
 	void OnAmmoCountChanged(const FOnAttributeChangeData& Data) const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
@@ -178,8 +185,14 @@ protected:
 
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnMagazineSizeChangedDelegate OnMagazineSizeChangedDelegate;
+
+	void OnDamageChanged(const FOnAttributeChangeData& Data) const;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnDamageChangedDelegate OnDamageChangedDelegate;
+
+	
 	
 };
-
 
 
