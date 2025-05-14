@@ -30,6 +30,24 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
 	bool BulletTrace(TArray<FHitResult>& Hits);
+
+	
+	
+	bool NormalBulletTrace(TArray<FHitResult>& HitResults, 
+						 const FVector& StartPoint, 
+						 const FVector& BulletDirection,
+						 float NumPellets,
+						 float ConeHalfAngleDegrees,
+						 float MaxRange,
+						 const FCollisionQueryParams& QueryParams);
+                          
+	bool PiercingBulletTrace(TArray<FHitResult>& HitResults,
+							const FVector& StartPoint,
+							const FVector& BulletDirection,
+							float NumPellets,
+							float ConeHalfAngleDegrees,
+							float MaxRange,
+							const FCollisionQueryParams& QueryParams);
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetData);

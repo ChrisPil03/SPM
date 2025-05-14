@@ -84,25 +84,66 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 	float NumPellets = Attributes->GetPellets();
 	const float ConeHalfAngleDegrees = Attributes->GetBulletSpreadAngle();
 	float MaxRange = Attributes->GetMaxRange();
-	ECollisionChannel TraceChannel = NORMAL_TRACE;
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
-	TArray<FHitResult> PiercingHitResults;
-	if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive")))
+	
+	bool bPiercingMode = ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive"));
+    
+	if (bPiercingMode)
 	{
-		TraceChannel = PIERCING_TRACE;
 		UE_LOG(LogTemp, Warning, TEXT("Weapon.PiercingActive"));
+		bHasTarget = PiercingBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
+										 ConeHalfAngleDegrees, MaxRange, QueryParams);
 	}
+	else
+	{
+		bHasTarget = NormalBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
+									   ConeHalfAngleDegrees, MaxRange, QueryParams);
+	}
+    
+	return bHasTarget;
+}
+
+bool UGA_FireWeapon::NormalBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
+	const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
+	const FCollisionQueryParams& QueryParams)
+{
+	bool bHasTarget = false;
+	for (int32 i = 0; i < NumPellets; ++i)
+	{
+		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
+		FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
+        
+		FHitResult HitResult;
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
+        
+		if (bHit)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+			DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+            
+			HitResults.Add(HitResult);
+			bHasTarget = true;
+		}
+	}
+	return bHasTarget;
+}
+
+bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
+	const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
+	const FCollisionQueryParams& QueryParams)
+{
+	bool bHasTarget = false;
 	for (int32 i = 0; i < NumPellets; ++i)
 	{
 		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
 		FVector EndPoint = StartPoint + (ShootDirection * MaxRange); // Trace distance
-		bool bHit = GetWorld()->LineTraceMultiByChannel(PiercingHitResults, StartPoint, EndPoint, TraceChannel, QueryParams);
+		TArray<FHitResult> PiercingHitResults;
+		bool bHit = GetWorld()->LineTraceMultiByChannel(PiercingHitResults, StartPoint, EndPoint, PIERCING_TRACE, QueryParams);
 		if (bHit)
 		{
-			
 			TArray<FHitResult> ValidHits;
 			for (const FHitResult& HitResult : PiercingHitResults)
 			{
@@ -118,15 +159,13 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 				HitResults.Add(HitResult);
 			}
 			
-			//DrawDebugLine(GetWorld(), StartPoint, EndPoint,FColor::Red, false, 2.0f);
-			
-			//BlinkDebug(Hit);
 			bHasTarget = true;
 		}
 	}
 
 	return bHasTarget;
 }
+
 
 
 bool UGA_FireWeapon::IsDuplicateHit(const TArray<FHitResult>& ExistingHits, const AActor* Actor)
