@@ -22,7 +22,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagazineSizeChangedDelegate, floa
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireRateChangedDelegate, float, FireRate);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadTimeChangedDelegate, float, FireRate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadTimeChangedDelegate, float, ReloadTime);
 
 class UGameplayAbility;
 class UGameplayEffect;
@@ -191,7 +191,8 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnDamageChangedDelegate OnDamageChangedDelegate;
 
-	
+	void OnReloadTimeChanged(const FOnAttributeChangeData& Data) const;
+	FOnReloadTimeChangedDelegate OnReloadTimeChangedDelegate;
 	
 };
 

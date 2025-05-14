@@ -65,6 +65,12 @@ void AGunBase::OnDamageChanged(const FOnAttributeChangeData& Data) const
 	OnDamageChangedDelegate.Broadcast(NewDamage);
 }
 
+void AGunBase::OnReloadTimeChanged(const FOnAttributeChangeData& Data) const
+{
+	float NewReloadTime = Data.NewValue;
+	OnReloadTimeChangedDelegate.Broadcast(NewReloadTime);
+}
+
 
 void AGunBase::OnFireRateChanged(const FOnAttributeChangeData& Data)
 {
