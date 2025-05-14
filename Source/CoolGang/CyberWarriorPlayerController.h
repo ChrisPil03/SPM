@@ -40,6 +40,6 @@ private:
 	
 	FTimerHandle RestartTimer;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	UUserWidget* HUD;
 };
