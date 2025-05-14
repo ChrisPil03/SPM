@@ -5,6 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "GunBase.h"
 #include "WeaponAttributeSet.h"
+#include "EnemyAI.h"
 
 #include "PlayerCharacter.h"
 #include "Engine/OverlapResult.h"
@@ -177,7 +178,10 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
 	const FCollisionQueryParams& QueryParams)
 {
 	bool bHasTarget = false;
-	float SphereRadius = 100.0f;
+	float SphereRadius = 1000.0f;
+	FCollisionQueryParams OverlapQueryParams;
+	OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
+	OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
 	
 	for (int32 i = 0; i < NumPellets; ++i)
 	{
@@ -189,10 +193,11 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
         
 		if (bHit)
 		{
+			OverlapQueryParams.AddIgnoredActor(HitResult.GetActor());
 			TArray<FHitResult> ValidHits;
 			for (int32 j = 0; i < 5; ++i)
 			{
-				
+				DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
 				TArray<FOverlapResult> OverlapResults;
 				bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
 				OverlapResults,
@@ -200,22 +205,29 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
 				FQuat::Identity, // No rotation
 				NORMAL_TRACE,
 				FCollisionShape::MakeSphere(SphereRadius),
-				QueryParams);
+				OverlapQueryParams);
+
+				DrawDebugSphere(GetWorld(), HitResult.Location, SphereRadius, 30, FColor::Red, false, 10.0f);
+				
 				for (const FOverlapResult& OverlapResult : OverlapResults)
 				{
-					bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(HitResult, HitResult.Location, OverlapResult.GetActor()->GetActorLocation(), NORMAL_TRACE, QueryParams);
-					if (bIsTargetable)
+					if  (AEnemyAI* enemy = Cast<AEnemyAI>(OverlapResult.GetActor()))
+					if (OverlapResult.GetActor() != HitResult.GetActor())
 					{
-						if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
+						bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(HitResult, HitResult.Location, OverlapResult.GetActor()->GetActorLocation(), NORMAL_TRACE, QueryParams);
+						if (bIsTargetable)
 						{
-							UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
-							DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
-							ValidHits.Add(HitResult);
+							if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
+							{
+								UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+								DrawDebugLine(GetWorld(), HitResult.Location, OverlapResult.GetActor()->GetActorLocation(), FColor::Red, false, 2.0f);
+								DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, true);
+								ValidHits.Add(HitResult);
+							}
 						}
 					}
+					
 				}
-				
-				
 			}
 			
 			for (const FHitResult& ValidHit : ValidHits)
@@ -225,6 +237,7 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
 			bHasTarget = true;
 		}
 	}
+	OverlapQueryParams.ClearIgnoredSourceObjects();
 	return bHasTarget;
 	
 }
