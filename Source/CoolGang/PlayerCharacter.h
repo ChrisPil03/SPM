@@ -66,6 +66,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Events");
 	FOnPlayerTakeDamage OnPlayerTakeDamage;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void SaveScore();
+	
 	void Die();
 
 	void SetAvailableInteractable(IInteractInterface* Interactable);
@@ -74,6 +77,8 @@ public:
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
+
+	
 	UPROPERTY(EditAnywhere, Category=Interact)
 	float InteractRange = 200;
 
