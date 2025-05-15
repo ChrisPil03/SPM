@@ -161,99 +161,172 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 					ValidHits.Add(HitResult);
 				}
 			}
-			for (const FHitResult& HitResult : ValidHits)
+			if (ValidHits.Num() > 0)
 			{
-				HitResults.Add(HitResult);
+				HitResults.Append(ValidHits);
+				bHasTarget = true;
 			}
-			
-			bHasTarget = true;
 		}
 	}
 
 	return bHasTarget;
 }
-
 bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
-	const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
-	const FCollisionQueryParams& QueryParams)
+    const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
+    const FCollisionQueryParams& QueryParams)
 {
-	bool bHasTarget = false;
-	float SphereRadius = 1000.0f;
-	FCollisionQueryParams OverlapQueryParams;
-	OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
-	OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
-	
-	for (int32 i = 0; i < NumPellets; ++i)
-	{
-		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
-		FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
+    bool bHasTarget = false;
+    const float SphereRadius = 1000.0f;
+    const int32 MaxChainDepth = 3; // Limit how many times a bullet can chain
+    
+    // Set up collision parameters
+    FCollisionQueryParams OverlapQueryParams;
+    OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
+    OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
+    
+    // Process each pellet
+    for (int32 i = 0; i < NumPellets; ++i)
+    {
+        // Get randomized direction within cone
+        FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
+        FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
         
-		FHitResult HitResult;
-		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
-		DrawDebugSphere(GetWorld(), HitResult.Location, SphereRadius, 30, FColor::Red, false, 10.0f);
-		
-		if (bHit)
-		{
-			//DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
-			
-			OverlapQueryParams.AddIgnoredActor(HitResult.GetActor());
-			
-			TArray<FHitResult> ValidHits;
-			
-				TArray<FOverlapResult> OverlapResults;
-				bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
-				OverlapResults,
-				HitResult.Location,               // FVector center
-				FQuat::Identity, // No rotation
-				NORMAL_TRACE,
-				FCollisionShape::MakeSphere(SphereRadius),
-				OverlapQueryParams);
-				float ClosestDistanceSq = FLT_MAX;
-				AActor* ClosestActor = nullptr;
-			
-				FHitResult NextHitResult;
-			
-				for (const FOverlapResult& OverlapResult : OverlapResults)
-				{
-					if  (AEnemyAI* enemy = Cast<AEnemyAI>(OverlapResult.GetActor()))
-					{
-						FVector Origin;
-						FVector BoxExtent;
-						enemy->GetActorBounds(true, Origin, BoxExtent); // true = only colliding components
+        // Initial line trace
+        FHitResult InitialHit;
+        bool bHit = GetWorld()->LineTraceSingleByChannel(InitialHit, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
+        
+        // Skip if no initial hit
+        if (!bHit)
+        {
+            continue;
+        }
+        
+        // Process hit chain
+        TArray<FHitResult> PelletHits;
+        ProcessHitChain(InitialHit, PelletHits, MaxChainDepth, SphereRadius, OverlapQueryParams);
+        
+        // If we found valid hits, add them to results and mark that we have a target
+        if (PelletHits.Num() > 0)
+        {
+            HitResults.Append(PelletHits);
+            bHasTarget = true;
+        }
+    }
+    
+    return bHasTarget;
+}
 
-						float DistanceSq = FVector::DistSquared(HitResult.Location, Origin);
-						bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(NextHitResult, HitResult.Location, Origin, NORMAL_TRACE, QueryParams);
-						if (DistanceSq < ClosestDistanceSq && bIsTargetable)
-						{
-							ClosestDistanceSq = DistanceSq;
-							ClosestActor = enemy;
-						}
-						
-					}
-				}
-			
-						
-				if (!IsDuplicateHit(ValidHits, NextHitResult.GetActor()))
-				{
-					//UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
-					DrawDebugLine(GetWorld(), HitResult.Location, ClosestActor->GetActorLocation(), FColor::Green, false, 2.0f);
-					UE_LOG(LogTemp, Warning, TEXT("NExt target: %s"), *NextHitResult.GetActor()->GetActorNameOrLabel());
-					ValidHits.Add(NextHitResult);
-				}
-							 
-			
-
-			
-			for (const FHitResult& ValidHit : ValidHits)
-			{
-				HitResults.Add(ValidHit);
-			}
-			bHasTarget = true;
-		}
-	}
-	OverlapQueryParams.ClearIgnoredSourceObjects();
-	return bHasTarget;
-	
+void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitResult>& ChainHits, 
+    int32 MaxChainDepth, float SphereRadius, FCollisionQueryParams& OverlapQueryParams)
+{
+    // Add initial hit to results
+    ChainHits.Add(InitialHit);
+    DrawDebugSphere(GetWorld(), InitialHit.Location, 5.0f, 12, FColor::Red, false, 2.0f);
+    
+    // Track actors we've already hit to avoid duplicates
+    TArray<AActor*> HitActors;
+    if (InitialHit.GetActor())
+    {
+        HitActors.Add(InitialHit.GetActor());
+        OverlapQueryParams.AddIgnoredActor(InitialHit.GetActor());
+    }
+    
+    FVector CurrentHitLocation = InitialHit.Location;
+    
+    // Chain process (limited by MaxChainDepth)
+    for (int32 ChainIndex = 0; ChainIndex < MaxChainDepth - 1; ChainIndex++)
+    {
+        // Visual debugging for the sphere overlap
+        DrawDebugSphere(GetWorld(), CurrentHitLocation, SphereRadius, 30, FColor::Blue, false, 2.0f);
+        
+        // Find nearby potential targets
+        TArray<FOverlapResult> OverlapResults;
+        bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
+            OverlapResults,
+            CurrentHitLocation,
+            FQuat::Identity,
+            NORMAL_TRACE,
+            FCollisionShape::MakeSphere(SphereRadius),
+            OverlapQueryParams);
+            
+        if (!bHasOverlap || OverlapResults.Num() == 0)
+        {
+            break; // No more targets to chain to
+        }
+        
+        // Find the closest valid target
+        float ClosestDistanceSq = FLT_MAX;
+        AActor* ClosestActor = nullptr;
+        FHitResult ClosestHitResult;
+        
+        for (const FOverlapResult& OverlapResult : OverlapResults)
+        {
+            AActor* PotentialTarget = OverlapResult.GetActor();
+            if (!PotentialTarget || HitActors.Contains(PotentialTarget))
+            {
+                continue;
+            }
+            
+            // Check if it's an enemy
+            AEnemyAI* Enemy = Cast<AEnemyAI>(PotentialTarget);
+            if (!Enemy)
+            {
+                continue;
+            }
+            
+            // Get target position
+            FVector TargetOrigin;
+            FVector BoxExtent;
+            Enemy->GetActorBounds(true, TargetOrigin, BoxExtent);
+            
+            // Check visibility with line trace
+            FHitResult VisibilityHit;
+            FCollisionQueryParams VisibilityParams = OverlapQueryParams;
+            bool bIsVisible = GetWorld()->LineTraceSingleByChannel(
+                VisibilityHit, 
+                CurrentHitLocation, 
+                TargetOrigin, 
+                NORMAL_TRACE, 
+                VisibilityParams);
+                
+            // Only consider if line trace hits the intended target
+            if (bIsVisible && VisibilityHit.GetActor() == Enemy)
+            {
+                float DistanceSq = FVector::DistSquared(CurrentHitLocation, TargetOrigin);
+                
+                UE_LOG(LogTemp, Warning, TEXT("Potential chain target: %s; Distance: %f"), 
+                    *Enemy->GetActorNameOrLabel(), FMath::Sqrt(DistanceSq));
+                
+                // Visualize potential chain
+                DrawDebugLine(GetWorld(), CurrentHitLocation, TargetOrigin, FColor::Green, false, 2.0f);
+                
+                if (DistanceSq < ClosestDistanceSq)
+                {
+                    ClosestDistanceSq = DistanceSq;
+                    ClosestActor = Enemy;
+                    ClosestHitResult = VisibilityHit;
+                }
+            }
+        }
+        
+        // If no valid target was found, end the chain
+        if (!ClosestActor)
+        {
+            break;
+        }
+        
+        // Add the new hit to our results
+        ChainHits.Add(ClosestHitResult);
+        HitActors.Add(ClosestActor);
+        OverlapQueryParams.AddIgnoredActor(ClosestActor);
+        
+        // Visualize the selected chain
+        DrawDebugLine(GetWorld(), CurrentHitLocation, ClosestHitResult.Location, FColor::Yellow, false, 2.0f);
+        UE_LOG(LogTemp, Warning, TEXT("Chained to target: %s"), *ClosestActor->GetActorNameOrLabel());
+        
+        // Update current position for next chain
+        CurrentHitLocation = ClosestHitResult.Location;
+    }
 }
 
 
