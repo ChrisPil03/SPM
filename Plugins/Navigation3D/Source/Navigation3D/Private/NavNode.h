@@ -1,41 +1,51 @@
 #pragma once
 
-#include "CoreMinimal.h"
-#include <vector> // Or use TArray if preferred and update usage below
+#include "CoreMinimal.h" // Usually good to have for UE types like FIntVector
+#include <vector>
+#include <limits>       // For std::numeric_limits
 
 // Represents a single node in the 3D navigation grid
 struct NavNode
 {
-    FIntVector Coordinates = FIntVector::ZeroValue; // Grid coordinates (X, Y, Z)
-
-    // Using std::vector as per your original code. TArray<NavNode*> could also be used.
+    FIntVector Coordinates = FIntVector::ZeroValue;
     std::vector<NavNode*> Neighbors;
-
-    // A* score (Cost from start + Heuristic estimate to end)
-    float FScore = FLT_MAX;
-
-    // Pre-calculated flag indicating if this node is blocked by an obstacle
     bool bIsTraversable = true;
 
-    // Default constructor needed for TArray initialization
+    // --- Per-search A* data ---
+    // This data will be valid only for the current ongoing FindPath operation,
+    // identified by comparing SearchID_Pathfinding with ANavigationVolume3D::CurrentPathfindingSearchID.
+    float FScore_Pathfinding = std::numeric_limits<float>::max();
+    float GScore_Pathfinding = std::numeric_limits<float>::max();
+    NavNode* CameFrom_Pathfinding = nullptr;
+    uint32_t SearchID_Pathfinding = 0; // 0 can mean "not yet visited by any search" or "data is stale"
+
     NavNode() = default;
+
+    // Optional: Add a reset function if you prefer not to check SearchID everywhere
+    // void ResetForPathfinding() {
+    //     FScore_Pathfinding = std::numeric_limits<float>::max();
+    //     GScore_Pathfinding = std::numeric_limits<float>::max();
+    //     CameFrom_Pathfinding = nullptr;
+    //     // SearchID_Pathfinding would be set by the pathfinder
+    // }
 };
 
-// Comparison struct for the A* open set (used with std::multiset)
-// Sorts primarily by FScore, uses memory address as a stable tie-breaker.
+// Comparison struct for the A* open set (used with std::priority_queue or std::multiset)
+// std::priority_queue is a max-heap by default, so for a min-heap (lowest FScore first),
+// the comparator needs to return true if 'lhs' has a GREATER FScore than 'rhs'.
 struct NodeCompare
 {
     bool operator()(const NavNode* lhs, const NavNode* rhs) const
     {
-        // Handle potential null pointers gracefully if they could ever enter the set
-        if (!lhs) return false; // Null is considered "greater"
-        if (!rhs) return true;  // Non-null is considered "lesser"
+        if (!lhs) return true;  // Null is considered "greater" (pushed further down in a min-priority_queue)
+        if (!rhs) return false; // Non-null is considered "lesser"
 
-        // Primary sort key: FScore
-        if (lhs->FScore < rhs->FScore) return true;
-        if (lhs->FScore > rhs->FScore) return false;
+        // Primary sort key: FScore_Pathfinding
+        // For std::priority_queue (min-heap behavior):
+        if (lhs->FScore_Pathfinding > rhs->FScore_Pathfinding) return true;
+        if (lhs->FScore_Pathfinding < rhs->FScore_Pathfinding) return false;
 
         // Secondary sort key (tie-breaker): Memory address for stability
-        return lhs < rhs;
+        return lhs > rhs; // Consistent tie-breaker for priority_queue
     }
 };

@@ -118,10 +118,10 @@ void AEnemyAI::Attack()
 
 	}
 	AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
-	if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
-	{
-		//Reduce damage here ???
-	}
+	// if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
+	// {
+	// 	//Reduce damage here ???
+	// }
 	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
 

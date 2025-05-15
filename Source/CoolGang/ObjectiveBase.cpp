@@ -154,6 +154,10 @@ void AObjectiveBase::CompleteObjective()
 	{
 		OnObjectiveCompleted.Broadcast();
 	}
+	if (EnableWaypoint.IsBound())
+	{
+		EnableWaypoint.Broadcast(this, false);
+	}
 
 	if (ObjectiveManager == nullptr)
 	{

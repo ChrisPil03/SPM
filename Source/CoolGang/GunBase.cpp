@@ -45,6 +45,14 @@ void AGunBase::BeginPlay()
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		UWeaponAttributeSet::GetMagazineSizeAttribute()
 	).AddUObject(this, &AGunBase::OnMagazineSizeChanged);
+
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		UWeaponAttributeSet::GetDamageAttribute()
+	).AddUObject(this, &AGunBase::OnDamageChanged);
+
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+	UWeaponAttributeSet::GetReloadTimeAttribute()
+	).AddUObject(this, &AGunBase::OnReloadTimeChanged);
 	
 }
 
@@ -62,6 +70,7 @@ void AGunBase::CalculateTimeBetweenShots(float NewFireRate)
 void AGunBase::OnDamageChanged(const FOnAttributeChangeData& Data) const
 {
 	float NewDamage = Data.NewValue;
+	UE_LOG(LogTemp, Warning, TEXT("NEw damage: %f"), NewDamage);
 	OnDamageChangedDelegate.Broadcast(NewDamage);
 }
 

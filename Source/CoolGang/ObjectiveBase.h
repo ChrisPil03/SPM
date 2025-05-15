@@ -227,4 +227,7 @@ private:
 	AGate* RoomGate;
 
 	bool bPlayerInRoom;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UMaterialInstance* IconMaterialInstance;
 };
