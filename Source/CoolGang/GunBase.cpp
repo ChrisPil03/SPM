@@ -145,6 +145,8 @@ void AGunBase::GiveAbilities()
 	{
 		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(FireAbilityClass, 1, 0, this));
 		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(ReloadAbilityClass, 1, 0, this));
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UltimateAbilityClass, 1, 0, this));
+		
 	}
 	
 }
