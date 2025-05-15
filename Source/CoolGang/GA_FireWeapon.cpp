@@ -194,9 +194,10 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
 		
 		if (bHit)
 		{
-			DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+			//DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
 			
 			OverlapQueryParams.AddIgnoredActor(HitResult.GetActor());
+			
 			TArray<FHitResult> ValidHits;
 			
 				TArray<FOverlapResult> OverlapResults;
@@ -216,10 +217,12 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
 				{
 					if  (AEnemyAI* enemy = Cast<AEnemyAI>(OverlapResult.GetActor()))
 					{
+						FVector Origin;
+						FVector BoxExtent;
+						enemy->GetActorBounds(true, Origin, BoxExtent); // true = only colliding components
 
-						float DistanceSq = FVector::DistSquared(HitResult.Location, enemy->GetActorLocation());
-						bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(NextHitResult, HitResult.Location, enemy->GetActorLocation(), NORMAL_TRACE, QueryParams);
-						UE_LOG(LogTemp, Warning, TEXT("NExt target: %s"), *NextHitResult.GetActor()->GetActorNameOrLabel());
+						float DistanceSq = FVector::DistSquared(HitResult.Location, Origin);
+						bool bIsTargetable = GetWorld()->LineTraceSingleByChannel(NextHitResult, HitResult.Location, Origin, NORMAL_TRACE, QueryParams);
 						if (DistanceSq < ClosestDistanceSq && bIsTargetable)
 						{
 							ClosestDistanceSq = DistanceSq;
@@ -232,11 +235,12 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
 						
 				if (!IsDuplicateHit(ValidHits, NextHitResult.GetActor()))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+					//UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
 					DrawDebugLine(GetWorld(), HitResult.Location, ClosestActor->GetActorLocation(), FColor::Green, false, 2.0f);
+					UE_LOG(LogTemp, Warning, TEXT("NExt target: %s"), *NextHitResult.GetActor()->GetActorNameOrLabel());
 					ValidHits.Add(NextHitResult);
 				}
-							
+							 
 			
 
 			

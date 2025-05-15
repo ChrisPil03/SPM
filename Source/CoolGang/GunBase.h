@@ -124,7 +124,7 @@ public:
 	TSubclassOf<UGameplayEffect> UltimateEffectClass;
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly )
-	UMaterial* PickupMat;
+	UMaterialInstance* PickupMat;
 	
 public:	
 	UFUNCTION(BlueprintImplementableEvent)
