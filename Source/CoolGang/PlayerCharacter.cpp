@@ -143,7 +143,6 @@ void APlayerCharacter::Die()
 		if (GameMode != nullptr)
 		{
 			GameMode->PlayerKilled(this);
-			SaveScore();
 		}
 	}
 }
