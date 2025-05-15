@@ -58,6 +58,14 @@ void ADiveGameMode::EndGame()
 	bGameHasEnded = true;
 	AController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	Controller->GameHasEnded(Controller->GetPawn(), false);
+
+	//Save the player data
+	APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (PlayerCharacter)
+	{
+		// Call a method or trigger an event on the player character
+		PlayerCharacter->CallFunctionByNameWithArguments(TEXT("SaveStats"), *GLog, nullptr, true);
+	}
 }
 
 void ADiveGameMode::GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSeconds) const
