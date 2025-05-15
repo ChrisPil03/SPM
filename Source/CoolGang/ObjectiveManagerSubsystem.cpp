@@ -12,7 +12,7 @@ UObjectiveManagerSubsystem::UObjectiveManagerSubsystem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	ObjectivesInLevel.Empty();
-	LastActivatedObjective = nullptr;
+	LastCompletedObjective = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -48,9 +48,9 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 		UE_LOG(LogTemp, Warning, TEXT("No available objectives to activate"));
 		return;
 	}
-	if (AvailableObjectives.Num() > 1 && LastActivatedObjective)
+	if (AvailableObjectives.Num() > 1 && LastCompletedObjective)
 	{
-		AvailableObjectives.Remove(LastActivatedObjective);
+		AvailableObjectives.Remove(LastCompletedObjective);
 	}
 	int32 RandomIndex = FMath::RandRange(0, AvailableObjectives.Num() - 1);
 	if (AObjectiveBase* SelectedObjective = AvailableObjectives[RandomIndex])
@@ -58,7 +58,6 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 		SelectedObjective->ResetObjective();
 		SelectedObjective->SetIsActive(true);
 		SelectedObjective->StartMalfunctionTimer(MalfunctionTimer, MalfunctionInterval, MalfunctionDamage);
-		LastActivatedObjective = SelectedObjective;
 		CreateObjectiveUIListItem(SelectedObjective->GetObjectiveName(), SelectedObjective);
 		
 		//UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
@@ -67,6 +66,7 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 
 void UObjectiveManagerSubsystem::RegisterCompletedObjective(AObjectiveBase* CompletedObjective)
 {
+	LastCompletedObjective = CompletedObjective;
 	CompletedObjective->StopMalfunctioning();
 	CompletedObjective->SetIsActive(false);
 	CompletedObjectives++;
