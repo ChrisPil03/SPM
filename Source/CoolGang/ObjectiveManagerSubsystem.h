@@ -40,5 +40,5 @@ private:
 	TArray<AObjectiveBase*> ObjectivesInLevel;
 
 	UPROPERTY()
-	AObjectiveBase* LastActivatedObjective;
+	AObjectiveBase* LastCompletedObjective;
 };
