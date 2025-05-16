@@ -104,20 +104,12 @@ void AEnemyAI::Attack()
 	{
 		return;
 	}
-	
-	UClass* DamageTypeClass = UDamageType::StaticClass();	
-	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
+
 	if (EnemyAttributeSet != nullptr)
 	{
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 	}
-	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
-	{
-		//UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
-
-	}
-	AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
+	
 	// if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
 	// {
 	// 	//Reduce damage here ???

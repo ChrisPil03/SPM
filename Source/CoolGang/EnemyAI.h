@@ -44,8 +44,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetAttackRange() const;
-
-	UHealthComponent* GetHealthComponent() const;
 	
 	UPROPERTY(EditAnywhere, Category = "Drop")
 	TSubclassOf<AActor> Drop;
@@ -139,10 +137,7 @@ private:
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> AttackAbilityClass;
-	
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UGameplayEffect> GE_ApplyDamageToPlayer;
-	
+
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_ResetHealth;
 	
