@@ -85,6 +85,9 @@ public:
 	virtual void FailObjective();
 
 	UFUNCTION(BlueprintCallable)
+	virtual FVector GetWaypointTargetLocation() const;
+
+	UFUNCTION(BlueprintCallable)
 	FString GetObjectiveName() const { return ObjectiveDescription; }
 	
 	void SetObjectiveState(EObjectiveState const NewObjectiveState) { ObjectiveState = NewObjectiveState; }
