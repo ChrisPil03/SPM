@@ -67,6 +67,8 @@ private:
 	bool GetTraceStartLocationAndRotation(FVector& OutStartPoint, FRotator& OutRotation) const;
 	bool IsDuplicateHit(const TArray<FHitResult>& ExistingHits, const AActor* Actor);
 
+	void DrawImpactPointDeBug(const FVector& Location) const;
+
 	
 	void ProcessHitChain(const FHitResult& InitialHit, TArray<FHitResult>& ChainHits, 
 		int32 MaxChainDepth, float SphereRadius, FCollisionQueryParams& OverlapQueryParams);

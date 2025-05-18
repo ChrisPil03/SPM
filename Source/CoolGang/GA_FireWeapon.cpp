@@ -90,17 +90,16 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
 	QueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
-	
-
     
 	if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive")))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Weapon.PiercingActive"));
+		UE_LOG(LogTemp, Warning, TEXT("PiercingActive"));
 		bHasTarget = PiercingBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
 										 ConeHalfAngleDegrees, MaxRange, QueryParams);
 	}
 	else if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.ChainingActive")))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ChainingActive"));
 		bHasTarget = ChainingBulletTrace(HitResults, StartPoint, BulletDirection, NumPellets, 
 									 ConeHalfAngleDegrees, MaxRange, QueryParams);
 	}
@@ -120,7 +119,8 @@ bool UGA_FireWeapon::NormalBulletTrace(TArray<FHitResult>& HitResults, const FVe
 	bool bHasTarget = false;
 	for (int32 i = 0; i < NumPellets; ++i)
 	{
-		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
+		FVector ShootDirection = FMath::VRandCone(BulletDirection,
+				 FMath::DegreesToRadians(ConeHalfAngleDegrees));
 		FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
         
 		FHitResult HitResult;
@@ -129,7 +129,7 @@ bool UGA_FireWeapon::NormalBulletTrace(TArray<FHitResult>& HitResults, const FVe
 		if (bHit)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
-			DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+			DrawImpactPointDeBug(HitResult.Location);
             
 			HitResults.Add(HitResult);
 			bHasTarget = true;
@@ -145,17 +145,21 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 	bool bHasTarget = false;
 	for (int32 i = 0; i < NumPellets; ++i)
 	{
-		FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
-		FVector EndPoint = StartPoint + (ShootDirection * MaxRange); // Trace distance
+		FVector ShootDirection = FMath::VRandCone(
+			BulletDirection,
+		FMath::DegreesToRadians(ConeHalfAngleDegrees)
+		);
+		FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
 		TArray<FHitResult> PiercingHitResults;
-		bool bHit = GetWorld()->LineTraceMultiByChannel(PiercingHitResults, StartPoint, EndPoint, PIERCING_TRACE, QueryParams);
+		bool bHit = GetWorld()->LineTraceMultiByChannel(PiercingHitResults,
+		StartPoint, EndPoint, PIERCING_TRACE, QueryParams);
 		if (bHit)
 		{
 			TArray<FHitResult> ValidHits;
 			for (const FHitResult& HitResult : PiercingHitResults)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
-				DrawDebugSphere(GetWorld(), HitResult.Location, 2.0f, 30, FColor::Red, false, 2.0f);
+				DrawImpactPointDeBug(HitResult.Location);
 				if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
 				{
 					ValidHits.Add(HitResult);
@@ -171,13 +175,14 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 
 	return bHasTarget;
 }
+
 bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
     const FVector& BulletDirection, float NumPellets, float ConeHalfAngleDegrees, float MaxRange,
     const FCollisionQueryParams& QueryParams)
 {
     bool bHasTarget = false;
     const float SphereRadius = 1000.0f;
-    const int32 MaxChainDepth = 3; // Limit how many times a bullet can chain
+    const int32 MaxChainDepth = 4; // Limit how many times a bullet can chain
     
     // Set up collision parameters
     FCollisionQueryParams OverlapQueryParams;
@@ -194,12 +199,17 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
         // Initial line trace
         FHitResult InitialHit;
         bool bHit = GetWorld()->LineTraceSingleByChannel(InitialHit, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
-        
+    	DrawImpactPointDeBug(InitialHit.Location);
         // Skip if no initial hit
         if (!bHit)
         {
             continue;
         }
+
+    	if (!InitialHit.GetActor()->IsA(AEnemyAI::StaticClass()))
+    	{
+    		continue;
+    	}
         
         // Process hit chain
         TArray<FHitResult> PelletHits;
@@ -221,7 +231,6 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
 {
     // Add initial hit to results
     ChainHits.Add(InitialHit);
-    DrawDebugSphere(GetWorld(), InitialHit.Location, 5.0f, 12, FColor::Red, false, 2.0f);
     
     // Track actors we've already hit to avoid duplicates
     TArray<AActor*> HitActors;
@@ -298,7 +307,10 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
                     *Enemy->GetActorNameOrLabel(), FMath::Sqrt(DistanceSq));
                 
                 // Visualize potential chain
-                DrawDebugLine(GetWorld(), CurrentHitLocation, TargetOrigin, FColor::Green, false, 2.0f);
+                DrawDebugLine(
+                	GetWorld(), CurrentHitLocation, TargetOrigin,
+                	FColor::Green, false, 2.0f
+                	);
                 
                 if (DistanceSq < ClosestDistanceSq)
                 {
@@ -321,7 +333,10 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
         OverlapQueryParams.AddIgnoredActor(ClosestActor);
         
         // Visualize the selected chain
-        DrawDebugLine(GetWorld(), CurrentHitLocation, ClosestHitResult.Location, FColor::Yellow, false, 2.0f);
+        DrawDebugLine(
+        	GetWorld(), CurrentHitLocation, ClosestHitResult.Location,
+        	FColor::Yellow, false, 2.0f
+        	);
         UE_LOG(LogTemp, Warning, TEXT("Chained to target: %s"), *ClosestActor->GetActorNameOrLabel());
         
         // Update current position for next chain
@@ -340,4 +355,17 @@ bool UGA_FireWeapon::IsDuplicateHit(const TArray<FHitResult>& ExistingHits, cons
 		}
 	}
 	return false;
+}
+
+void UGA_FireWeapon::DrawImpactPointDeBug(const FVector& Location) const
+{
+	DrawDebugSphere(
+				GetWorld(),
+				Location,
+				2.0f,
+				30,
+				FColor::Red,
+				false,
+				2.
+			);
 }
