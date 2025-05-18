@@ -64,7 +64,7 @@ void ADiveGameMode::EndGame()
 	if (PlayerCharacter)
 	{
 		// Call a method or trigger an event on the player character
-		PlayerCharacter->CallFunctionByNameWithArguments(TEXT("SaveStats"), *GLog, nullptr, true);
+		PlayerCharacter->SaveScore();
 	}
 }
 
