@@ -11,6 +11,7 @@
 #include "Engine/OverlapResult.h"
 #define PIERCING_TRACE ECC_GameTraceChannel6
 #define NORMAL_TRACE ECC_GameTraceChannel1
+#define CHAINING_TRACE ECC_GameTraceChannel7
 UGA_FireWeapon::UGA_FireWeapon()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
@@ -233,7 +234,8 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
         HitActors.Add(InitialHit.GetActor());
         OverlapQueryParams.AddIgnoredActor(InitialHit.GetActor());
     }
-    
+
+	
     FVector CurrentHitLocation = InitialHit.Location;
     
     // Chain process (limited by MaxChainDepth)
@@ -248,7 +250,7 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
             OverlapResults,
             CurrentHitLocation,
             FQuat::Identity,
-            NORMAL_TRACE,
+            CHAINING_TRACE,
             FCollisionShape::MakeSphere(SphereRadius),
             OverlapQueryParams);
             
