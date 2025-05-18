@@ -77,6 +77,8 @@ public:
 private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
+
+	
 	UPROPERTY(EditAnywhere, Category=Interact)
 	float InteractRange = 200;
 

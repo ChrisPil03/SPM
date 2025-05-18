@@ -144,6 +144,18 @@ void AObjectiveDefendGenerator::SetIsActive(const bool bNewState)
 	}
 }
 
+FVector AObjectiveDefendGenerator::GetWaypointTargetLocation() const
+{
+	if (ControlPanel)
+	{
+		// FVector Origin;
+		// FVector Extent;
+		// ControlPanel->GetActorBounds(false, Origin, Extent, false);
+		return ControlPanel->GetActorLocation();
+	}
+	return Super::GetWaypointTargetLocation();
+}
+
 float AObjectiveDefendGenerator::GetHealthPercentage() const
 {
 	const UGeneratorAttributeSet* MyAttributes = AbilitySystemComponent->GetSet<UGeneratorAttributeSet>();
