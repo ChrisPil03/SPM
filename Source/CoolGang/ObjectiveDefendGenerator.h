@@ -36,6 +36,7 @@ public:
 	// 	AController* EventInstigator,
 	// 	AActor* DamageCauser) override;
 	virtual void SetIsActive(const bool bNewState) override;
+	virtual FVector GetWaypointTargetLocation() const override;
 	
 	UFUNCTION(BlueprintCallable)
 	float GetHealthPercentage() const;
