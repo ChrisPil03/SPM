@@ -166,7 +166,7 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 					ValidHits.Add(HitResult);
 				}
 			}
-			if (ValidHits.Num() > 0)
+			if (!ValidHits.IsEmpty())
 			{
 				HitResults.Append(ValidHits);
 				bHasTarget = true;
@@ -211,7 +211,7 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
         TArray<FHitResult> PelletHits;
         ProcessHitChain(InitialHit, PelletHits, MaxChainDepth, SphereRadius, OverlapQueryParams);
     	
-        if (PelletHits.Num() > 0)
+        if (!PelletHits.IsEmpty())
         {
             HitResults.Append(PelletHits);
             bHasTarget = true;
@@ -234,7 +234,6 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
         HitActors.Add(InitialHit.GetActor());
         OverlapQueryParams.AddIgnoredActor(InitialHit.GetActor());
     }
-
 	
     FVector CurrentHitLocation = InitialHit.Location;
     
@@ -254,7 +253,7 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
             FCollisionShape::MakeSphere(SphereRadius),
             OverlapQueryParams);
             
-        if (!bHasOverlap || OverlapResults.Num() == 0)
+        if (!bHasOverlap || OverlapResults.IsEmpty())
         {
             break; // No more targets to chain to
         }
@@ -286,13 +285,12 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
             
             // Check visibility with line trace
             FHitResult VisibilityHit;
-            FCollisionQueryParams VisibilityParams = OverlapQueryParams;
             bool bIsVisible = GetWorld()->LineTraceSingleByChannel(
                 VisibilityHit, 
                 CurrentHitLocation, 
                 TargetOrigin, 
                 NORMAL_TRACE, 
-                VisibilityParams);
+                OverlapQueryParams);
                 
             // Only consider if line trace hits the intended target
             if (bIsVisible && VisibilityHit.GetActor() == Enemy)
@@ -303,10 +301,10 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
                     *Enemy->GetActorNameOrLabel(), FMath::Sqrt(DistanceSq));
                 
                 // Visualize potential chain
-                DrawDebugLine(
-                	GetWorld(), CurrentHitLocation, TargetOrigin,
-                	FColor::Green, false, 2.0f
-                	);
+                //DrawDebugLine(
+                //	GetWorld(), CurrentHitLocation, TargetOrigin,
+               // 	FColor::Green, false, 2.0f
+               // 	);
                 
                 if (DistanceSq < ClosestDistanceSq)
                 {
