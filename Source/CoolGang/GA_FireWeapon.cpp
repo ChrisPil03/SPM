@@ -184,23 +184,19 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
     const float SphereRadius = 1000.0f;
     const int32 MaxChainDepth = 4; // Limit how many times a bullet can chain
     
-    // Set up collision parameters
     FCollisionQueryParams OverlapQueryParams;
     OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo());
     OverlapQueryParams.AddIgnoredActor(GetOwningActorFromActorInfo()->GetOwner());
-    
-    // Process each pellet
+	
     for (int32 i = 0; i < NumPellets; ++i)
     {
-        // Get randomized direction within cone
         FVector ShootDirection = FMath::VRandCone(BulletDirection, FMath::DegreesToRadians(ConeHalfAngleDegrees));
         FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
-        
-        // Initial line trace
+    	
         FHitResult InitialHit;
         bool bHit = GetWorld()->LineTraceSingleByChannel(InitialHit, StartPoint, EndPoint, NORMAL_TRACE, QueryParams);
     	DrawImpactPointDeBug(InitialHit.Location);
-        // Skip if no initial hit
+       
         if (!bHit)
         {
             continue;
@@ -210,12 +206,10 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
     	{
     		continue;
     	}
-        
-        // Process hit chain
+    	
         TArray<FHitResult> PelletHits;
         ProcessHitChain(InitialHit, PelletHits, MaxChainDepth, SphereRadius, OverlapQueryParams);
-        
-        // If we found valid hits, add them to results and mark that we have a target
+    	
         if (PelletHits.Num() > 0)
         {
             HitResults.Append(PelletHits);
