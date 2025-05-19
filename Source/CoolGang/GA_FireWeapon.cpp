@@ -131,9 +131,26 @@ bool UGA_FireWeapon::NormalBulletTrace(TArray<FHitResult>& HitResults, const FVe
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
 			DrawImpactPointDeBug(HitResult.Location);
-            
-			HitResults.Add(HitResult);
-			bHasTarget = true;
+			if (HitResult.GetActor()->IsA(AEnemyAI::StaticClass()))
+			{
+				HitResults.Add(HitResult);
+				bHasTarget = true;
+			}
+			else
+			{
+				FGameplayCueParameters CueParams;
+				FGameplayEffectContextHandle EffectContext = GetActorInfo().AbilitySystemComponent.Get()->MakeEffectContext();
+				EffectContext.AddHitResult(HitResult);
+				CueParams.EffectContext = EffectContext;
+				// This will play the cue on the local ASC (usually the shooter)
+				UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+				if (ASC)
+				{
+					ASC->ExecuteGameplayCue(FGameplayTag::RequestGameplayTag(FName("GameplayCue.ApplyDamageToEnemy")), CueParams);
+				}
+			}
+			
+		
 		}
 	}
 	return bHasTarget;
@@ -161,9 +178,25 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
 				DrawImpactPointDeBug(HitResult.Location);
-				if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
+				if (HitResult.GetActor()->IsA(AEnemyAI::StaticClass()))
 				{
-					ValidHits.Add(HitResult);
+					if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
+					{
+						ValidHits.Add(HitResult);
+					}
+				}
+				else
+				{
+					FGameplayCueParameters CueParams;
+					FGameplayEffectContextHandle EffectContext = GetActorInfo().AbilitySystemComponent.Get()->MakeEffectContext();
+					EffectContext.AddHitResult(HitResult);
+					CueParams.EffectContext = EffectContext;
+					// This will play the cue on the local ASC (usually the shooter)
+					UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+					if (ASC)
+					{
+						ASC->ExecuteGameplayCue(FGameplayTag::RequestGameplayTag(FName("GameplayCue.ApplyDamageToEnemy")), CueParams);
+					}
 				}
 			}
 			if (!ValidHits.IsEmpty())
@@ -205,6 +238,16 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
 
     	if (!InitialHit.GetActor()->IsA(AEnemyAI::StaticClass()))
     	{
+    		FGameplayCueParameters CueParams;
+    		FGameplayEffectContextHandle EffectContext = GetActorInfo().AbilitySystemComponent.Get()->MakeEffectContext();
+    		EffectContext.AddHitResult(InitialHit);
+    		CueParams.EffectContext = EffectContext;
+    		// This will play the cue on the local ASC (usually the shooter)
+    		UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+    		if (ASC)
+    		{
+    			ASC->ExecuteGameplayCue(FGameplayTag::RequestGameplayTag(FName("GameplayCue.ApplyDamageToEnemy")), CueParams);
+    		}
     		continue;
     	}
     	
