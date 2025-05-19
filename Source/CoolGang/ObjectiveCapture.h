@@ -31,6 +31,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual void FailObjective() override;
+	virtual FVector GetWaypointTargetLocation() const override;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SpawnCaptureZone();
