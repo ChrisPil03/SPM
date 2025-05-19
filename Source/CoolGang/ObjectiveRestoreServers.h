@@ -64,6 +64,7 @@ public:
 
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual void FailObjective() override;
+	virtual FVector GetWaypointTargetLocation() const override;
 	
 private:
 	void InitializeServerHall();

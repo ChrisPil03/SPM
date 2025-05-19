@@ -120,6 +120,18 @@ void AObjectiveCapture::FailObjective()
 	}
 }
 
+FVector AObjectiveCapture::GetWaypointTargetLocation() const
+{
+	if (ControlPanel)
+	{
+		// FVector Origin;
+		// FVector Extent;
+		// ControlPanel->GetActorBounds(false, Origin, Extent, false);
+		return ControlPanel->GetActorLocation();
+	}
+	return Super::GetWaypointTargetLocation();
+}
+
 void AObjectiveCapture::FindInteractable()
 {
 	TArray<AActor*> AttachedActors;

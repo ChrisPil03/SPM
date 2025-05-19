@@ -194,6 +194,14 @@ void AObjectiveBase::FailObjective()
 	}
 }
 
+FVector AObjectiveBase::GetWaypointTargetLocation() const
+{
+	// FVector Origin;
+	// FVector Extent;
+	// GetActorBounds(false, Origin, Extent, false);
+	return GetActorLocation();
+}
+
 void AObjectiveBase::IncreaseObjectiveProgress(float const DeltaTime)
 {
 	if (bIsTimeBased && ProgressTimer)
