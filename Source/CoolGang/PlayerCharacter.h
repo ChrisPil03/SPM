@@ -66,9 +66,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Events");
 	FOnPlayerTakeDamage OnPlayerTakeDamage;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void SaveScore();
-	
 	void Die();
 
 	void SetAvailableInteractable(IInteractInterface* Interactable);

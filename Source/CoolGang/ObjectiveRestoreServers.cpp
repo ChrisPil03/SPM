@@ -275,6 +275,18 @@ void AObjectiveRestoreServers::IncreaseObjectiveProgress(float const DeltaTime)
 	SetObjectiveProgress(ObjectiveProgress);
 }
 
+FVector AObjectiveRestoreServers::GetWaypointTargetLocation() const
+{
+	if (ControlPanel)
+	{
+		// FVector Origin;
+		// FVector Extent;
+		// ControlPanel->GetActorBounds(false, Origin, Extent, false);
+		return ControlPanel->GetActorLocation();
+	}
+	return Super::GetWaypointTargetLocation();
+}
+
 // ________________________________________________________________
 // ____________________ Overheat / Cooling ________________________
 
