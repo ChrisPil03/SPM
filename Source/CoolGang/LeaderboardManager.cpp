@@ -18,7 +18,6 @@ void ULeaderboardManager::AddEntry(const FString& PlayerName, int32 Score)
 
 TArray<FLeaderboardEntry> ULeaderboardManager::GetSortedLeaderboard() const
 {
-	UE_LOG(LogTemp, Warning, TEXT("GetSortedLeaderboard called. Num entries: %d"), Leaderboard.Num());
 	return Leaderboard;
 }
 
