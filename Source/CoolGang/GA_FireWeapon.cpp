@@ -392,5 +392,4 @@ void UGA_FireWeapon::SpawnImpactEffect(const FHitResult& HitResult) const
 	{
 		ASC->ExecuteGameplayCue(FGameplayTag::RequestGameplayTag(FName("GameplayCue.ApplyDamageToEnemy")), CueParams);
 	}
-	
 }
