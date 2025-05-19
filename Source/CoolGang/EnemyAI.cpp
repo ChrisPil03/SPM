@@ -39,15 +39,16 @@ void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
 	CollisionType = GetCapsuleComponent()->GetCollisionEnabled();
+	
 	AIController = Cast<AEnemyAIController>(Controller);
+	AIController->RunBehaviorTree(BehaviorTree);
 	
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		MeshComp->SetMaterial(0, FadeMaterial);
-		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0, FadeMaterial);
+		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0);
 		if (FadeDMI)
 		{
 			FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), 0.0f);
@@ -66,6 +67,19 @@ void AEnemyAI::BeginPlay()
 	}
 	GiveAbilities();
 	InitEnemyStats();
+}
+
+void AEnemyAI::StartDeathSequence()
+{
+	if (bIsDead)
+	{
+		return;
+	}
+	
+	bIsDead = true;
+
+	PerformPreDeathActions();
+	Die();
 }
 
 void AEnemyAI::InitEnemyStats()
@@ -145,11 +159,7 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
-	if (bIsDead)
-	{
-		return;
-	}
-	bIsDead = true;
+	
 	DropUpgrade();
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
@@ -173,7 +183,11 @@ void AEnemyAI::Die()
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
 	}
-	
+
+	if (GetCapsuleComponent() == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Capsule component not there?"));	
+	}
 	GetCapsuleComponent()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
