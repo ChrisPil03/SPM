@@ -68,6 +68,7 @@ private:
 	bool IsDuplicateHit(const TArray<FHitResult>& ExistingHits, const AActor* Actor);
 
 	void DrawImpactPointDeBug(const FVector& Location) const;
+	void SpawnImpactEffect(const FHitResult& HitResult) const;
 
 	
 	void ProcessHitChain(const FHitResult& InitialHit, TArray<FHitResult>& ChainHits, 
