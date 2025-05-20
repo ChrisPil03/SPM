@@ -191,6 +191,11 @@ void AObjectiveBase::FailObjective()
 		{
 			EnableWaypoint.Broadcast(this, false);
 		}
+
+		if (ObjectiveManager)
+		{
+			ObjectiveManager->RegisterFailedObjective(this);
+		}
 	}
 }
 
