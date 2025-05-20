@@ -73,6 +73,11 @@ void UObjectiveManagerSubsystem::RegisterCompletedObjective(AObjectiveBase* Comp
 	//UE_LOG(LogTemp, Warning, TEXT("Completed Objectives: %d"), CompletedObjectives);
 }
 
+void UObjectiveManagerSubsystem::RegisterFailedObjective(AObjectiveBase* FailedObjective)
+{
+	LastCompletedObjective = FailedObjective;
+}
+
 void UObjectiveManagerSubsystem::ResetAllObjectives()
 {
 	for (AObjectiveBase* Objective : ObjectivesInLevel)

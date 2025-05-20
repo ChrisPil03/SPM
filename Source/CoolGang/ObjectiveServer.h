@@ -11,6 +11,7 @@ class UNiagaraComponent;
 
 DECLARE_DELEGATE_OneParam(FServerHeatUpDelegate, float);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCompleteDelegate, AInteractableObject*, InteractableObject);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnServerEvent, AObjectiveServer*);
 
 UENUM(BlueprintType)
 enum class EServerState : uint8
@@ -52,6 +53,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	float GetProgress() const { return ProgressTimer->GetProgress(); }
+	int32 GetFailTime() const { return FailTime; }
 	
 	UFUNCTION()
 	void ResumeRestoration();
@@ -59,11 +61,39 @@ public:
 	void ResetServer();
 	void SetSmokeEffectActive(const bool bNewState) const;
 	void StartRestoration();
+	void GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSeconds);
 
 	// void SetHeatUpFunction(const FServerHeatUpDelegate& NewDelegate) { HeatUpDelegate = NewDelegate; }
 	
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FCompleteDelegate CompleteDelegate;
+
+	template <typename T>
+	void AddOnFailFunction(T* Object, void (T::*Func)(AObjectiveServer*))
+	{
+		if (!OnFailEvent.IsBoundToObject(Object))
+		{
+			OnFailEvent.AddUObject(Object, Func);	
+		}
+	}
+
+	template <typename T>
+	void AddOnPausedFunction(T* Object, void (T::*Func)(AObjectiveServer*))
+	{
+		if (!OnPausedEvent.IsBoundToObject(Object))
+		{
+			OnPausedEvent.AddUObject(Object, Func);	
+		}
+	}
+
+	template <typename T>
+	void AddOnResumedFunction(T* Object, void (T::*Func)(AObjectiveServer*))
+	{
+		if (!OnResumedEvent.IsBoundToObject(Object))
+		{
+			OnResumedEvent.AddUObject(Object, Func);	
+		}
+	}
 
 private:
 	void SetDebugMaterial() const;
@@ -74,8 +104,12 @@ private:
 	UMaterialInterface* StandardMaterial;
 	
 	void IncreaseRestorationProgress(float DeltaTime);
+	void IncreaseFailProgress(float DeltaTime);
+	void BroadcastServerFailed();
+	void BroadcastServerPaused();
+	void BroadcastServerResumed();
 	// void GenerateHeat(float DeltaTime);
-
+	
 	UFUNCTION()
 	void CompleteRestoration();
 	
@@ -94,7 +128,16 @@ private:
 	TUniquePtr<FProgressTimer> ProgressTimer;
 
 	FTimerHandle MalfunctionTimerHandle;
+	
+	FOnServerEvent OnFailEvent;
+	FOnServerEvent OnPausedEvent;
+	FOnServerEvent OnResumedEvent;
 
+	TUniquePtr<FProgressTimer> FailProgressTimer;
+
+	UPROPERTY(EditAnywhere, Category = "Server")
+	int32 FailTime;
+	
 	// bool bInstantRestoration;
 	//
 	// UPROPERTY(EditAnywhere, Category = "Overheat")

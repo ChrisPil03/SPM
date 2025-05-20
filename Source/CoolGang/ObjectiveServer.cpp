@@ -6,7 +6,8 @@ AObjectiveServer::AObjectiveServer() :
 	RestoreTime(40),
 	RestoreProgress(FProgressTimer::ZeroCompletion),
 	ServerState(EServerState::Idle),
-	ProgressTimer(nullptr)
+	ProgressTimer(nullptr),
+	FailTime(20)
 	// bInstantRestoration(true),
 	// HeatGeneration(3)
 {
@@ -25,6 +26,8 @@ void AObjectiveServer::BeginPlay()
 	// 	bInstantRestoration = false;
 	// }
 	ProgressTimer = MakeUnique<FProgressTimer>(RestoreTime);
+	FailProgressTimer = MakeUnique<FProgressTimer>(FailTime);
+	FailProgressTimer->SetCompletionFunction(this, &AObjectiveServer::BroadcastServerFailed);
 	SetCanInteractWith(false);
 }
 
@@ -34,10 +37,9 @@ void AObjectiveServer::Tick(float DeltaTime)
 
 	if (GetIsPaused())
 	{
-		return;
+		IncreaseFailProgress(DeltaTime);
 	}
-
-	if (GetIsRestoring())
+	else if (GetIsRestoring())
 	{
 		IncreaseRestorationProgress(DeltaTime);
 	}
@@ -91,6 +93,14 @@ void AObjectiveServer::StartRestoration()
 		false);
 }
 
+void AObjectiveServer::GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSeconds)
+{
+	if (FailProgressTimer)
+	{
+		FailProgressTimer->GetElapsedMinutesAndSeconds(OutMinutes, OutSeconds);
+	}
+}
+
 void AObjectiveServer::IncreaseRestorationProgress(float DeltaTime)
 {
 	ProgressTimer->IncreaseProgress(DeltaTime);
@@ -100,6 +110,38 @@ void AObjectiveServer::IncreaseRestorationProgress(float DeltaTime)
 	if (RestoreProgress == FProgressTimer::FullCompletion)
 	{
 		CompleteRestoration();
+	}
+}
+
+void AObjectiveServer::IncreaseFailProgress(float DeltaTime)
+{
+	if (FailProgressTimer)
+	{
+		FailProgressTimer->IncreaseProgress(DeltaTime);
+	}
+}
+
+void AObjectiveServer::BroadcastServerFailed()
+{
+	if (OnFailEvent.IsBound())
+	{
+		OnFailEvent.Broadcast(this);
+	}
+}
+
+void AObjectiveServer::BroadcastServerPaused()
+{
+	if (OnPausedEvent.IsBound())
+	{
+		OnPausedEvent.Broadcast(this);
+	}
+}
+
+void AObjectiveServer::BroadcastServerResumed()
+{
+	if (OnResumedEvent.IsBound())
+	{
+		OnResumedEvent.Broadcast(this);
 	}
 }
 
@@ -122,6 +164,7 @@ void AObjectiveServer::CompleteRestoration()
 		CompleteDelegate.Broadcast(this);
 	}
 	ResetMaterial();
+	GetWorld()->GetTimerManager().ClearTimer(MalfunctionTimerHandle);
 }
 
 void AObjectiveServer::PauseRestoration()
@@ -132,6 +175,7 @@ void AObjectiveServer::PauseRestoration()
 		ProgressTimer->SetIsPaused(true);
 		SetCanInteractWith(true);
 		SetDebugMaterial();
+		BroadcastServerPaused();
 		// UE_LOG(LogTemp, Warning, TEXT("Pause Restoration"));
 	}
 }
@@ -142,6 +186,9 @@ void AObjectiveServer::ResumeRestoration()
 	{
 		SetServerState(EServerState::Restoring);
 		ProgressTimer->SetIsPaused(false);
+		FailProgressTimer->ResetTimer();
+		SetCanInteractWith(false);
+		BroadcastServerResumed();
 		// UE_LOG(LogTemp, Warning, TEXT("Resume Restoration"));
 	}
 }
@@ -151,9 +198,12 @@ void AObjectiveServer::ResetServer()
 	Super::Reset();
 	SetServerState(EServerState::Idle);
 	ProgressTimer->ResetTimer();
+	FailProgressTimer->ResetTimer();
 	RestoreProgress = 0;
 	ResetMaterial();
+	SetCanInteractWith(false);
 	SetSmokeEffectActive(false);
+	GetWorld()->GetTimerManager().ClearTimer(MalfunctionTimerHandle);
 }
 
 void AObjectiveServer::SetSmokeEffectActive(const bool bNewState) const
