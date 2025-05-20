@@ -37,22 +37,30 @@ public:
 	// 	AActor* DamageCauser) override;
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual FVector GetWaypointTargetLocation() const override;
+	virtual void FailObjective() override;
+	virtual void DamageGeneratorShield(const float Damage) override;
 	
 	UFUNCTION(BlueprintCallable)
 	float GetHealthPercentage() const;
 
-	UPROPERTY(EditAnywhere)
+	UFUNCTION(BlueprintPure)
+	float GetShieldPercentage() const;
+
+	UFUNCTION(BlueprintPure)
+	bool GetIsActivating() const { return bIsActivating; }
+	
+	UPROPERTY(EditAnywhere, Category = "Objective")
 	float Health;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Objective")
 	float MaxHealth;
 
 private:
 	void BindControlPanel();
-	void BindDeathFunction();
 	void BindCompletionFunction();
 	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
 	bool CannotTakeDamage() const;
+	void ActivateObjective();
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
@@ -64,7 +72,7 @@ private:
 	UHealthComponent* HealthComponent;
 
 	UPROPERTY(EditDefaultsOnly)
-	float StartDelay;
+	float ActivationDelay;
 
 	UPROPERTY(EditAnywhere, Category = "Audio")
 	USoundBase* DownToHalfHealthVoiceLine;
@@ -75,7 +83,7 @@ private:
 	bool bHalfHealthVoiceLinePlayed;
 	bool bLowHealthVoiceLinePlayed;
 
-	FTimerHandle StartWaitTimerHandle;
+	FTimerHandle ActivationDelayTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	class UAbilitySystemComponent *AbilitySystemComponent;
@@ -94,4 +102,14 @@ private:
 	
 	UPROPERTY(EditInstanceOnly, meta = (AllowPrivateAccess))
 	AInteractableObject* ControlPanel;
+
+	UPROPERTY(VisibleAnywhere, Category = "Objective")
+	bool bIsActivating;
+
+	// --------- Shield ------- //
+	UPROPERTY(EditAnywhere, Category = "Objective")
+	float CurrentShield;
+
+	UPROPERTY(EditAnywhere, Category = "Objective")
+	float MaxShield;
 };

@@ -23,6 +23,7 @@
 #include "EnemyAIController.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "ObjectiveDefendGenerator.h"
 #include "ScoreManagerComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -55,16 +56,23 @@ void AEnemyAI::BeginPlay()
 		}
 	}
 		
-	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
-	for (AObjectiveBase* Objective : AllObjectives)
+	// TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllSubObjectives();
+	// for (AObjectiveBase* Objective : AllObjectives)
+	// {
+	// 	if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
+	// 	{
+	// 		//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+	// 		Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+	// 		Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
+	// 	}
+	// }
+	if (AObjectiveDefendGenerator* MainObjective = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetMainObjective())
 	{
-		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
-		{
-			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
-			// Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
-			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
-		}
+		MainObjective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+		MainObjective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 	}
+	
+	
 	GiveAbilities();
 	InitEnemyStats();
 }
