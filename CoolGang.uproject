@@ -12,7 +12,8 @@
 				"Engine",
 				"AIModule",
 				"GameplayAbilities",
-				"CoreUObject"
+				"CoreUObject",
+				"DeveloperSettings"
 			]
 		}
 	],

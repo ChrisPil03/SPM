@@ -5,10 +5,24 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "EnemySpawnManagerSubsystem.generated.h"
 
+class UEnemySpawnConfigurationDataAsset;
 // Forward declarations
 class APlayerLocationDetection;
 class AEnemySpawner;
 class AEnemyAI;
+
+USTRUCT() 
+struct FEnemyArrayWrapper
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    TArray<AEnemyAI*> Enemies;
+    
+    FEnemyArrayWrapper() {}
+    
+    FEnemyArrayWrapper(const TArray<AEnemyAI*>& InEnemies) : Enemies(InEnemies) {}
+};
 
 UCLASS(Blueprintable)
 class COOLGANG_API UEnemySpawnManagerSubsystem : public UTickableWorldSubsystem
@@ -26,6 +40,14 @@ public:
     void MarkEnemyAsDead(AEnemyAI* Enemy);
     const TArray<AEnemyAI*>& GetAliveEnemies() const;
     const TArray<AEnemyAI*>& GetDeadEnemies() const;
+
+    /** Gets the current number of spawned enemies of a specific Blueprint class. */
+    UFUNCTION(BlueprintPure, Category = "Enemy Spawn Manager")
+    int32 GetSpawnedEnemyCountByType(TSubclassOf<AEnemyAI> EnemyClass) const;
+
+    /** Gets all spawned enemies of a specific Blueprint class. */
+    UFUNCTION(BlueprintPure, Category = "Enemy Spawn Manager")
+    TArray<AEnemyAI*> GetSpawnedEnemiesByType(TSubclassOf<AEnemyAI> EnemyClass) const;
 
 protected:
 
@@ -69,6 +91,14 @@ protected:
     float RangeCheckTimerInterval = 1.f;
 
 private:
+    UPROPERTY(VisibleInstanceOnly, Category = "Enemy Spawn Manager|Limits")
+    TMap<TSubclassOf<AEnemyAI>, int32> MaxEnemyCounts;
+    
+    UPROPERTY(VisibleInstanceOnly, Category = "Enemy Spawn Manager|Runtime")
+    TMap<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> SpawnedEnemiesByTypeMap;
+
+    void ApplySpawnConfiguration(const UEnemySpawnConfigurationDataAsset* ConfigData);
+    
     UFUNCTION(BlueprintCallable, meta = (AllowPrivateAccess = "true"))
     void RelocateToRandomSpawner(AEnemyAI* Enemy);
     

@@ -1,16 +1,15 @@
 #include "EnemySpawnManagerSubsystem.h"
-
 #include "AIController.h"
 #include "EnemySpawner.h"
 #include "EnemyAI.h"
 #include "EnemyAIController.h"
-#include "ObjectiveBase.h"
+#include "EnemySpawnManagerSettings.h"
 #include "PlayerLocationDetection.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "EnemySpawnDataTypes.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Math/UnitConversion.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogEnemySpawnSub, Log, All);
 
@@ -22,7 +21,23 @@ TStatId UEnemySpawnManagerSubsystem::GetStatId() const
 void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
-    
+    const UEnemySpawnManagerSettings* Settings = UEnemySpawnManagerSettings::Get();
+    if (Settings && Settings->SpawnConfigurationDataAssetPath.IsValid())
+    {
+        UEnemySpawnConfigurationDataAsset* ConfigData = Cast<UEnemySpawnConfigurationDataAsset>(Settings->SpawnConfigurationDataAssetPath.TryLoad());
+        if (ConfigData)
+        {
+            ApplySpawnConfiguration(ConfigData);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Failed to load Spawn Configuration Data Asset from Project Settings path: %s"), *Settings->SpawnConfigurationDataAssetPath.ToString());
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("SpawnConfigurationDataAssetPath is not set in EnemySpawnManagerSettings or settings are invalid."));
+    }
     UpdatedSpawnInterval = BaselineSpawnInterval;
     SpawnInterval = BaselineSpawnInterval;
     SpawnIntervalIncreaseCount = 0;
@@ -37,6 +52,35 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
     FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::BindPlayerLocationDetection);
     
     UE_LOG(LogEnemySpawnSub, Log, TEXT("EnemySpawnSubsystem Initialized."));
+}
+
+void UEnemySpawnManagerSubsystem::ApplySpawnConfiguration(const UEnemySpawnConfigurationDataAsset* ConfigData)
+{
+    if (!ConfigData)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UEnemySpawnManagerSubsystem::ApplySpawnConfiguration: ConfigData is null. Cannot apply configuration."));
+        return;
+    }
+    
+    MaxEnemyCounts.Empty();
+    
+    for (const FEnemyTypeSpawnConfig& ConfigEntry : ConfigData->EnemyConfigs)
+    {
+        if (ConfigEntry.EnemyClass)
+        {
+            MaxEnemyCounts.Add(ConfigEntry.EnemyClass, ConfigEntry.MaxSpawnCount);
+
+            UE_LOG(LogTemp, Log, TEXT("Applied spawn config for %s: Max Count = %d"),
+                   *ConfigEntry.EnemyClass->GetName(),
+                   ConfigEntry.MaxSpawnCount);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("UEnemySpawnManagerSubsystem::ApplySpawnConfiguration: Found an entry in ConfigData with no EnemyClass assigned. Skipping."));
+        }
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("Enemy spawn configuration applied. %d types configured."), MaxEnemyCounts.Num());
 }
 
 void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
@@ -124,13 +168,10 @@ AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
 
 void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("UEnemySpawnManagerSubsystem::RelocateToRandomSpawner"));
     if (Enemy == nullptr)
     {
         return;
     }
-
-    
     
     if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner())
     {
@@ -144,7 +185,6 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
 
 void UEnemySpawnManagerSubsystem::CheckOutOfRange()
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("UEnemySpawnManagerSubsystem::CheckOutOfRange"));
     if (AliveEnemies.Num() == 0)
     {
         return;
@@ -253,6 +293,16 @@ const TArray<AEnemyAI*>& UEnemySpawnManagerSubsystem::GetAliveEnemies() const
 const TArray<AEnemyAI*>& UEnemySpawnManagerSubsystem::GetDeadEnemies() const 
 {
     return DeadEnemies;
+}
+
+int32 UEnemySpawnManagerSubsystem::GetSpawnedEnemyCountByType(TSubclassOf<AEnemyAI> EnemyClass) const
+{
+    return MaxEnemyCounts[EnemyClass];
+}
+
+TArray<AEnemyAI*> UEnemySpawnManagerSubsystem::GetSpawnedEnemiesByType(TSubclassOf<AEnemyAI> EnemyClass) const
+{
+    return SpawnedEnemiesByTypeMap[EnemyClass].Enemies;
 }
 
 float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
