@@ -51,7 +51,7 @@ void AObjectiveRestoreServers::Tick(float DeltaTime)
 			int32 OutMinutes;
 			int32 OutSeconds;
 			GetTimeUntilFailure(OutMinutes, OutSeconds);
-			UE_LOG(LogTemp, Display, TEXT("Elapsed seconds: %d"), OutSeconds);
+			// UE_LOG(LogTemp, Display, TEXT("Elapsed seconds: %d"), OutSeconds);
 		}
 	}
 
