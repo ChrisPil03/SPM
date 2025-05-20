@@ -3,6 +3,7 @@
 #include "EnemyDamageCalculation.h"
 #include "WeaponAttributeSet.h"
 #include "EnemyAttributeSet.h"
+#include "Engine/DamageEvents.h"
 
 // Struct to help capture attributes
 struct FDamageStatics
