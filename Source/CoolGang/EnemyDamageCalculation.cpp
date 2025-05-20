@@ -83,7 +83,7 @@ void UEnemyDamageCalculation::Execute_Implementation(const FGameplayEffectCustom
     }
     
     // You can add modifiers here (critical hits, buffs, etc.)
-    float FinalDamage = WeaponDamage;
+    float FinalDamage = WeaponDamage * FMath::FRandRange(0.95f, 1.05);
 
     
     // Apply the damage as negative health
