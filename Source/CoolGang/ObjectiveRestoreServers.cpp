@@ -45,6 +45,14 @@ void AObjectiveRestoreServers::Tick(float DeltaTime)
 	if (GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaTime);
+
+		if (bServerFailing)
+		{
+			int32 OutMinutes;
+			int32 OutSeconds;
+			GetTimeUntilFailure(OutMinutes, OutSeconds);
+			UE_LOG(LogTemp, Display, TEXT("Elapsed seconds: %d"), OutSeconds);
+		}
 	}
 
 	// if (GetIsComplete() || GetIsFailed())
@@ -130,6 +138,9 @@ void AObjectiveRestoreServers::PrepareSelectedServers()
 		{
 			Server->CompleteDelegate.AddDynamic(this, &AObjectiveRestoreServers::RegisterServerRestored);
 		}
+		Server->AddOnFailFunction(this, &AObjectiveRestoreServers::RegisterFailedServer);
+		Server->AddOnPausedFunction(this, &AObjectiveRestoreServers::RegisterServerPaused);
+		Server->AddOnResumedFunction(this, &AObjectiveRestoreServers::RegisterServerResumed);
 		Server->StartRestoration();
 	}
 }
@@ -249,6 +260,26 @@ void AObjectiveRestoreServers::RegisterControlPanelInteraction(AInteractableObje
 	// InitiateCoolingCycle();
 }
 
+void AObjectiveRestoreServers::RegisterFailedServer(AObjectiveServer* Server)
+{
+	FailObjective();
+}
+
+void AObjectiveRestoreServers::RegisterServerPaused(AObjectiveServer* Server)
+{
+	FailingServers.Add(Server);
+	bServerFailing = true;
+}
+
+void AObjectiveRestoreServers::RegisterServerResumed(AObjectiveServer* Server)
+{
+	FailingServers.Remove(Server);
+	if (FailingServers.IsEmpty())
+	{
+		bServerFailing = false;
+	}
+}
+
 void AObjectiveRestoreServers::ResetObjective()
 {
 	Super::ResetObjective();
@@ -285,6 +316,24 @@ FVector AObjectiveRestoreServers::GetWaypointTargetLocation() const
 		return ControlPanel->GetActorLocation();
 	}
 	return Super::GetWaypointTargetLocation();
+}
+
+void AObjectiveRestoreServers::GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds)
+{
+	if (!FailingServers.IsEmpty() && FailingServers[0])
+	{
+		int32 OutElapsedMinutes;
+		int32 OutElapsedSeconds;
+		FailingServers[0]->GetElapsedMinutesAndSeconds(OutElapsedMinutes, OutElapsedSeconds);
+		int32 FailTime = FailingServers[0]->GetFailTime();
+		int32 FailMinutes = FailTime / 60;
+		int32 FailSeconds = FailTime % 60;
+		OutMinutes = FailMinutes - OutElapsedMinutes;
+		OutSeconds = FailSeconds - OutElapsedSeconds;
+		return;
+	}
+	OutMinutes = -1;
+	OutSeconds = -1;
 }
 
 // ________________________________________________________________
