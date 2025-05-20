@@ -39,15 +39,16 @@ void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
 	CollisionType = GetCapsuleComponent()->GetCollisionEnabled();
+	
 	AIController = Cast<AEnemyAIController>(Controller);
+	AIController->RunBehaviorTree(BehaviorTree);
 	
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		MeshComp->SetMaterial(0, FadeMaterial);
-		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0, FadeMaterial);
+		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0);
 		if (FadeDMI)
 		{
 			FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), 0.0f);
@@ -66,6 +67,19 @@ void AEnemyAI::BeginPlay()
 	}
 	GiveAbilities();
 	InitEnemyStats();
+}
+
+void AEnemyAI::StartDeathSequence()
+{
+	if (bIsDead)
+	{
+		return;
+	}
+	
+	bIsDead = true;
+
+	PerformPreDeathActions();
+	Die();
 }
 
 void AEnemyAI::InitEnemyStats()
@@ -104,20 +118,12 @@ void AEnemyAI::Attack()
 	{
 		return;
 	}
-	
-	UClass* DamageTypeClass = UDamageType::StaticClass();	
-	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
+
 	if (EnemyAttributeSet != nullptr)
 	{
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 	}
-	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
-	{
-		//UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
-
-	}
-	AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
+	
 	// if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
 	// {
 	// 	//Reduce damage here ???
@@ -153,11 +159,7 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
-	if (bIsDead)
-	{
-		return;
-	}
-	bIsDead = true;
+	
 	DropUpgrade();
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
@@ -181,7 +183,11 @@ void AEnemyAI::Die()
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
 	}
-	
+
+	if (GetCapsuleComponent() == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Capsule component not there?"));	
+	}
 	GetCapsuleComponent()->SetEnableGravity(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
