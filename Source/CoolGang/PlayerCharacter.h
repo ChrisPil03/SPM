@@ -55,7 +55,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void Dash();
-
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnDash();
+	
 	UFUNCTION(BlueprintCallable)
 	void ChangeEquippedGun(int32 WeaponSlot);
 
