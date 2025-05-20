@@ -20,7 +20,8 @@ UENUM(BlueprintType)
 enum class EEnemyType : uint8
 {
 	Spider UMETA(DisplayName = "Spider"),
-	Wasp UMETA(DisplayName = "Wasp")
+	Wasp UMETA(DisplayName = "Wasp"),
+	Gloorb UMETA(DisplayName = "Gloorb")
 };
 
 UCLASS()
@@ -35,17 +36,23 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetAlive();
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void PerformPreDeathActions();
+
+	void Die();
+	
 public:
 	void Attack();
 
+	void StartDeathSequence();
+	
 	UFUNCTION(BlueprintCallable)
 	float GetAttackRange() const;
-
-	UHealthComponent* GetHealthComponent() const;
 	
 	UPROPERTY(EditAnywhere, Category = "Drop")
 	TSubclassOf<AActor> Drop;
@@ -63,8 +70,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IAttackable> GetTarget() const;
-	
-	void Die();
 
 	UFUNCTION()
 	void AttackPlayer(AObjectiveBase*  Objective);
@@ -92,9 +97,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="VFX")
 	UNiagaraSystem* DeathVFX;
-
-	UPROPERTY(EditAnywhere, Category="VFX")
-	UMaterialInterface* FadeMaterial;
 	
 	UPROPERTY(Transient)
 	UMaterialInstanceDynamic* FadeDMI;
@@ -137,12 +139,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TScriptInterface<IAttackable> CurrentTarget;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> AttackAbilityClass;
-	
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UGameplayEffect> GE_ApplyDamageToPlayer;
-	
+
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_ResetHealth;
 	
