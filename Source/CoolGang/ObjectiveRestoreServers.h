@@ -65,6 +65,9 @@ public:
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual void FailObjective() override;
 	virtual FVector GetWaypointTargetLocation() const override;
+
+	UFUNCTION(BlueprintPure)
+	void GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds);
 	
 private:
 	void InitializeServerHall();
@@ -95,6 +98,15 @@ private:
 	UFUNCTION()
 	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
 
+	UFUNCTION()
+	void RegisterFailedServer(AObjectiveServer* Server);
+
+	UFUNCTION()
+	void RegisterServerPaused(AObjectiveServer* Server);
+
+	UFUNCTION()
+	void RegisterServerResumed(AObjectiveServer* Server);
+	
 	// UFUNCTION()
 	// void AddHeatBuildup(float Heat);
 	
@@ -118,6 +130,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Objective")
 	AInteractableObject* ControlPanel;
+
+	UPROPERTY()
+	TArray<AObjectiveServer*> FailingServers;
+
+	UPROPERTY(VisibleAnywhere, Category = "Objective")
+	bool bServerFailing;
 
 	// UPROPERTY(EditAnywhere, Category = "Overheat")
 	// bool bCanOverheat;

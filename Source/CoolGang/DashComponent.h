@@ -7,7 +7,7 @@
 #include "DashComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class COOLGANG_API UDashComponent : public UActorComponent
 {
 	GENERATED_BODY()

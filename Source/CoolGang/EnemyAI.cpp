@@ -38,7 +38,7 @@ AEnemyAI::AEnemyAI()
 void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionType = GetCapsuleComponent()->GetCollisionEnabled();
+	CollisionType = GetMesh()->GetCollisionEnabled();
 	
 	AIController = Cast<AEnemyAIController>(Controller);
 	AIController->RunBehaviorTree(BehaviorTree);
@@ -159,6 +159,9 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Enemy dying"))
+	GetCapsuleComponent()->SetEnableGravity(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	DropUpgrade();
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
@@ -189,8 +192,7 @@ void AEnemyAI::Die()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Capsule component not there?"));	
 	}
-	GetCapsuleComponent()->SetEnableGravity(false);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
@@ -274,7 +276,7 @@ void AEnemyAI::SetAlive()
 	}
 	SetActorHiddenInGame(false);
 	AIController->RunBehaviorTree(BehaviorTree);
-	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
+	GetMesh()->SetCollisionEnabled(CollisionType);
 	GetCapsuleComponent()->SetEnableGravity(true);
 	//Should call this in BP
 	if (GE_ResetHealth)
