@@ -180,6 +180,7 @@ void AEnemyAI::Die()
 	if (Controller)
 	{
 		Controller->StopMovement();
+		PlayAnimMontage(DeathMontage);
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
 	}
