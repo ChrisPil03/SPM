@@ -22,6 +22,7 @@ public:
 	bool GetIsPaused() const { return bIsPaused; }
 	bool GetIsCompleted() const { return bIsCompleted; }
 	float GetProgress() const { return Progress; }
+	void GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSeconds) const;
 
 	void SetCompletionDelegate(const FTimerCompletionDelegate& NewDelegate) { CompletionDelegate = NewDelegate; }
 
@@ -36,6 +37,7 @@ private:
 	
 	float Duration;
 	float Progress;
+	float ElapsedTime;
 	bool bIsPaused;
 	bool bIsCompleted;
 
