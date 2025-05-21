@@ -14,7 +14,7 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 	bLowHealthVoiceLinePlayed(false),
 	bIsActivating(false),
 	CurrentShield(0.f),
-	MaxShield(1000.f)
+	MaxShield(20000.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
