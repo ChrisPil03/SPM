@@ -44,14 +44,46 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
     SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
     OutOfRangeDelegate.BindUFunction(this, FName("CheckOutOfRange"));
     GetWorld()->GetTimerManager().SetTimer(OutOfRangeCheckTimer, OutOfRangeDelegate, RangeCheckTimerInterval, true);
-    AliveEnemies.Empty();
-    DeadEnemies.Empty();
+    AliveEnemiesByTypeMap.Empty();
+    DeadEnemiesByTypeMap.Empty();
     SpawnersByLocation.Empty();
     CurrentEnemySpawners.Empty();
 
     FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::BindPlayerLocationDetection);
     
     UE_LOG(LogEnemySpawnSub, Log, TEXT("EnemySpawnSubsystem Initialized."));
+}
+
+TSubclassOf<AEnemyAI> UEnemySpawnManagerSubsystem::GetRandomAvailableEnemyTypeToSpawn() const
+{
+    
+    TArray<TSubclassOf<AEnemyAI>> AvailableEnemyClasses;
+    for (const TPair<TSubclassOf<AEnemyAI>, int32>& Pair : MaxEnemyCounts)
+    {
+        TSubclassOf<AEnemyAI> EnemyClass = Pair.Key;
+        int32 MaxCountForThisType = Pair.Value;
+        int32 CurrentCountForThisType = 0;
+
+        const FEnemyArrayWrapper* EnemyWrapperPtr = AliveEnemiesByTypeMap.Find(EnemyClass);
+
+        if (EnemyWrapperPtr)
+        {
+            CurrentCountForThisType = EnemyWrapperPtr->Enemies.Num();
+        }
+        
+        if (CurrentCountForThisType < MaxCountForThisType)
+        {
+            AvailableEnemyClasses.Add(EnemyClass);
+        }
+    }
+    if (AvailableEnemyClasses.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("GetRandomAvailableEnemyTypeToSpawn: No enemy types available to spawn (all might be at max capacity or none configured with capacity)."));
+        return nullptr; // No available types
+    }
+    
+    int32 RandomIndex = FMath::RandRange(0, AvailableEnemyClasses.Num() - 1);
+    return AvailableEnemyClasses[RandomIndex];
 }
 
 void UEnemySpawnManagerSubsystem::ApplySpawnConfiguration(const UEnemySpawnConfigurationDataAsset* ConfigData)
@@ -69,7 +101,7 @@ void UEnemySpawnManagerSubsystem::ApplySpawnConfiguration(const UEnemySpawnConfi
         if (ConfigEntry.EnemyClass)
         {
             MaxEnemyCounts.Add(ConfigEntry.EnemyClass, ConfigEntry.MaxSpawnCount);
-
+            MaximumEnemies += ConfigEntry.MaxSpawnCount;
             UE_LOG(LogTemp, Log, TEXT("Applied spawn config for %s: Max Count = %d"),
                    *ConfigEntry.EnemyClass->GetName(),
                    ConfigEntry.MaxSpawnCount);
@@ -79,6 +111,13 @@ void UEnemySpawnManagerSubsystem::ApplySpawnConfiguration(const UEnemySpawnConfi
             UE_LOG(LogTemp, Warning, TEXT("UEnemySpawnManagerSubsystem::ApplySpawnConfiguration: Found an entry in ConfigData with no EnemyClass assigned. Skipping."));
         }
     }
+
+    BaselineSpawnInterval           = ConfigData->BaselineSpawnInterval;
+    MinimumSpawnInterval            = ConfigData->MinimumSpawnInterval;
+    MaxSpawnIntervalIncreaseCount   = ConfigData->MaxSpawnIntervalIncreaseCount;
+    SpawnIntervalScale              = ConfigData->SpawnIntervalScale;
+    SpawnAccelerationRate           = ConfigData->SpawnAccelerationRate;
+    SpawnIntervalIncreaseTimer      = ConfigData->SpawnIntervalIncreaseTimer;
 
     UE_LOG(LogTemp, Log, TEXT("Enemy spawn configuration applied. %d types configured."), MaxEnemyCounts.Num());
 }
@@ -105,7 +144,13 @@ void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
 
 void UEnemySpawnManagerSubsystem::SpawnEnemy()
 {
-    if (AliveEnemies.Num() >= MaximumEnemies)
+    int32 AliveEnemies = 0;
+    for (const TTuple<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> Pair : AliveEnemiesByTypeMap)
+    {
+        AliveEnemies += Pair.Value.Enemies.Num();
+    }
+    
+    if (AliveEnemies >= MaximumEnemies)
     {
         return;
     }
@@ -121,7 +166,7 @@ void UEnemySpawnManagerSubsystem::SpawnEnemy()
         return;
     }
     
-    AEnemyAI* Enemy = RandomSpawner->SpawnEnemy();
+    AEnemyAI* Enemy = RandomSpawner->SpawnEnemy(GetRandomAvailableEnemyTypeToSpawn());
     if (Enemy == nullptr)
     {
         return;
@@ -139,22 +184,121 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
 
  void UEnemySpawnManagerSubsystem::MarkEnemyAsAlive(AEnemyAI* Enemy)
  {
-    if (!Enemy) return;
+    if (!IsValid(Enemy)) return;
 
-    DeadEnemies.Remove(Enemy);
-    AliveEnemies.AddUnique(Enemy);
+    UClass* EnemyClass = Enemy->GetClass();
+    if (!EnemyClass)  return; 
+
+    FEnemyArrayWrapper& AliveEnemyListWrapper = AliveEnemiesByTypeMap.FindOrAdd(EnemyClass);
+
+    if (!AliveEnemyListWrapper.Enemies.Contains(Enemy))
+    {
+        AliveEnemyListWrapper.Enemies.Add(Enemy);
+        UE_LOG(LogTemp, Verbose, TEXT("Marked enemy '%s' (Type: %s) as alive. Total alive of this type: %d"),
+            *Enemy->GetName(), *EnemyClass->GetName(), AliveEnemyListWrapper.Enemies.Num());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("Enemy '%s' (Type: %s) was already marked as alive."),
+            *Enemy->GetName(), *EnemyClass->GetName());
+    }
+
+    FEnemyArrayWrapper& DeadEnemyListWrapper = DeadEnemiesByTypeMap.FindOrAdd(EnemyClass);
+    if (DeadEnemyListWrapper.Enemies.Contains(Enemy))
+    {
+        DeadEnemyListWrapper.Enemies.Remove(Enemy);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("Tried to remove Enemy '%s' (Type: %s) from dead map but it was not marked as dead."),
+            *Enemy->GetName(), *EnemyClass->GetName());
+    }
+    
  }
 
  void UEnemySpawnManagerSubsystem::MarkEnemyAsDead(AEnemyAI* Enemy)
- {
-    if (!Enemy) return;
-
-    if (AliveEnemies.Contains(Enemy))
+{
+    // --- Initial Validation ---
+    if (!IsValid(Enemy))
     {
-        AliveEnemies.Remove(Enemy);
-        DeadEnemies.AddUnique(Enemy);
+        UE_LOG(LogTemp, Warning, TEXT("MarkEnemyAsDead: Attempted to mark an INVALID or NULL enemy as dead. Function will exit."));
+        return;
     }
- }
+
+    UClass* EnemyClass = Enemy->GetClass();
+    if (!EnemyClass)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("MarkEnemyAsDead: Enemy '%s' has NO VALID CLASS. Cannot process. Function will exit."), *Enemy->GetName());
+        return;
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("MarkEnemyAsDead: Processing enemy '%s' of type '%s'."), *Enemy->GetName(), *EnemyClass->GetName());
+
+    // --- Add to DeadEnemiesByTypeMap ---
+    UE_LOG(LogTemp, Verbose, TEXT("MarkEnemyAsDead: Accessing DeadEnemiesByTypeMap for class '%s'..."), *EnemyClass->GetName());
+    FEnemyArrayWrapper& DeadEnemyListWrapper = DeadEnemiesByTypeMap.FindOrAdd(EnemyClass); // FindOrAdd is fine here
+
+    int32 DeadCountBeforeAdd = DeadEnemyListWrapper.Enemies.Num();
+    if (!DeadEnemyListWrapper.Enemies.Contains(Enemy))
+    {
+        DeadEnemyListWrapper.Enemies.Add(Enemy);
+        UE_LOG(LogTemp, Log, TEXT("MarkEnemyAsDead: ADDED '%s' to dead list for type '%s'. Dead count for type: %d -> %d."),
+            *Enemy->GetName(), *EnemyClass->GetName(), DeadCountBeforeAdd, DeadEnemyListWrapper.Enemies.Num());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("MarkEnemyAsDead: Enemy '%s' (Type: %s) was ALREADY in the dead list. No change to dead list. Current dead count for type: %d."),
+            *Enemy->GetName(), *EnemyClass->GetName(), DeadCountBeforeAdd);
+    }
+
+    // --- Remove from AliveEnemiesByTypeMap ---
+    UE_LOG(LogTemp, Verbose, TEXT("MarkEnemyAsDead: Accessing AliveEnemiesByTypeMap for class '%s'..."), *EnemyClass->GetName());
+
+    // It's better to use Find here because if the class isn't in the alive map, we don't want to add an empty entry.
+    if (FEnemyArrayWrapper* AliveEnemyListWrapperPtr = AliveEnemiesByTypeMap.Find(EnemyClass))
+    {
+        // The class type exists in the alive map, now check if this specific enemy instance is in its list.
+        int32 AliveCountBeforeRemove = AliveEnemyListWrapperPtr->Enemies.Num();
+        int32 RemovedCount = AliveEnemyListWrapperPtr->Enemies.Remove(Enemy); // Remove returns the number of elements removed (0 or 1)
+
+        if (RemovedCount > 0)
+        {
+            UE_LOG(LogTemp, Log, TEXT("MarkEnemyAsDead: REMOVED '%s' from alive list for type '%s'. Alive count for type: %d -> %d."),
+                *Enemy->GetName(), *EnemyClass->GetName(), AliveCountBeforeRemove, AliveEnemyListWrapperPtr->Enemies.Num());
+
+            // Optional: Clean up the map entry if the list becomes empty
+            if (AliveEnemyListWrapperPtr->Enemies.Num() == 0)
+            {
+                UE_LOG(LogTemp, Verbose, TEXT("MarkEnemyAsDead: Alive list for type '%s' is now empty. Removing class entry from AliveEnemiesByTypeMap."), *EnemyClass->GetName());
+                // AliveEnemiesByTypeMap.Remove(EnemyClass); // Uncomment if you want to remove empty entries
+            }
+        }
+        else
+        {
+            // This means the class type was in the alive map, but this specific enemy instance wasn't in its list.
+            UE_LOG(LogTemp, Warning, TEXT("MarkEnemyAsDead: Enemy '%s' (Type: %s) was NOT FOUND in its class's alive list for removal. Alive count for type remains: %d."),
+                *Enemy->GetName(), *EnemyClass->GetName(), AliveCountBeforeRemove);
+        }
+    }
+    else
+    {
+        // This means the EnemyClass itself was not a key in AliveEnemiesByTypeMap.
+        UE_LOG(LogTemp, Warning, TEXT("MarkEnemyAsDead: No alive list found for type '%s' when trying to remove '%s'. Enemy was likely never marked alive or already removed from alive list."),
+            *EnemyClass->GetName(), *Enemy->GetName());
+    }
+
+    // --- Log Final Counts for Verification (Optional but helpful) ---
+    int32 FinalAliveCountThisType = 0;
+    if (const FEnemyArrayWrapper* FinalAliveWrapper = AliveEnemiesByTypeMap.Find(EnemyClass))
+    {
+        FinalAliveCountThisType = FinalAliveWrapper->Enemies.Num();
+    }
+    int32 FinalDeadCountThisType = 0; // DeadEnemyListWrapper is still valid here
+    FinalDeadCountThisType = DeadEnemyListWrapper.Enemies.Num();
+
+    UE_LOG(LogTemp, Log, TEXT("MarkEnemyAsDead: FINISHED processing '%s'. Final counts for type '%s' - Alive: %d, Dead: %d."),
+        *Enemy->GetName(), *EnemyClass->GetName(), FinalAliveCountThisType, FinalDeadCountThisType);
+}
 
 AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
 {
@@ -185,36 +329,46 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
 
 void UEnemySpawnManagerSubsystem::CheckOutOfRange()
 {
-    if (AliveEnemies.Num() == 0)
+    if (AliveEnemiesByTypeMap.IsEmpty())
     {
         return;
     }
-    for (AEnemyAI* Enemy : AliveEnemies)
+    
+    for (const TTuple<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> Pair : AliveEnemiesByTypeMap)
     {
-        if (Cast<APlayerCharacter>(Enemy->GetTarget().GetObject()) == nullptr)
+        for (AEnemyAI* Enemy : Pair.Value.Enemies)
         {
-            return;
-        }
-        FName DistanceSqKey = "DistanceToTargetSquared";
-        AAIController* EnemyController = Cast<AAIController>(Enemy->GetController());
-        if (EnemyController)
-        {
-            UBlackboardComponent* Blackboard = EnemyController->GetBlackboardComponent();
-
-            if (Blackboard)
+            if (!IsValid(Enemy) || !IsValid(Enemy->GetController())) // Also check for valid controller
             {
-                float DistanceSq =  Blackboard->GetValueAsFloat(DistanceSqKey);
+                continue; // Skip invalid enemies or those without controllers
+            }
+            
+            if (Cast<APlayerCharacter>(Enemy->GetTarget().GetObject()) == nullptr)
+            {
+                continue;
+            }
+            
+            FName DistanceSqKey = "DistanceToTargetSquared";
+            AAIController* EnemyController = Cast<AAIController>(Enemy->GetController());
+            
+            if (EnemyController)
+            {
+                UBlackboardComponent* Blackboard = EnemyController->GetBlackboardComponent();
 
-                if (DistanceSq > RelocateDistanceThreshold)
+                if (Blackboard)
                 {
-                    UE_LOG(LogTemp, Warning, TEXT("Distance is: %f"), DistanceSq)
-                    RelocateToRandomSpawner(Enemy);
+                    float DistanceSq =  Blackboard->GetValueAsFloat(DistanceSqKey);
+
+                    if (DistanceSq > RelocateDistanceThreshold)
+                    {
+                        UE_LOG(LogTemp, Warning, TEXT("Distance is: %f"), DistanceSq)
+                        RelocateToRandomSpawner(Enemy);
+                    }
                 }
             }
         }
     }
 }
-
 
 void UEnemySpawnManagerSubsystem::BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params)
 {
@@ -284,25 +438,24 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
     }
 }
 
-
-const TArray<AEnemyAI*>& UEnemySpawnManagerSubsystem::GetAliveEnemies() const 
+const TMap<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper>& UEnemySpawnManagerSubsystem::GetAliveEnemiesMap() const 
 {
-    return AliveEnemies;
+    return AliveEnemiesByTypeMap;
 }
 
-const TArray<AEnemyAI*>& UEnemySpawnManagerSubsystem::GetDeadEnemies() const 
+const TMap<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper>& UEnemySpawnManagerSubsystem::GetDeadEnemiesMap() const 
 {
-    return DeadEnemies;
+    return DeadEnemiesByTypeMap;
 }
 
-int32 UEnemySpawnManagerSubsystem::GetSpawnedEnemyCountByType(TSubclassOf<AEnemyAI> EnemyClass) const
+TArray<AEnemyAI*> UEnemySpawnManagerSubsystem::GetAliveEnemiesByType(const TSubclassOf<AEnemyAI>& EnemyClass) const
+{
+    return AliveEnemiesByTypeMap[EnemyClass].Enemies;
+}
+
+int32 UEnemySpawnManagerSubsystem::GetMaxEnemiesByType(const TSubclassOf<AEnemyAI>& EnemyClass) const
 {
     return MaxEnemyCounts[EnemyClass];
-}
-
-TArray<AEnemyAI*> UEnemySpawnManagerSubsystem::GetSpawnedEnemiesByType(TSubclassOf<AEnemyAI> EnemyClass) const
-{
-    return SpawnedEnemiesByTypeMap[EnemyClass].Enemies;
 }
 
 float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)

@@ -19,7 +19,17 @@ struct FEnemyTypeSpawnConfig
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Config", meta = (ClampMin = "0", UIMin = "0"))
 	int32 MaxSpawnCount = 1;
+};
 
+UCLASS(BlueprintType)
+class COOLGANG_API UEnemySpawnConfigurationDataAsset : public UDataAsset // Using UDataAsset for simplicity
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Configurations", meta = (TitleProperty = "EnemyClass"))
+	TArray<FEnemyTypeSpawnConfig> EnemyConfigs;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Rate", meta = (ClampMin = "0", UIMin = "0"))
 	double BaselineSpawnInterval = 4.0f;
 
@@ -37,16 +47,6 @@ struct FEnemyTypeSpawnConfig
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Rate", meta = (ClampMin = "0", UIMin = "0"))
 	double SpawnIntervalIncreaseTimer = 20.0;
-};
-
-UCLASS(BlueprintType)
-class COOLGANG_API UEnemySpawnConfigurationDataAsset : public UDataAsset // Using UDataAsset for simplicity
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Configurations", meta = (TitleProperty = "EnemyClass"))
-	TArray<FEnemyTypeSpawnConfig> EnemyConfigs;
-
+	
 	UEnemySpawnConfigurationDataAsset() {}
 };
