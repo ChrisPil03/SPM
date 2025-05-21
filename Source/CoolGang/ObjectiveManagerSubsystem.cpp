@@ -1,21 +1,17 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ObjectiveManagerSubsystem.h"
-
 #include "ObjectiveBase.h"
-#include "Blueprint/UserWidget.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "ObjectiveDefendGenerator.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
-UObjectiveManagerSubsystem::UObjectiveManagerSubsystem()
+UObjectiveManagerSubsystem::UObjectiveManagerSubsystem() :
+	CompletedSubObjectives(0),
+	CompletionsMainObjective(0)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	ObjectivesInLevel.Empty();
+	SubObjectivesInLevel.Empty();
+	MainObjective = nullptr;
 	LastCompletedObjective = nullptr;
 }
 
-// Called when the game starts or when spawned
 void UObjectiveManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -28,14 +24,28 @@ void UObjectiveManagerSubsystem::OnWorldInitialized(const UWorld::FActorsInitial
 	FindObjectivesInLevel();
 }
 
+void UObjectiveManagerSubsystem::DeactivateAllSubObjectives()
+{
+	for (AObjectiveBase* SubObjective : SubObjectivesInLevel)
+	{
+		if (SubObjective->GetIsActive())
+		{
+			SubObjective->ResetObjective();
+			SubObjective->SetIsActive(false);
+		}
+	}
+}
+
 void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage)
 {
-	if (ObjectivesInLevel.IsEmpty())
+	UE_LOG(LogTemp, Warning, TEXT("MainObjective is active: %hd"), MainObjective->GetIsActive());
+	if (SubObjectivesInLevel.IsEmpty() ||
+		(MainObjective && (MainObjective->GetIsActive() || MainObjective->GetIsActivating())))
 	{
 		return;
 	}
 	TArray<AObjectiveBase*> AvailableObjectives;
-	for (AObjectiveBase* Objective : ObjectivesInLevel)
+	for (AObjectiveBase* Objective : SubObjectivesInLevel)
 	{
 		if (Objective && !Objective->GetIsActive())
 		{
@@ -64,12 +74,22 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 	}
 }
 
+void UObjectiveManagerSubsystem::ActivateMainObjective()
+{
+	if (MainObjective)
+	{
+		// DeactivateAllSubObjectives();
+		MainObjective->SetIsActive(true);
+		CreateObjectiveUIListItem(MainObjective->GetObjectiveName(), MainObjective);
+	}
+}
+
 void UObjectiveManagerSubsystem::RegisterCompletedObjective(AObjectiveBase* CompletedObjective)
 {
 	LastCompletedObjective = CompletedObjective;
 	CompletedObjective->StopMalfunctioning();
 	CompletedObjective->SetIsActive(false);
-	CompletedObjectives++;
+	CompletedSubObjectives++;
 	//UE_LOG(LogTemp, Warning, TEXT("Completed Objectives: %d"), CompletedObjectives);
 }
 
@@ -80,15 +100,20 @@ void UObjectiveManagerSubsystem::RegisterFailedObjective(AObjectiveBase* FailedO
 
 void UObjectiveManagerSubsystem::ResetAllObjectives()
 {
-	for (AObjectiveBase* Objective : ObjectivesInLevel)
+	for (AObjectiveBase* Objective : SubObjectivesInLevel)
 	{
 		Objective->ResetObjective();
 	}
 }
 
-TArray<AObjectiveBase*> UObjectiveManagerSubsystem::GetAllObjectives() const
+TArray<AObjectiveBase*> UObjectiveManagerSubsystem::GetAllSubObjectives() const
 {
-	return ObjectivesInLevel;
+	return SubObjectivesInLevel;
+}
+
+AObjectiveDefendGenerator* UObjectiveManagerSubsystem::GetMainObjective() const
+{
+	return MainObjective;
 }
 
 void UObjectiveManagerSubsystem::CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective)
@@ -114,7 +139,15 @@ void UObjectiveManagerSubsystem::FindObjectivesInLevel()
 	{
 		if (AObjectiveBase* Objective = Cast<AObjectiveBase>(Actor))
 		{
-			ObjectivesInLevel.Add(Objective);
+			if (AObjectiveDefendGenerator* Main = Cast<AObjectiveDefendGenerator>(Objective))
+			{
+				MainObjective = Main;
+			}else
+			{
+				SubObjectivesInLevel.Add(Objective);	
+			}
 		}
 	}
+	UE_LOG(LogTemp, Warning, TEXT("MainObjective: %hd"), MainObjective != nullptr);
+
 }
