@@ -63,6 +63,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AGunBase* GetEquippedGun() const{ return EquippedGun;};
+	UFUNCTION(BlueprintCallable)
 	void EquipWeapon(AGunBase* NewWeapon);
 
 	UPROPERTY(BlueprintAssignable, Category="Events");
