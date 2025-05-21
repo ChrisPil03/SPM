@@ -20,6 +20,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UUserWidget* GetHUDWidget() const {return HUD;}
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowGameOverScreen(bool bIsWinner);
 	
 private:
 	UPROPERTY(EditAnywhere)

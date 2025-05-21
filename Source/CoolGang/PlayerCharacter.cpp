@@ -43,6 +43,8 @@ void APlayerCharacter::BeginPlay()
 	GiveGun(Shotgun);
 	GiveGun(Rifle);
 
+	bDead = false;
+	
 	EquippedGun->SetActorHiddenInGame(false);
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(

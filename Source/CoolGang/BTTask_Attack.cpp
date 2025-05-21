@@ -23,6 +23,7 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	{
 		return EBTNodeResult::Failed;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Enemy %s is attacking"), *EnemyAI->GetClass()->GetName())
 	EnemyAI->Attack();
 	
 	return EBTNodeResult::Succeeded;
