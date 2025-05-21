@@ -176,8 +176,13 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 				{
 					if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
 					{
+						DrawImpactPointDeBug(HitResult.Location);
 						ValidHits.Add(HitResult);
 					}
+				}
+				else
+				{
+					SpawnImpactEffect(HitResult);
 				}
 			}
 			if (!ValidHits.IsEmpty())
