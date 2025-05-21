@@ -100,6 +100,7 @@ void AObjectiveDefendGenerator::ActivateObjective()
 	bIsActivating = false;
 	if (ObjectiveManager)
 	{
+		ObjectiveManager->DeactivateAllSubObjectives();
 		ObjectiveManager->ActivateMainObjective();	
 	}
 	ResetProgress();
@@ -184,6 +185,10 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 				&AObjectiveDefendGenerator::ActivateObjective,
 				ActivationDelay,
 				false);
+			if (ObjectiveManager)
+			{
+				ObjectiveManager->DeactivateAllSubObjectives();
+			}
 		}
 	}
 }

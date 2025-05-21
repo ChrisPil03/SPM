@@ -24,10 +24,23 @@ void UObjectiveManagerSubsystem::OnWorldInitialized(const UWorld::FActorsInitial
 	FindObjectivesInLevel();
 }
 
+void UObjectiveManagerSubsystem::DeactivateAllSubObjectives()
+{
+	for (AObjectiveBase* SubObjective : SubObjectivesInLevel)
+	{
+		if (SubObjective->GetIsActive())
+		{
+			SubObjective->ResetObjective();
+			SubObjective->SetIsActive(false);
+		}
+	}
+}
+
 void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage)
 {
 	UE_LOG(LogTemp, Warning, TEXT("MainObjective is active: %hd"), MainObjective->GetIsActive());
-	if (SubObjectivesInLevel.IsEmpty() || (MainObjective && MainObjective->GetIsActive()))
+	if (SubObjectivesInLevel.IsEmpty() ||
+		(MainObjective && (MainObjective->GetIsActive() || MainObjective->GetIsActivating())))
 	{
 		return;
 	}
@@ -65,6 +78,7 @@ void UObjectiveManagerSubsystem::ActivateMainObjective()
 {
 	if (MainObjective)
 	{
+		// DeactivateAllSubObjectives();
 		MainObjective->SetIsActive(true);
 		CreateObjectiveUIListItem(MainObjective->GetObjectiveName(), MainObjective);
 	}

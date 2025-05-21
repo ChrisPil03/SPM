@@ -37,6 +37,9 @@ public:
 
 	void CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective);
 
+	// Should probably be called from this class not Defend generator
+	void DeactivateAllSubObjectives();
+
 private:
 	void FindObjectivesInLevel();
 	void OnWorldInitialized(const UWorld::FActorsInitializedParams& Params);

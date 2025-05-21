@@ -75,6 +75,15 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 			UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
 			OnObjectiveDeactivated.Broadcast(this);
 		}
+		StopMalfunctioning();
+		if (EnableWaypoint.IsBound())
+		{
+			EnableWaypoint.Broadcast(this, false);
+		}
+		if (!bPlayerInRoom && RoomGate)
+		{
+			RoomGate->CloseGate();
+		}
 	}
 }
 
