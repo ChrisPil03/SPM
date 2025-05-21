@@ -8,7 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
-#include "EnemySpawnDataTypes.h"
+#include "EnemySpawnConfigurationDataAsset.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogEnemySpawnSub, Log, All);

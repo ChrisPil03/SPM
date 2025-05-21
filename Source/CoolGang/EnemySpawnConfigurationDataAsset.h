@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "EnemySpawnDataTypes.generated.h" // MUST BE THE LAST #include in this header
+#include "EnemySpawnConfigurationDataAsset.generated.h"
 
 // Forward declare your base AI class.
 // Ensure the actual AEnemyAI class is defined in its own header (e.g., "AI/EnemyAI.h")
