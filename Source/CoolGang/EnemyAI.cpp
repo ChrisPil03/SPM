@@ -217,10 +217,12 @@ AActor* AEnemyAI::GetCurrentTarget() const
 	return  Cast<AActor>(CurrentTarget.GetObject());
 }
 
-
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
-	if (!bChangedToTargetPlayer && EnemySpawnManager->GetAliveEnemies().Contains(this))
+	const TArray<AEnemyAI*> AliveEnemies = EnemySpawnManager->GetAliveEnemiesMap().Find(GetClass())->Enemies;
+	if (AliveEnemies.Num() == 0) return;
+	
+	if (!bChangedToTargetPlayer && AliveEnemies.Contains(this))
 	{
 		CurrentTarget = Objective;
 		bChangedToTargetPlayer = true;

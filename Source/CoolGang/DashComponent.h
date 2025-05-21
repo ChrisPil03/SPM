@@ -50,6 +50,8 @@ private:
 	class UCharacterMovementComponent* CharacterMovement;
 	
 	FTimerHandle CooldownTimer;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	FTimerHandle DashTimer;
 	
 	bool bIsDashing;
