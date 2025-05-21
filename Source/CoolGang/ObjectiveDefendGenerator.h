@@ -13,6 +13,7 @@ class UHealthComponent;
 
 struct FOnAttributeChangeData;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGeneratorHealthChangedDelegate, float, Health);
+
 UCLASS()
 
 class COOLGANG_API AObjectiveDefendGenerator : public AObjectiveBase, public IAttackable
@@ -54,6 +55,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Objective")
 	float MaxHealth;
+
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnObjectiveEvent OnShieldChanged;
 
 private:
 	void BindControlPanel();

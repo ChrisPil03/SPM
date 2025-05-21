@@ -69,6 +69,10 @@ void AObjectiveDefendGenerator::CompleteObjective()
 	Super::CompleteObjective();
 	OnRequestAddScore.Broadcast(EScoreType::ObjectiveGeneratorCompleted);
 	CurrentShield = MaxShield;
+	if (OnShieldChanged.IsBound())
+	{
+		OnShieldChanged.Broadcast();
+	}
 }
 
 void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
@@ -189,6 +193,11 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 			{
 				ObjectiveManager->DeactivateAllSubObjectives();
 			}
+		}
+
+		if (OnShieldChanged.IsBound())
+		{
+			OnShieldChanged.Broadcast();
 		}
 	}
 }
