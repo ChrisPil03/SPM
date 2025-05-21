@@ -47,6 +47,11 @@ void AInteractableObject::Interact(AActor* Interactor)
 	}
 }
 
+void AInteractableObject::ResetInteractable()
+{
+	SetCanInteractWith(false);
+}
+
 void AInteractableObject::SetCanInteractWith(bool const bNewState)
 {
 	if (!bNewState)

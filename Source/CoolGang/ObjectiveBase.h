@@ -46,17 +46,21 @@ protected:
 	virtual void DecreaseObjectiveProgress(float const DeltaTime);
 
 	UFUNCTION()
-	virtual void WeakenSystemIntegrity(const float Damage);
+	virtual void DamageGeneratorShield(const float Damage);
 
 	void SetObjectiveProgress(const float NewProgress);
 	void SetIsTimeBased(bool const bNewState) { bIsTimeBased = bNewState; }
 	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
-	ASystemIntegrity* GetSystemIntegrity() const { return SystemIntegrity; }
+	// ASystemIntegrity* GetSystemIntegrity() const { return SystemIntegrity; }
 	float GetBaseIntegrityDamage() const { return BaseIntegrityDamage; }
 	
 	void EnqueueVoiceLineWithMessage(USoundBase* VoiceLine, const FString& Message) const;
 	void DisplayMessageForSeconds(const FString& Message, const float Seconds) const;
 
+	void ResetProgress();
+
+	UPROPERTY()
+	UObjectiveManagerSubsystem* ObjectiveManager;
 
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -132,11 +136,10 @@ public:
 	FOnObjectiveEvent OnStopWeakeningSystemIntegrity;
 
 private:
-	void ResetProgress();
 	void FindObjectiveManager();
 	void FindAnnouncementSubsystem();
 	void FindDisplayTextMessageSubsystem();
-	void FindSystemIntegrity();
+	// void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();
 	void BroadcastObjectiveIsActive();
 	void BindPlayerLocationDetection();
@@ -158,9 +161,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	EObjectiveState ObjectiveState;
 
-	UPROPERTY()
-	UObjectiveManagerSubsystem* ObjectiveManager;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Objective")
 	FString ObjectiveDescription;
 
@@ -172,8 +172,8 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	float Progress;
 
-	UPROPERTY()
-	ASystemIntegrity* SystemIntegrity;
+	// UPROPERTY()
+	// ASystemIntegrity* SystemIntegrity;
 	
 	UPROPERTY(EditAnywhere, Category = "System Integrity")
 	float BaseIntegrityDamage;

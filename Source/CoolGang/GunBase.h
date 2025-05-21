@@ -108,7 +108,7 @@ public:
 	UPROPERTY()
 	const class UWeaponAttributeSet* WeaponAttributeSet;
 	
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent *AbilitySystemComponent;
 
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
@@ -133,7 +133,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartFire();
 	
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void StopFire();
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)

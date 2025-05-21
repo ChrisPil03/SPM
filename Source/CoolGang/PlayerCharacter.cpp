@@ -13,6 +13,7 @@
 #include "PlayerAttributeSet.h"
 #include "ScoreManagerComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -23,8 +24,11 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
+	SpringArmComponent->SetupAttachment(CameraComponent);
+	
 	GunComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun Component"));
-	GunComponent->SetupAttachment(CameraComponent);
+	GunComponent->SetupAttachment(SpringArmComponent);
 	
 	ScoreManagerComponent = CreateDefaultSubobject<UScoreManagerComponent>(TEXT("Score Manager Component"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
