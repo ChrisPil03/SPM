@@ -168,7 +168,11 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 void AEnemyAI::Die()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Enemy dying"))
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (GetMesh())
+	{
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 	
 	DropUpgrade();
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
