@@ -101,6 +101,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetAttackingState(bool IsAttacking) {bIsAttacking = IsAttacking;}
 
+	UFUNCTION(BlueprintCallable)
+	void SetJumpingState(bool IsJumping) {bIsJumping = IsJumping;}
+
+
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
