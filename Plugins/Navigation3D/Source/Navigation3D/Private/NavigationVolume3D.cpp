@@ -496,7 +496,8 @@ ENavigationVolumeResult ANavigationVolume3D::FindPath(const AActor* Actor, const
     }
 
     // Path not found
-    UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Failed to find path from node %s to %s. At start position: %s and end position: %s"),
+    UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - %s failed to find path from node %s to %s. At start position: %s and end position: %s"),
+        *Actor->GetName(),
         (StartNodePtr ? *StartNodePtr->Coordinates.ToString() : TEXT("INVALID_START")),
         (EndNodePtr ? *EndNodePtr->Coordinates.ToString() : TEXT("INVALID_END")),
         *StartLocation.ToString(),
