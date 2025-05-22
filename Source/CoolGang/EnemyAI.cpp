@@ -168,7 +168,6 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 void AEnemyAI::Die()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Enemy dying"))
-	GetCapsuleComponent()->SetEnableGravity(false);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	DropUpgrade();
@@ -283,7 +282,6 @@ void AEnemyAI::SetAlive()
 	SetActorHiddenInGame(false);
 	AIController->RunBehaviorTree(BehaviorTree);
 	GetMesh()->SetCollisionEnabled(CollisionType);
-	GetCapsuleComponent()->SetEnableGravity(true);
 	//Should call this in BP
 	if (GE_ResetHealth)
 	{
@@ -313,9 +311,7 @@ void AEnemyAI::OnFadeFinished()
 
 void AEnemyAI::ReleaseToPool()
 {
-		FVector Location = FVector(10000, 10000, 10000);
 		SetActorHiddenInGame(true);
-    	SetActorLocation(Location);
     	bChangedToTargetPlayer = false;
     	EnemySpawnManager->MarkEnemyAsDead(this);
 		SetActorTickEnabled(false);
