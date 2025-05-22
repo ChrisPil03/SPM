@@ -121,6 +121,7 @@ void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 	if (EquippedGun)
 	{
 		EquippedGun->SetActorHiddenInGame(true);
+		EquippedGun->CancelReload();
 		ReleasedTrigger();
 	}
 
