@@ -122,6 +122,7 @@ void AEnemyAI::GiveAbilities()
 
 void AEnemyAI::Attack()
 {
+	bIsAttacking = true;
 	if (CurrentTarget == nullptr)
 	{
 		return;
