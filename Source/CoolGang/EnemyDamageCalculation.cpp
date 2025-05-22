@@ -3,6 +3,7 @@
 #include "EnemyDamageCalculation.h"
 #include "WeaponAttributeSet.h"
 #include "EnemyAttributeSet.h"
+#include "Engine/DamageEvents.h"
 
 // Struct to help capture attributes
 struct FDamageStatics
@@ -73,9 +74,17 @@ void UEnemyDamageCalculation::Execute_Implementation(const FGameplayEffectCustom
             WeaponDamage = 10.0f; // Default fallback damage
         }
     }
+    float Health = 0.0f;
+    ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().HealthDef, EvaluateParameters, Health);
+
+    if (Health <= 0.0f)
+    {
+        return;
+    }
     
     // You can add modifiers here (critical hits, buffs, etc.)
-    float FinalDamage = WeaponDamage;
+    float FinalDamage = WeaponDamage * FMath::FRandRange(0.95f, 1.05);
+
     
     // Apply the damage as negative health
     if (FinalDamage > 0.0f)

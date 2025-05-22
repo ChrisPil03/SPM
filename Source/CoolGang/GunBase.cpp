@@ -56,6 +56,18 @@ void AGunBase::BeginPlay()
 	
 }
 
+void AGunBase::CancelReload()
+{
+		// Cancel reload GA
+		FGameplayTagContainer CancelTags;
+		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("Status.Reload"));
+		AbilitySystemComponent->CancelAbilities(&CancelTags);
+
+		// Optional: remove reload cue
+		AbilitySystemComponent->RemoveGameplayCue(FGameplayTag::RequestGameplayTag("GameplayCue.Reload"));
+	
+}
+
 void AGunBase::Initialize()
 {
 	GiveAbilities();

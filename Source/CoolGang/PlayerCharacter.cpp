@@ -7,12 +7,12 @@
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
-#include "Kismet/GameplayStatics.h"
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
 #include "PlayerAttributeSet.h"
 #include "ScoreManagerComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -23,8 +23,11 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
+	SpringArmComponent->SetupAttachment(CameraComponent);
+	
 	GunComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Gun Component"));
-	GunComponent->SetupAttachment(CameraComponent);
+	GunComponent->SetupAttachment(SpringArmComponent);
 	
 	ScoreManagerComponent = CreateDefaultSubobject<UScoreManagerComponent>(TEXT("Score Manager Component"));
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
@@ -39,6 +42,8 @@ void APlayerCharacter::BeginPlay()
 	GiveGun(Shotgun);
 	GiveGun(Rifle);
 
+	bDead = false;
+	
 	EquippedGun->SetActorHiddenInGame(false);
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
@@ -116,6 +121,7 @@ void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 	if (EquippedGun)
 	{
 		EquippedGun->SetActorHiddenInGame(true);
+		EquippedGun->CancelReload();
 		ReleasedTrigger();
 	}
 

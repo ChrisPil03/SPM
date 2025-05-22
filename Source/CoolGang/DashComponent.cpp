@@ -2,6 +2,8 @@
 
 
 #include "DashComponent.h"
+
+#include "PlayerCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -38,6 +40,9 @@ void UDashComponent::Dash()
 	{
 		return;
 	}
+
+	GetWorld()->GetTimerManager().SetTimer(CooldownTimer, FTimerDelegate::CreateLambda([this](){}), Cooldown, false);
+	GetWorld()->GetTimerManager().SetTimer(DashTimer, FTimerDelegate::CreateLambda([this](){}), StopTime, false);
 	
 	FVector Location;
 	FRotator Rotation;
@@ -56,10 +61,15 @@ void UDashComponent::Dash()
 	CharacterMovement->GroundFriction = 0;
 	bIsDashing = true;
 	CharacterMovement->StopMovementImmediately();
-	OwnerCharacter->LaunchCharacter(DashVelocity, false, false);
+	CharacterMovement->Velocity = DashVelocity;
+	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OwnerCharacter))
+	{
+		Player->OnDash();
+	}
+
+	//OwnerCharacter->LaunchCharacter(DashVelocity, false, false);
 	
-	GetWorld()->GetTimerManager().SetTimer(CooldownTimer, FTimerDelegate::CreateLambda([this](){}), Cooldown, false);
-	GetWorld()->GetTimerManager().SetTimer(DashTimer, FTimerDelegate::CreateLambda([this](){}), StopTime, false);
+	
 }
 
 void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

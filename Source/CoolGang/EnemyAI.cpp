@@ -23,6 +23,7 @@
 #include "EnemyAIController.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "ObjectiveDefendGenerator.h"
 #include "ScoreManagerComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -38,34 +39,55 @@ AEnemyAI::AEnemyAI()
 void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionType = GetCapsuleComponent()->GetCollisionEnabled();
+	CollisionType = GetMesh()->GetCollisionEnabled();
+	
 	AIController = Cast<AEnemyAIController>(Controller);
+	AIController->RunBehaviorTree(BehaviorTree);
 	
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		MeshComp->SetMaterial(0, FadeMaterial);
-		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0, FadeMaterial);
+		FadeDMI = MeshComp->CreateDynamicMaterialInstance(0);
 		if (FadeDMI)
 		{
 			FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), 0.0f);
 		}
 	}
 		
-	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
-	for (AObjectiveBase* Objective : AllObjectives)
+	// TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllSubObjectives();
+	// for (AObjectiveBase* Objective : AllObjectives)
+	// {
+	// 	if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
+	// 	{
+	// 		//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+	// 		Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+	// 		Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
+	// 	}
+	// }
+	if (AObjectiveDefendGenerator* MainObjective = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetMainObjective())
 	{
-		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
-		{
-			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
-			// Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
-			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
-		}
+		MainObjective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+		MainObjective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 	}
+	
+	
 	GiveAbilities();
 	InitEnemyStats();
+}
+
+void AEnemyAI::StartDeathSequence()
+{
+	if (bIsDead)
+	{
+		return;
+	}
+	
+	bIsDead = true;
+
+	PerformPreDeathActions();
+	Die();
 }
 
 void AEnemyAI::InitEnemyStats()
@@ -104,20 +126,12 @@ void AEnemyAI::Attack()
 	{
 		return;
 	}
-	
-	UClass* DamageTypeClass = UDamageType::StaticClass();	
-	AController* MyOwnerInstigator = GetOwner()->GetInstigatorController();
+
 	if (EnemyAttributeSet != nullptr)
 	{
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
 	}
-	const float Damage = EnemyAttributeSet->Damage.GetCurrentValue();
-	if (CurrentTarget !=  UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))
-	{
-		//UGameplayStatics::ApplyDamage(Cast<AActor>(CurrentTarget.GetObject()), Damage, MyOwnerInstigator, this, DamageTypeClass);
-
-	}
-	AActor* DamagedActor = Cast<AActor>(CurrentTarget.GetObject());
+	
 	// if (DamagedActor->ActorHasTag("Player") && IsPlayerShieldActive(DamagedActor))
 	// {
 	// 	//Reduce damage here ???
@@ -153,11 +167,10 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
-	if (bIsDead)
-	{
-		return;
-	}
-	bIsDead = true;
+	UE_LOG(LogTemp, Warning, TEXT("Enemy dying"))
+	GetCapsuleComponent()->SetEnableGravity(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 	DropUpgrade();
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
@@ -178,13 +191,13 @@ void AEnemyAI::Die()
 	if (Controller)
 	{
 		Controller->StopMovement();
+		
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
+		Cast<AEnemyAIController>(Controller)->BrainComponent->Cleanup();
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 100000000000000.f);
 	}
 	
-	GetCapsuleComponent()->SetEnableGravity(false);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
 	GiveScore();
@@ -209,10 +222,12 @@ AActor* AEnemyAI::GetCurrentTarget() const
 	return  Cast<AActor>(CurrentTarget.GetObject());
 }
 
-
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
-	if (!bChangedToTargetPlayer && EnemySpawnManager->GetAliveEnemies().Contains(this))
+	const TArray<AEnemyAI*> AliveEnemies = EnemySpawnManager->GetAliveEnemiesMap().Find(GetClass())->Enemies;
+	if (AliveEnemies.Num() == 0) return;
+	
+	if (!bChangedToTargetPlayer && AliveEnemies.Contains(this))
 	{
 		CurrentTarget = Objective;
 		bChangedToTargetPlayer = true;
@@ -267,7 +282,7 @@ void AEnemyAI::SetAlive()
 	}
 	SetActorHiddenInGame(false);
 	AIController->RunBehaviorTree(BehaviorTree);
-	GetCapsuleComponent()->SetCollisionEnabled(CollisionType);
+	GetMesh()->SetCollisionEnabled(CollisionType);
 	GetCapsuleComponent()->SetEnableGravity(true);
 	//Should call this in BP
 	if (GE_ResetHealth)

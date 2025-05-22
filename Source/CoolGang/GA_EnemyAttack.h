@@ -24,6 +24,7 @@ protected:
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetData);
+	
 	UFUNCTION(BlueprintCallable)
 	void Attack();
 };

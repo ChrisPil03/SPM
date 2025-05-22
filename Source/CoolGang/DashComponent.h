@@ -7,7 +7,7 @@
 #include "DashComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class COOLGANG_API UDashComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -50,6 +50,8 @@ private:
 	class UCharacterMovementComponent* CharacterMovement;
 	
 	FTimerHandle CooldownTimer;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	FTimerHandle DashTimer;
 	
 	bool bIsDashing;

@@ -2,14 +2,19 @@
 #include "HealthComponent.h"
 #include "ScoreManagerComponent.h"
 #include "AbilitySystemComponent.h"
+#include "DiveGameMode.h"
 #include "Components/CapsuleComponent.h"
 #include "GeneratorAttributeSet.h"
 #include "InteractableObject.h"
+#include "Kismet/GameplayStatics.h"
 
 AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
-	StartDelay(3.f),
+	ActivationDelay(10.f),
 	bHalfHealthVoiceLinePlayed(false),
-	bLowHealthVoiceLinePlayed(false)
+	bLowHealthVoiceLinePlayed(false),
+	bIsActivating(false),
+	CurrentShield(0.f),
+	MaxShield(20000.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
@@ -21,20 +26,19 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-	
 }
 
 void AObjectiveDefendGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 	BindControlPanel();
-	BindDeathFunction();
 	BindCompletionFunction();
 	InitStats();
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		UGeneratorAttributeSet::GetHealthAttribute()
 	).AddUObject(this, &AObjectiveDefendGenerator::OnCurrentHealthChanged);
-	
+
+	CurrentShield = MaxShield;
 }
 
 void AObjectiveDefendGenerator::OnCurrentHealthChanged(const FOnAttributeChangeData& Data)
@@ -64,6 +68,11 @@ void AObjectiveDefendGenerator::CompleteObjective()
 {
 	Super::CompleteObjective();
 	OnRequestAddScore.Broadcast(EScoreType::ObjectiveGeneratorCompleted);
+	CurrentShield = MaxShield;
+	if (OnShieldChanged.IsBound())
+	{
+		OnShieldChanged.Broadcast();
+	}
 }
 
 void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
@@ -90,6 +99,18 @@ bool AObjectiveDefendGenerator::CannotTakeDamage() const
 	return !GetIsActive() || GetIsComplete() || GetIsFailed() || GetIsNotStarted();
 }
 
+void AObjectiveDefendGenerator::ActivateObjective()
+{
+	bIsActivating = false;
+	if (ObjectiveManager)
+	{
+		ObjectiveManager->DeactivateAllSubObjectives();
+		ObjectiveManager->ActivateMainObjective();	
+	}
+	ResetProgress();
+	SetObjectiveState(EObjectiveState::NotStarted);
+}
+
 void AObjectiveDefendGenerator::InitStats()
 {
 	if (AbilitySystemComponent)
@@ -104,7 +125,6 @@ void AObjectiveDefendGenerator::InitStats()
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), Health);
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.MaxHealth"), MaxHealth);
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
-			
 		}
 	}	
 }
@@ -115,25 +135,12 @@ void AObjectiveDefendGenerator::ResetObjective()
 	bHalfHealthVoiceLinePlayed = false;
 	bLowHealthVoiceLinePlayed = false;
 	
-	if (GE_ResetGeneratorHealth)
-	{
-		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
-		AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(GE_ResetGeneratorHealth, 1.f, Context);
-	}
+	// if (GE_ResetGeneratorHealth)
+	// {
+	// 	FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+	// 	AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(GE_ResetGeneratorHealth, 1.f, Context);
+	// }
 }
-
-// float AObjectiveDefendGenerator::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
-// 	AController* EventInstigator, AActor* DamageCauser)
-// {
-// 	if (CannotTakeDamage())
-// 	{
-// 		//UE_LOG(LogEngine, Warning, TEXT("Cannot take damage"));
-// 		return 0;
-// 	}
-// 	//UE_LOG(LogEngine, Warning, TEXT("Taking %f damage!"), DamageAmount);
-// 	
-// 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-// }
 
 void AObjectiveDefendGenerator::SetIsActive(const bool bNewState)
 {
@@ -156,11 +163,55 @@ FVector AObjectiveDefendGenerator::GetWaypointTargetLocation() const
 	return Super::GetWaypointTargetLocation();
 }
 
+void AObjectiveDefendGenerator::FailObjective()
+{
+	if (!GetIsFailed())
+	{
+		SetObjectiveState(EObjectiveState::Failed);
+		SetIsActive(false);
+		Cast<ADiveGameMode>(UGameplayStatics::GetGameMode(GetWorld()))->EndGame();	
+	}
+}
+
+void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
+{
+	if (!GetIsActive() && CurrentShield > 0)
+	{
+		CurrentShield -= Damage;
+
+		if (CurrentShield <= 0)
+		{
+			CurrentShield = 0;
+			bIsActivating = true;
+			GetWorld()->GetTimerManager().SetTimer(
+				ActivationDelayTimerHandle,
+				this,
+				&AObjectiveDefendGenerator::ActivateObjective,
+				ActivationDelay,
+				false);
+			if (ObjectiveManager)
+			{
+				ObjectiveManager->DeactivateAllSubObjectives();
+			}
+		}
+
+		if (OnShieldChanged.IsBound())
+		{
+			OnShieldChanged.Broadcast();
+		}
+	}
+}
+
 float AObjectiveDefendGenerator::GetHealthPercentage() const
 {
 	const UGeneratorAttributeSet* MyAttributes = AbilitySystemComponent->GetSet<UGeneratorAttributeSet>();
 	
 	return MyAttributes->GetHealth() / MyAttributes->GetMaxHealth();
+}
+
+float AObjectiveDefendGenerator::GetShieldPercentage() const
+{
+	return CurrentShield / MaxShield;
 }
 
 void AObjectiveDefendGenerator::BindControlPanel()
@@ -169,13 +220,6 @@ void AObjectiveDefendGenerator::BindControlPanel()
 	{
 		ControlPanel->SetOnInteractFunction(this, &AObjectiveDefendGenerator::RegisterControlPanelInteraction);
 	}
-}
-
-void AObjectiveDefendGenerator::BindDeathFunction()
-{
-	FDeathDelegate Delegate;
-	Delegate.BindUObject(this, &Super::FailObjective);
-	HealthComponent->SetDeathFunction(Delegate);
 }
 
 void AObjectiveDefendGenerator::BindCompletionFunction()

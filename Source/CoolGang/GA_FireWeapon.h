@@ -33,28 +33,19 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 
 	
 	
-	bool NormalBulletTrace(TArray<FHitResult>& HitResults, 
+	bool NormalBulletTrace(FHitResult& HitResult, 
 						 const FVector& StartPoint, 
-						 const FVector& BulletDirection,
-						 float NumPellets,
-						 float ConeHalfAngleDegrees,
-						 float MaxRange,
+						 const FVector& EndPoint,
 						 const FCollisionQueryParams& QueryParams);
                           
 	bool PiercingBulletTrace(TArray<FHitResult>& HitResults,
 							const FVector& StartPoint,
-							const FVector& BulletDirection,
-							float NumPellets,
-							float ConeHalfAngleDegrees,
-							float MaxRange,
+							const FVector& EndPoint,
 							const FCollisionQueryParams& QueryParams);
 
 	bool ChainingBulletTrace(TArray<FHitResult>& HitResults,
 							const FVector& StartPoint,
-							const FVector& BulletDirection,
-							float NumPellets,
-							float ConeHalfAngleDegrees,
-							float MaxRange,
+							const FVector& EndPoint,
 							const FCollisionQueryParams& QueryParams);
 	
 	UFUNCTION(BlueprintImplementableEvent)
@@ -68,7 +59,12 @@ private:
 	bool IsDuplicateHit(const TArray<FHitResult>& ExistingHits, const AActor* Actor);
 
 	void DrawImpactPointDeBug(const FVector& Location) const;
+	void SpawnImpactEffect(const FHitResult& HitResult) const;
 
+	UPROPERTY()
+	FGameplayAbilityTargetDataHandle TargetDator;
+	
+	FGameplayAbilityTargetData_SingleTargetHit* NewTargetData;
 	
 	void ProcessHitChain(const FHitResult& InitialHit, TArray<FHitResult>& ChainHits, 
 		int32 MaxChainDepth, float SphereRadius, FCollisionQueryParams& OverlapQueryParams);

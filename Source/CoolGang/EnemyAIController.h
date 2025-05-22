@@ -15,13 +15,9 @@ class COOLGANG_API AEnemyAIController : public AAIController
 	GENERATED_BODY()
 
 public:
-	bool IsDead() const;
 	virtual void Tick(float DeltaTime) override;
 	
 protected:
 	virtual void BeginPlay() override;
-
-private:
-	UPROPERTY(EditAnywhere)
-	class UBehaviorTree* AIBehavior; 
+	
 };
