@@ -78,7 +78,7 @@ public:
 	void ClearAvailableInteractable(const IInteractInterface* Interactable);
 
 private:
-	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
 
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")

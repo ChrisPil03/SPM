@@ -14,7 +14,7 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 	bLowHealthVoiceLinePlayed(false),
 	bIsActivating(false),
 	CurrentShield(0.f),
-	MaxShield(1000.f)
+	MaxShield(20000.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
@@ -69,6 +69,10 @@ void AObjectiveDefendGenerator::CompleteObjective()
 	Super::CompleteObjective();
 	OnRequestAddScore.Broadcast(EScoreType::ObjectiveGeneratorCompleted);
 	CurrentShield = MaxShield;
+	if (OnShieldChanged.IsBound())
+	{
+		OnShieldChanged.Broadcast();
+	}
 }
 
 void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
@@ -189,6 +193,11 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 			{
 				ObjectiveManager->DeactivateAllSubObjectives();
 			}
+		}
+
+		if (OnShieldChanged.IsBound())
+		{
+			OnShieldChanged.Broadcast();
 		}
 	}
 }

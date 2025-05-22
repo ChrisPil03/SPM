@@ -38,7 +38,6 @@ void UObjectiveManagerSubsystem::DeactivateAllSubObjectives()
 
 void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("MainObjective is active: %hd"), MainObjective->GetIsActive());
 	if (SubObjectivesInLevel.IsEmpty() ||
 		(MainObjective && (MainObjective->GetIsActive() || MainObjective->GetIsActivating())))
 	{
@@ -69,7 +68,7 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 		SelectedObjective->SetIsActive(true);
 		SelectedObjective->StartMalfunctionTimer(MalfunctionTimer, MalfunctionInterval, MalfunctionDamage);
 		CreateObjectiveUIListItem(SelectedObjective->GetObjectiveName(), SelectedObjective);
-		
+		BroadcastActivatedObjective(SelectedObjective);
 		//UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
 	}
 }
@@ -81,6 +80,7 @@ void UObjectiveManagerSubsystem::ActivateMainObjective()
 		// DeactivateAllSubObjectives();
 		MainObjective->SetIsActive(true);
 		CreateObjectiveUIListItem(MainObjective->GetObjectiveName(), MainObjective);
+		BroadcastActivatedObjective(MainObjective);
 	}
 }
 
@@ -90,12 +90,14 @@ void UObjectiveManagerSubsystem::RegisterCompletedObjective(AObjectiveBase* Comp
 	CompletedObjective->StopMalfunctioning();
 	CompletedObjective->SetIsActive(false);
 	CompletedSubObjectives++;
+	BroadcastCompletedObjective(CompletedObjective);
 	//UE_LOG(LogTemp, Warning, TEXT("Completed Objectives: %d"), CompletedObjectives);
 }
 
 void UObjectiveManagerSubsystem::RegisterFailedObjective(AObjectiveBase* FailedObjective)
 {
 	LastCompletedObjective = FailedObjective;
+	BroadcastFailedObjective(FailedObjective);
 }
 
 void UObjectiveManagerSubsystem::ResetAllObjectives()
@@ -149,5 +151,28 @@ void UObjectiveManagerSubsystem::FindObjectivesInLevel()
 		}
 	}
 	UE_LOG(LogTemp, Warning, TEXT("MainObjective: %hd"), MainObjective != nullptr);
+}
 
+void UObjectiveManagerSubsystem::BroadcastCompletedObjective(AObjectiveBase* Objective) const
+{
+	if (OnCompletedObjective.IsBound())
+	{
+		OnCompletedObjective.Broadcast(Objective);
+	}
+}
+
+void UObjectiveManagerSubsystem::BroadcastFailedObjective(AObjectiveBase* Objective) const
+{
+	if (OnFailedObjective.IsBound())
+	{
+		OnFailedObjective.Broadcast(Objective);
+	}
+}
+
+void UObjectiveManagerSubsystem::BroadcastActivatedObjective(AObjectiveBase* Objective) const
+{
+	if (OnActivatedObjective.IsBound())
+	{
+		OnActivatedObjective.Broadcast(Objective);
+	}
 }

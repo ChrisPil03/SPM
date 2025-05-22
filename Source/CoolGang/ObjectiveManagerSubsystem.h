@@ -10,6 +10,8 @@ class AObjectiveDefendGenerator;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FCreateObjectiveListItem, FString, ObjectiveName, AObjectiveBase*, Objective);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnObjectiveManagerEvent, AObjectiveBase*, Objective);
+
 class AObjectiveBase;
 
 UCLASS(BlueprintType)
@@ -35,6 +37,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FCreateObjectiveListItem CreateObjectiveListItemDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveManagerEvent OnCompletedObjective;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveManagerEvent OnFailedObjective;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveManagerEvent OnActivatedObjective;
+
 	void CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective);
 
 	// Should probably be called from this class not Defend generator
@@ -43,6 +54,10 @@ public:
 private:
 	void FindObjectivesInLevel();
 	void OnWorldInitialized(const UWorld::FActorsInitializedParams& Params);
+
+	void BroadcastCompletedObjective(AObjectiveBase* Objective) const;
+	void BroadcastFailedObjective(AObjectiveBase* Objective) const;
+	void BroadcastActivatedObjective(AObjectiveBase* Objective) const;
 	
 	UPROPERTY(VisibleAnywhere)
 	int32 CompletedSubObjectives;
