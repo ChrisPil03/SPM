@@ -24,6 +24,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireRateChangedDelegate, float, F
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadTimeChangedDelegate, float, ReloadTime);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUltimateReadyDelegate);
+
 class UGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
@@ -148,6 +150,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CancelReload();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnEquipped();
+
+	UFUNCTION(BlueprintCallable)
+	void OnUltimateReady();
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite )
+	bool bIsUltimateReady;
+	
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};
 
@@ -200,7 +211,9 @@ protected:
 	void OnReloadTimeChanged(const FOnAttributeChangeData& Data) const;
 	UPROPERTY(BlueprintAssignable, Category = "Weapon Stats")
 	FOnReloadTimeChangedDelegate OnReloadTimeChangedDelegate;
-	
+
+	UPROPERTY(BlueprintAssignable, Category = "Weapon")
+	FOnUltimateReadyDelegate OnUltimateReadyDelegate;
 };
 
 

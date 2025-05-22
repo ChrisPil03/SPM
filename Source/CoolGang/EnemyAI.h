@@ -68,6 +68,13 @@ public:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent* AbilitySystemComponent;
 
+	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
+	class UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
+	class USoundBase* MovementSound;
+	
+
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IAttackable> GetTarget() const;
 
@@ -82,7 +89,21 @@ public:
 
 	UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 
+	UFUNCTION(BlueprintCallable)
 	bool IsDead() const {return bIsDead;}
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsJumping() const {return bIsJumping;}
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsAttacking() const {return bIsAttacking;}
+
+	UFUNCTION(BlueprintCallable)
+	void SetAttackingState(bool IsAttacking) {bIsAttacking = IsAttacking;}
+
+	UFUNCTION(BlueprintCallable)
+	void SetJumpingState(bool IsJumping) {bIsJumping = IsJumping;}
+
 
 private:
 	UFUNCTION()
@@ -109,6 +130,8 @@ private:
 
 	bool bFadeComplete = true;
 	bool bIsDead = false;
+	bool bIsJumping = false;
+	bool bIsAttacking = false;
 
 	bool bDeathVFXComplete = false;
 

@@ -35,6 +35,13 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 	return CurrentAmmo >= 1;
 }
 
+void UGA_FireWeapon::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
+	
+}
+
 void UGA_FireWeapon::Fire()
 {
 	TArray<FHitResult> HitResults;
@@ -91,7 +98,6 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 		FVector EndPoint = StartPoint + (ShootDirection * MaxRange);
         
 		
-		
 		if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive")))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("PiercingActive"));
@@ -101,6 +107,13 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ChainingActive"));
 			bHasTarget = ChainingBulletTrace(HitResults, StartPoint, EndPoint, QueryParams);
+		}
+		else if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.LaserActive")))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LaserActive"));
+			AGunBase* Gun = Cast<AGunBase>(GetOwningActorFromActorInfo());
+			StartPoint = Gun->MuzzlePosition->GetComponentLocation();
+			bHasTarget = LaserBulletTrace(HitResults,StartPoint, EndPoint, QueryParams);
 		}
 		else
 		{
@@ -195,8 +208,57 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 	return bHasTarget;
 }
 
+bool UGA_FireWeapon::LaserBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
+	const FVector& EndPoint, const FCollisionQueryParams& QueryParams)
+{
+	bool bHasTarget = false;
+
+	TArray<FHitResult> LaserHitResults;
+	
+	bool bHit = GetWorld()->SweepMultiByChannel(LaserHitResults,
+	StartPoint, EndPoint, FQuat::Identity, PIERCING_TRACE, FCollisionShape::MakeSphere(50), QueryParams);
+	DrawDebugCapsule(
+	GetWorld(),
+	(StartPoint + EndPoint) * 0.5f,         // Capsule center = midpoint
+	(EndPoint - StartPoint).Size() * 0.5f,  // Half-height = half length
+	50.f,                                   // Radius (matches FCollisionShape)
+	FRotationMatrix::MakeFromZ(EndPoint - StartPoint).ToQuat(),  // Rotation to align with trace
+	FColor::Red,
+	false,
+	2.0f
+);
+	if (bHit)
+	{
+		TArray<FHitResult> ValidHits;
+		for (const FHitResult& HitResult : LaserHitResults)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+			if (HitResult.GetActor()->IsA(AEnemyAI::StaticClass()))
+			{
+				if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
+				{
+					DrawImpactPointDeBug(HitResult.Location);
+					ValidHits.Add(HitResult);
+				}
+			}
+			else
+			{
+				//SpawnImpactEffect(HitResult);
+			}
+		}
+		if (!ValidHits.IsEmpty())
+		{
+			HitResults.Append(ValidHits);
+			bHasTarget = true;
+		}
+	}
+	
+	return bHasTarget;
+	
+}
+
 bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const FVector& StartPoint,
-	 const FVector& EndPoint, const FCollisionQueryParams& QueryParams)
+                                         const FVector& EndPoint, const FCollisionQueryParams& QueryParams)
 {
     bool bHasTarget = false;
     const float SphereRadius = 1000.0f;

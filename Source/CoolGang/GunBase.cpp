@@ -12,7 +12,6 @@
 #include "GameplayTagContainer.h"
 #include "WeaponAttributeSet.h"
 #include "UObject/ConstructorHelpers.h"
-#include "NiagaraComponent.h"
 #include "Components/AudioComponent.h"
 
 
@@ -70,6 +69,12 @@ void AGunBase::CancelReload()
 	{
 		AudioComponent->Stop();
 	}
+}
+
+void AGunBase::OnUltimateReady()
+{
+	OnUltimateReadyDelegate.Broadcast();
+	bIsUltimateReady = true;
 }
 
 void AGunBase::Initialize()
