@@ -128,8 +128,7 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly )
 	UMaterialInstance* PickupMat;
-	
-public:	
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartFire();
 	
@@ -144,6 +143,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Reload();
+
+	UFUNCTION(BlueprintCallable)
+	void CancelReload();
 
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};
