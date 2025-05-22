@@ -131,6 +131,7 @@ void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 	if (EquippedGun)
 	{
 		EquippedGun->SetActorHiddenInGame(false);
+		EquippedGun->OnEquipped();
 	}
 }
 
