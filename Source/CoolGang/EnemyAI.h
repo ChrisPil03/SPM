@@ -82,6 +82,8 @@ public:
 
 	UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 
+	bool IsDead() const {return bIsDead;}
+
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
