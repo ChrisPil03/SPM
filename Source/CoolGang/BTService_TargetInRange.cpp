@@ -17,17 +17,24 @@ void UBTService_TargetInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
+	UE_LOG(LogTemp, Warning, TEXT("Distance to player according to blackboard: %f"), OwnerComp.GetBlackboardComponent()->GetValueAsFloat(GetSelectedBlackboardKey()));
+
+	
 	AEnemyAI* Enemy = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn());
 	if (Enemy == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy is nullptr"));
 		return;
 	}
 	
 	AActor* Target = Cast<AActor>(Enemy->GetTarget().GetObject());
 	if (Target == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Target is nullptr"));
 		return;
 	}
+
+	
 	
 	OwnerComp.GetBlackboardComponent()->SetValueAsFloat(GetSelectedBlackboardKey(), Enemy->GetSquaredDistanceTo(Target));
 }

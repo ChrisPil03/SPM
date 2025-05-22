@@ -7,7 +7,6 @@
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
-#include "Kismet/GameplayStatics.h"
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
 #include "PlayerAttributeSet.h"
@@ -43,6 +42,8 @@ void APlayerCharacter::BeginPlay()
 	GiveGun(Shotgun);
 	GiveGun(Rifle);
 
+	bDead = false;
+	
 	EquippedGun->SetActorHiddenInGame(false);
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(

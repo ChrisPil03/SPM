@@ -191,16 +191,13 @@ void AEnemyAI::Die()
 	if (Controller)
 	{
 		Controller->StopMovement();
+		
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
-	}
-
-	if (GetCapsuleComponent() == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Capsule component not there?"));	
+		Cast<AEnemyAIController>(Controller)->BrainComponent->Cleanup();
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 100000000000000.f);
 	}
 	
-
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
 	GiveScore();
