@@ -496,9 +496,11 @@ ENavigationVolumeResult ANavigationVolume3D::FindPath(const AActor* Actor, const
     }
 
     // Path not found
-    UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Failed to find path from node %s to %s."),
+    UE_LOG(LogTemp, Warning, TEXT("ANavigationVolume3D::FindPath - Failed to find path from node %s to %s. At start position: %s and end position: %s"),
         (StartNodePtr ? *StartNodePtr->Coordinates.ToString() : TEXT("INVALID_START")),
-        (EndNodePtr ? *EndNodePtr->Coordinates.ToString() : TEXT("INVALID_END")));
+        (EndNodePtr ? *EndNodePtr->Coordinates.ToString() : TEXT("INVALID_END")),
+        *StartLocation.ToString(),
+        *DestinationLocation.ToString())
     // If general debug drawing is on (not filtered by long paths) and path failed, draw what was explored
     if (bDrawPathfindingDebug && !bOnlyDrawDebugForLongPaths) {
         FlushDebugDraws(World, DebugDrawLifetime);
