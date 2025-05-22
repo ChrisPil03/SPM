@@ -148,6 +148,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CancelReload();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnEquipped();
+	
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};
 
