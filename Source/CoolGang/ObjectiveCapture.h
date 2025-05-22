@@ -32,6 +32,10 @@ public:
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual void FailObjective() override;
 	virtual FVector GetWaypointTargetLocation() const override;
+	virtual TArray<FString> GetUniqueObjectiveProgress() const override;
+
+	UFUNCTION(BlueprintPure)
+	void GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds) const;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SpawnCaptureZone();

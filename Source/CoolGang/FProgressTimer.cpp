@@ -33,6 +33,7 @@ void FProgressTimer::DecreaseProgress(const float DeltaTime)
 
 	if (!bIsPaused && Progress > ZeroCompletion)
 	{
+		ElapsedTime -= DeltaTime;
 		UpdateProgress(Progress -= DeltaTime / Duration);
 	}
 }

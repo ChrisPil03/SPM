@@ -1,12 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ObjectiveCapture.h"
-
 #include "InteractableObject.h"
 #include "PlayerCharacter.h"
 #include "ScoreManagerComponent.h"
 #include "Components/SphereComponent.h"
-#include "Kismet/GameplayStatics.h"
 
 AObjectiveCapture::AObjectiveCapture()
 {
@@ -60,6 +56,11 @@ void AObjectiveCapture::Tick(float DeltaTime)
 		{
 			DecreaseObjectiveProgress(DeltaTime);
 		}
+
+		if (OnUniqueProgressChanged.IsBound())
+		{
+			OnUniqueProgressChanged.Broadcast();
+		}
 	}
 }
 
@@ -89,6 +90,7 @@ void AObjectiveCapture::CompleteObjective()
 void AObjectiveCapture::ResetObjective()
 {
 	Super::ResetObjective();
+	DestroyCaptureZone();
 }
 
 void AObjectiveCapture::IncreaseObjectiveProgress(float const DeltaTime)
@@ -130,6 +132,45 @@ FVector AObjectiveCapture::GetWaypointTargetLocation() const
 		return ControlPanel->GetActorLocation();
 	}
 	return Super::GetWaypointTargetLocation();
+}
+
+TArray<FString> AObjectiveCapture::GetUniqueObjectiveProgress() const
+{
+	if (!GetIsPlayerInZone() && GetIsInProgress())
+	{
+		int32 OutMinutes;
+		int32 OutSeconds;
+		GetTimeUntilFailure(OutMinutes, OutSeconds);
+		FString Minutes;
+		FString Seconds;
+		if (OutMinutes <= 9)
+		{
+			Minutes = FString::Printf(TEXT("0%d"), OutMinutes);
+		}else
+		{
+			Minutes = FString::Printf(TEXT("%d"), OutMinutes);
+		}
+		if (OutSeconds <= 9)
+		{
+			Seconds = FString::Printf(TEXT("0%d"), OutSeconds);
+		}else
+		{
+			Seconds = FString::Printf(TEXT("%d"), OutSeconds);
+		}
+		return {
+			FString::Printf(TEXT("Download failure in: %s:%s"), *Minutes, *Seconds)
+		};
+	}
+	return Super::GetUniqueObjectiveProgress();
+}
+
+void AObjectiveCapture::GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds) const
+{
+	int32 ElapsedTime = GetObjectiveTime() - GetProgressTimer().GetElapsedTime();
+	int32 FailElapsedTime = FailDelayProgressTimer->GetElapsedTime();
+	int32 TimeLeft = GetObjectiveTime() + FailObjectiveDelay - ElapsedTime - FailElapsedTime;
+	OutMinutes = TimeLeft / 60;
+	OutSeconds = TimeLeft % 60;
 }
 
 void AObjectiveCapture::FindInteractable()
@@ -177,6 +218,11 @@ void AObjectiveCapture::OnSphereBeginOverlap(
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(OtherActor))
 	{
 		PlayerInZone = Player;
+
+		if (OnUniqueProgressChanged.IsBound())
+		{
+			OnUniqueProgressChanged.Broadcast();
+		}
 	}
 }
 

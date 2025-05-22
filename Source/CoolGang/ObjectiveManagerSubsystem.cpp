@@ -65,9 +65,9 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 	if (AObjectiveBase* SelectedObjective = AvailableObjectives[RandomIndex])
 	{
 		SelectedObjective->ResetObjective();
+		ShowObjectiveUIListItem(SelectedObjective->GetObjectiveName(), SelectedObjective);
 		SelectedObjective->SetIsActive(true);
-		SelectedObjective->StartMalfunctionTimer(MalfunctionTimer, MalfunctionInterval, MalfunctionDamage);
-		CreateObjectiveUIListItem(SelectedObjective->GetObjectiveName(), SelectedObjective);
+		//SelectedObjective->StartMalfunctionTimer(MalfunctionTimer, MalfunctionInterval, MalfunctionDamage);
 		BroadcastActivatedObjective(SelectedObjective);
 		//UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
 	}
@@ -78,8 +78,8 @@ void UObjectiveManagerSubsystem::ActivateMainObjective()
 	if (MainObjective)
 	{
 		// DeactivateAllSubObjectives();
+		ShowObjectiveUIListItem(MainObjective->GetObjectiveName(), MainObjective);
 		MainObjective->SetIsActive(true);
-		CreateObjectiveUIListItem(MainObjective->GetObjectiveName(), MainObjective);
 		BroadcastActivatedObjective(MainObjective);
 	}
 }
@@ -87,7 +87,7 @@ void UObjectiveManagerSubsystem::ActivateMainObjective()
 void UObjectiveManagerSubsystem::RegisterCompletedObjective(AObjectiveBase* CompletedObjective)
 {
 	LastCompletedObjective = CompletedObjective;
-	CompletedObjective->StopMalfunctioning();
+	// CompletedObjective->StopMalfunctioning();
 	CompletedObjective->SetIsActive(false);
 	CompletedSubObjectives++;
 	BroadcastCompletedObjective(CompletedObjective);
@@ -118,11 +118,11 @@ AObjectiveDefendGenerator* UObjectiveManagerSubsystem::GetMainObjective() const
 	return MainObjective;
 }
 
-void UObjectiveManagerSubsystem::CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective)
+void UObjectiveManagerSubsystem::ShowObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective)
 {
-	if (CreateObjectiveListItemDelegate.IsBound())
+	if (ShowObjectiveListItem.IsBound())
 	{
-		CreateObjectiveListItemDelegate.Broadcast(ObjectiveName, Objective);
+		ShowObjectiveListItem.Broadcast(ObjectiveName, Objective);
 	}
 }
 

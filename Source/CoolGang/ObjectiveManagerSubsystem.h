@@ -35,7 +35,7 @@ public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FCreateObjectiveListItem CreateObjectiveListItemDelegate;
+	FCreateObjectiveListItem ShowObjectiveListItem;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnObjectiveManagerEvent OnCompletedObjective;
@@ -46,7 +46,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnObjectiveManagerEvent OnActivatedObjective;
 
-	void CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective);
+	void ShowObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective);
 
 	// Should probably be called from this class not Defend generator
 	void DeactivateAllSubObjectives();

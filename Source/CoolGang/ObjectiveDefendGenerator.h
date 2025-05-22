@@ -31,15 +31,14 @@ protected:
 public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ResetObjective() override;
-	// virtual float TakeDamage(
-	// 	float DamageAmount,
-	// 	FDamageEvent const& DamageEvent,
-	// 	AController* EventInstigator,
-	// 	AActor* DamageCauser) override;
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual FVector GetWaypointTargetLocation() const override;
 	virtual void FailObjective() override;
 	virtual void DamageGeneratorShield(const float Damage) override;
+	virtual TArray<FString> GetUniqueObjectiveProgress() const override;
+
+	UFUNCTION(BlueprintPure)
+	void GetTimeUntilShieldRestored(int32& OutMinutes, int32& OutSeconds) const;
 	
 	UFUNCTION(BlueprintCallable)
 	float GetHealthPercentage() const;
