@@ -89,7 +89,17 @@ public:
 
 	UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 
+	UFUNCTION(BlueprintCallable)
 	bool IsDead() const {return bIsDead;}
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsJumping() const {return bIsJumping;}
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsAttacking() const {return bIsAttacking;}
+
+	UFUNCTION(BlueprintCallable)
+	void SetAttackingState(bool IsAttacking) {bIsAttacking = IsAttacking;}
 
 private:
 	UFUNCTION()
@@ -116,6 +126,8 @@ private:
 
 	bool bFadeComplete = true;
 	bool bIsDead = false;
+	bool bIsJumping = false;
+	bool bIsAttacking = false;
 
 	bool bDeathVFXComplete = false;
 
