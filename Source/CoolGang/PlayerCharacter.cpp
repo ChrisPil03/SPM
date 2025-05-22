@@ -122,7 +122,6 @@ void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 	{
 		EquippedGun->SetActorHiddenInGame(true);
 		EquippedGun->CancelReload();
-		UE_LOG(LogTemp, Warning, TEXT("CancelReload"));
 		ReleasedTrigger();
 	}
 
