@@ -56,8 +56,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
 	USoundCue* ReloadSound;
-	
 
+	
+	
 	///   Effect   ///
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	class UNiagaraSystem* ImpactEffect;
