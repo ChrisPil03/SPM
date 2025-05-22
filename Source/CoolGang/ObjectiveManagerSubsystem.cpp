@@ -65,9 +65,9 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 	if (AObjectiveBase* SelectedObjective = AvailableObjectives[RandomIndex])
 	{
 		SelectedObjective->ResetObjective();
+		ShowObjectiveUIListItem(SelectedObjective->GetObjectiveName(), SelectedObjective);
 		SelectedObjective->SetIsActive(true);
 		//SelectedObjective->StartMalfunctionTimer(MalfunctionTimer, MalfunctionInterval, MalfunctionDamage);
-		ShowObjectiveUIListItem(SelectedObjective->GetObjectiveName(), SelectedObjective);
 		BroadcastActivatedObjective(SelectedObjective);
 		//UE_LOG(LogTemp, Warning, TEXT("Objective activated: %s"), *SelectedObjective->GetName());
 	}
@@ -78,8 +78,8 @@ void UObjectiveManagerSubsystem::ActivateMainObjective()
 	if (MainObjective)
 	{
 		// DeactivateAllSubObjectives();
-		MainObjective->SetIsActive(true);
 		ShowObjectiveUIListItem(MainObjective->GetObjectiveName(), MainObjective);
+		MainObjective->SetIsActive(true);
 		BroadcastActivatedObjective(MainObjective);
 	}
 }

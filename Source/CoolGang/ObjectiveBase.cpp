@@ -72,6 +72,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 			if (OnEnterObjectiveRoom.IsBound())
 			{
 				OnEnterObjectiveRoom.Broadcast();
+				UE_LOG(LogTemp, Warning, TEXT("Broadcasting OnEnterRoom"))
 			}
 		}
 	} else

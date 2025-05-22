@@ -249,6 +249,7 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "Room")
 	AGate* RoomGate;
 
+	UPROPERTY(VisibleAnywhere, Category = "Room")
 	bool bPlayerInRoom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
