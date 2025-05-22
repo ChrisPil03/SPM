@@ -89,7 +89,7 @@ void AObjectiveServer::StartRestoration()
 		MalfunctionTimerHandle,
 		this,
 		&AObjectiveServer::PauseRestoration,
-		FMath::RandRange(1, RestoreTime),
+		FMath::RandRange(1, RestoreTime - 1),
 		false);
 }
 
