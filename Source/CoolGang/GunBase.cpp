@@ -13,6 +13,7 @@
 #include "WeaponAttributeSet.h"
 #include "UObject/ConstructorHelpers.h"
 #include "NiagaraComponent.h"
+#include "Components/AudioComponent.h"
 
 
 // Sets default values
@@ -54,6 +55,21 @@ void AGunBase::BeginPlay()
 	UWeaponAttributeSet::GetReloadTimeAttribute()
 	).AddUObject(this, &AGunBase::OnReloadTimeChanged);
 	
+}
+
+void AGunBase::CancelReload()
+{
+		// Cancel reload GA
+		FGameplayTagContainer CancelTags;
+		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("Status.Reload"));
+		AbilitySystemComponent->CancelAbilities(&CancelTags);
+
+		// Optional: remove reload cue
+	UAudioComponent* AudioComponent = FindComponentByClass<UAudioComponent>();
+	if (AudioComponent)
+	{
+		AudioComponent->Stop();
+	}
 }
 
 void AGunBase::Initialize()
