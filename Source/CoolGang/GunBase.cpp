@@ -13,6 +13,7 @@
 #include "WeaponAttributeSet.h"
 #include "UObject/ConstructorHelpers.h"
 #include "NiagaraComponent.h"
+#include "Components/AudioComponent.h"
 
 
 // Sets default values
@@ -64,8 +65,11 @@ void AGunBase::CancelReload()
 		AbilitySystemComponent->CancelAbilities(&CancelTags);
 
 		// Optional: remove reload cue
-		AbilitySystemComponent->RemoveGameplayCue(FGameplayTag::RequestGameplayTag("GameplayCue.Reload"));
-	
+	UAudioComponent* AudioComponent = FindComponentByClass<UAudioComponent>();
+	if (AudioComponent)
+	{
+		AudioComponent->Stop();
+	}
 }
 
 void AGunBase::Initialize()

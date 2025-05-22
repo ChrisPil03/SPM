@@ -56,8 +56,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
 	USoundCue* ReloadSound;
-	
 
+	
+	
 	///   Effect   ///
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
 	class UNiagaraSystem* ImpactEffect;
@@ -147,6 +148,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CancelReload();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnEquipped();
+	
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};
 
