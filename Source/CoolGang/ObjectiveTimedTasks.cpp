@@ -35,6 +35,11 @@ void AObjectiveTimedTasks::ResetObjective()
 		Interactable->ResetInteractable();
 	}
 	InteractedTasks = 0;
+
+	if (OnUniqueProgressChanged.IsBound())
+	{
+		OnUniqueProgressChanged.Broadcast();
+	}
 }
 
 void AObjectiveTimedTasks::CompleteObjective()
@@ -60,6 +65,11 @@ void AObjectiveTimedTasks::Tick(float DeltaSeconds)
 	if (GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaSeconds);
+
+		if (OnUniqueProgressChanged.IsBound())
+		{
+			OnUniqueProgressChanged.Broadcast();
+		}
 	}
 }
 
@@ -76,6 +86,42 @@ float AObjectiveTimedTasks::GetObjectiveProgress() const
 		return static_cast<float>(InteractedTasks) / AllInteractableObjects.Num();
 	}
 	return 0;
+}
+
+TArray<FString> AObjectiveTimedTasks::GetUniqueObjectiveProgress() const
+{
+	int32 OutMinutes;
+	int32 OutSeconds;
+	GetTimeUntilFailure(OutMinutes, OutSeconds);
+	FString Minutes;
+	FString Seconds;
+	if (OutMinutes <= 9)
+	{
+		Minutes = FString::Printf(TEXT("0%d"), OutMinutes);
+	}else
+	{
+		Minutes = FString::Printf(TEXT("%d"), OutMinutes);
+	}
+	if (OutSeconds <= 9)
+	{
+		Seconds = FString::Printf(TEXT("0%d"), OutSeconds);
+	}else
+	{
+		Seconds = FString::Printf(TEXT("%d"), OutSeconds);
+	}
+	
+	return {
+		FString::Printf(TEXT("Buttons pressed: %d / %d"), GetInteractions(), GetTotalInteractables()),
+		FString::Printf(TEXT("Time left: %s:%s"), *Minutes, *Seconds)
+	};
+}
+
+void AObjectiveTimedTasks::GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds) const
+{
+	int32 ElapsedTime = GetProgressTimer().GetElapsedTime();
+	int32 TimeLeft = GetObjectiveTime() - ElapsedTime;
+	OutMinutes = TimeLeft / 60;
+	OutSeconds = TimeLeft % 60;
 }
 
 void AObjectiveTimedTasks::RegisterInteraction(AInteractableObject* InteractableObject)

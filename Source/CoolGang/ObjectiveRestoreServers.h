@@ -65,9 +65,14 @@ public:
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual void FailObjective() override;
 	virtual FVector GetWaypointTargetLocation() const override;
+	virtual TArray<FString> GetUniqueObjectiveProgress() const override;
 
 	UFUNCTION(BlueprintPure)
-	void GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds);
+	void GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds) const;
+	UFUNCTION(BlueprintPure)
+	int32 GetServerInteractions() const { return ServerInteractions; }
+	UFUNCTION(BlueprintPure)
+	int32 GetNumberOfSelectedServers() const { return NumberOfServersToSelect; }
 	
 private:
 	void InitializeServerHall();
@@ -118,6 +123,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	int32 RestoredServers;
+
+	UPROPERTY(VisibleAnywhere, Category = "Objective")
+	int32 ServerInteractions;
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	int32 NumberOfServers;
