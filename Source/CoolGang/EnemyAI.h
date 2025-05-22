@@ -68,6 +68,13 @@ public:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent* AbilitySystemComponent;
 
+	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
+	class UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
+	class USoundBase* MovementSound;
+	
+
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IAttackable> GetTarget() const;
 
