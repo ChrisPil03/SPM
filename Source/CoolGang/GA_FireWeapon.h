@@ -26,6 +26,10 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle,
 					   const FGameplayAbilityActorInfo* ActorInfo,
 					   FGameplayTagContainer* OptionalRelevantTags) const override;
+
+	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle,
+					   const FGameplayAbilityActorInfo* ActorInfo,
+					   const FGameplayAbilityActivationInfo ActivationInfo) const override;
 	
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon|Trace")
@@ -39,6 +43,11 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 						 const FCollisionQueryParams& QueryParams);
                           
 	bool PiercingBulletTrace(TArray<FHitResult>& HitResults,
+							const FVector& StartPoint,
+							const FVector& EndPoint,
+							const FCollisionQueryParams& QueryParams);
+
+	bool LaserBulletTrace(TArray<FHitResult>& HitResults,
 							const FVector& StartPoint,
 							const FVector& EndPoint,
 							const FCollisionQueryParams& QueryParams);
