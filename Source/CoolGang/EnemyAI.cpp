@@ -23,6 +23,7 @@
 #include "EnemyAIController.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "ObjectiveDefendGenerator.h"
 #include "ScoreManagerComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
@@ -55,16 +56,23 @@ void AEnemyAI::BeginPlay()
 		}
 	}
 		
-	TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllObjectives();
-	for (AObjectiveBase* Objective : AllObjectives)
+	// TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllSubObjectives();
+	// for (AObjectiveBase* Objective : AllObjectives)
+	// {
+	// 	if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
+	// 	{
+	// 		//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
+	// 		Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+	// 		Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
+	// 	}
+	// }
+	if (AObjectiveDefendGenerator* MainObjective = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetMainObjective())
 	{
-		if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
-		{
-			Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
-			// Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
-			Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
-		}
+		MainObjective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
+		MainObjective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 	}
+	
+	
 	GiveAbilities();
 	InitEnemyStats();
 }
@@ -183,17 +191,13 @@ void AEnemyAI::Die()
 	if (Controller)
 	{
 		Controller->StopMovement();
-		PlayAnimMontage(DeathMontage);
+		
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
 		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
-	}
-
-	if (GetCapsuleComponent() == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Capsule component not there?"));	
+		Cast<AEnemyAIController>(Controller)->BrainComponent->Cleanup();
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 100000000000000.f);
 	}
 	
-
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
 	GiveScore();
@@ -218,10 +222,12 @@ AActor* AEnemyAI::GetCurrentTarget() const
 	return  Cast<AActor>(CurrentTarget.GetObject());
 }
 
-
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
-	if (!bChangedToTargetPlayer && EnemySpawnManager->GetAliveEnemies().Contains(this))
+	const TArray<AEnemyAI*> AliveEnemies = EnemySpawnManager->GetAliveEnemiesMap().Find(GetClass())->Enemies;
+	if (AliveEnemies.Num() == 0) return;
+	
+	if (!bChangedToTargetPlayer && AliveEnemies.Contains(this))
 	{
 		CurrentTarget = Objective;
 		bChangedToTargetPlayer = true;

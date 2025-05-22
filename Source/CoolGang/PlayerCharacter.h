@@ -63,6 +63,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AGunBase* GetEquippedGun() const{ return EquippedGun;};
+	UFUNCTION(BlueprintCallable)
 	void EquipWeapon(AGunBase* NewWeapon);
 
 	UPROPERTY(BlueprintAssignable, Category="Events");
@@ -77,8 +78,11 @@ public:
 	void ClearAvailableInteractable(const IInteractInterface* Interactable);
 
 private:
-	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess="true"), Category="Component")
 	class UCameraComponent* CameraComponent;
+
+	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
+	class USpringArmComponent* SpringArmComponent;
 
 	
 	UPROPERTY(EditAnywhere, Category=Interact)

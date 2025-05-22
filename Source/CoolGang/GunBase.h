@@ -108,7 +108,7 @@ public:
 	UPROPERTY()
 	const class UWeaponAttributeSet* WeaponAttributeSet;
 	
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent *AbilitySystemComponent;
 
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
@@ -128,12 +128,11 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly )
 	UMaterialInstance* PickupMat;
-	
-public:	
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void StartFire();
 	
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void StopFire();
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
@@ -144,6 +143,9 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Reload();
+
+	UFUNCTION(BlueprintCallable)
+	void CancelReload();
 
 	UFUNCTION(BlueprintCallable)
 	int GetMagazineSize(){return MagazineSize;};

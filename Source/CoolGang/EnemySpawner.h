@@ -19,7 +19,7 @@ public:
 	// Sets default values for this actor's properties
 	AEnemySpawner();
 
-	AEnemyAI* SpawnEnemy() const;
+	AEnemyAI* SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) const;
 	
 	void RelocateEnemy(AEnemyAI* Enemy) const;
 	
@@ -38,9 +38,6 @@ private:
 	
 	UPROPERTY(EditInstanceOnly)
 	APlayerLocationDetection* SpawnArea;
-	
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
-	TArray<TSubclassOf<AEnemyAI>> EnemyClassArray;
 
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;

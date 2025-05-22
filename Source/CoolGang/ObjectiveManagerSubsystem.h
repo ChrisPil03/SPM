@@ -6,8 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "ObjectiveManagerSubsystem.generated.h"
 
+class AObjectiveDefendGenerator;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FCreateObjectiveListItem, FString, ObjectiveName, AObjectiveBase*, Objective);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnObjectiveManagerEvent, AObjectiveBase*, Objective);
 
 class AObjectiveBase;
 
@@ -20,25 +23,53 @@ public:
 	UObjectiveManagerSubsystem();
 
 	void ActivateRandomObjective(float MalfunctionTimer, float MalfunctionInterval, float MalfunctionDamage);
+	void ActivateMainObjective();
 	void RegisterCompletedObjective(AObjectiveBase* CompletedObjective);
 	void RegisterFailedObjective(AObjectiveBase* FailedObjective);
 	void ResetAllObjectives();
-	TArray<AObjectiveBase*> GetAllObjectives() const;
+	TArray<AObjectiveBase*> GetAllSubObjectives() const;
+
+	UFUNCTION(BlueprintPure)
+	AObjectiveDefendGenerator* GetMainObjective() const;
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FCreateObjectiveListItem CreateObjectiveListItemDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveManagerEvent OnCompletedObjective;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveManagerEvent OnFailedObjective;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveManagerEvent OnActivatedObjective;
+
+	void CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective);
+
+	// Should probably be called from this class not Defend generator
+	void DeactivateAllSubObjectives();
+
 private:
 	void FindObjectivesInLevel();
 	void OnWorldInitialized(const UWorld::FActorsInitializedParams& Params);
-	void CreateObjectiveUIListItem(FString ObjectiveName, AObjectiveBase* Objective);
+
+	void BroadcastCompletedObjective(AObjectiveBase* Objective) const;
+	void BroadcastFailedObjective(AObjectiveBase* Objective) const;
+	void BroadcastActivatedObjective(AObjectiveBase* Objective) const;
 	
 	UPROPERTY(VisibleAnywhere)
-	int CompletedObjectives = 0;
+	int32 CompletedSubObjectives;
 
 	UPROPERTY(VisibleAnywhere)
-	TArray<AObjectiveBase*> ObjectivesInLevel;
+	int32 CompletionsMainObjective;
+	
+	UPROPERTY(VisibleAnywhere)
+	TArray<AObjectiveBase*> SubObjectivesInLevel;
+
+	UPROPERTY(VisibleAnywhere)
+	AObjectiveDefendGenerator* MainObjective;
 
 	UPROPERTY()
 	AObjectiveBase* LastCompletedObjective;

@@ -32,7 +32,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual void Interact(AActor* Interactor) override;
-	virtual void ResetInteractable() { bCanInteractWith = false; }
+	virtual void ResetInteractable();
 	bool GetCanInteractWith() const { return bCanInteractWith && bPlayerInProximity; }
 	void SetCanInteractWith(bool const bNewState);
 	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }

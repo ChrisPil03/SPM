@@ -295,8 +295,6 @@ void ANavigationVolume3D::Tick(float DeltaTime)
 // --- Pathfinding Implementation ---
 ENavigationVolumeResult ANavigationVolume3D::FindPath(const AActor* Actor, const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath)
 {
-    const float HEURISTIC_WEIGHT = 1.1f;
-    
     TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("ANavigationVolume3D::FindPath_Total"));
     OutPath.Empty();
     DebugSpheresToDraw.Empty(); // Clear debug data from any previous calls
@@ -408,7 +406,7 @@ ENavigationVolumeResult ANavigationVolume3D::FindPath(const AActor* Actor, const
             
             AddDebugSphere(ConvertCoordinatesToLocation(Current->Coordinates), DebugNodeSphereRadius * 1.2f, FColor::Yellow);
             
-            if (ClosedSetForThisSearch.count(Current)) { continue; }
+            if (ClosedSetForThisSearch.contains(Current)) { continue; }
             ClosedSetForThisSearch.insert(Current);
 
             AddDebugSphere(ConvertCoordinatesToLocation(Current->Coordinates), DebugNodeSphereRadius, FColor::Red);
@@ -425,7 +423,7 @@ ENavigationVolumeResult ANavigationVolume3D::FindPath(const AActor* Actor, const
                 for (NavNode* Neighbor : Current->Neighbors) {
                     if (!Neighbor || !Neighbor->bIsTraversable) continue;
                     AddDebugLine(ConvertCoordinatesToLocation(Current->Coordinates), ConvertCoordinatesToLocation(Neighbor->Coordinates), FColor(128,128,128,100), 0.5f);
-                    if (ClosedSetForThisSearch.count(Neighbor)) continue;
+                    if (ClosedSetForThisSearch.contains(Neighbor)) continue;
 
                     float DistCurrentToNeighbor = NeighborDistance(Current, Neighbor);
                     if (DistCurrentToNeighbor == std::numeric_limits<float>::max()) continue;
@@ -442,7 +440,7 @@ ENavigationVolumeResult ANavigationVolume3D::FindPath(const AActor* Actor, const
                         TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("ANavigationVolume3D::FindPath_UpdateNeighborPath"));
                         Neighbor->CameFrom_Pathfinding = Current;
                         Neighbor->GScore_Pathfinding = TentativeGScore;
-                        Neighbor->FScore_Pathfinding = TentativeGScore + (HEURISTIC_WEIGHT * HeuristicCost(Neighbor)); 
+                        Neighbor->FScore_Pathfinding = TentativeGScore + HeuristicCost(Neighbor); 
                         OpenSet.push(Neighbor);
                         AddDebugSphere(ConvertCoordinatesToLocation(Neighbor->Coordinates), DebugNodeSphereRadius, FColor::Green);
                         AddDebugLine(ConvertCoordinatesToLocation(Current->Coordinates), ConvertCoordinatesToLocation(Neighbor->Coordinates), FColor::White);
