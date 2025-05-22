@@ -26,6 +26,7 @@
 #include "ObjectiveDefendGenerator.h"
 #include "ScoreManagerComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/AudioComponent.h"
 
 
 // Sets default values
@@ -34,6 +35,8 @@ AEnemyAI::AEnemyAI()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Component"));
+	AudioComponent->SetupAttachment(RootComponent);
 }
 
 void AEnemyAI::BeginPlay()
@@ -43,7 +46,6 @@ void AEnemyAI::BeginPlay()
 	
 	AIController = Cast<AEnemyAIController>(Controller);
 	AIController->RunBehaviorTree(BehaviorTree);
-	
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
@@ -72,6 +74,13 @@ void AEnemyAI::BeginPlay()
 		MainObjective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
 	}
 	
+	
+	if (MovementSound)
+	{
+		AudioComponent->SetSound(MovementSound);
+		AudioComponent->Play();
+	}
+
 	
 	GiveAbilities();
 	InitEnemyStats();
@@ -201,6 +210,8 @@ void AEnemyAI::Die()
 		Cast<AEnemyAIController>(Controller)->BrainComponent->Cleanup();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 100000000000000.f);
 	}
+
+	AudioComponent->FadeOut(0.5f, 0.0f);
 	
 	DeathStartTime = GetWorld()->GetTimeSeconds();
 	bFadeComplete = false;
@@ -293,7 +304,7 @@ void AEnemyAI::SetAlive()
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
 		AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(GE_ResetHealth, 1.f, Context);
 	}
-	
+	AudioComponent->Play();
 	bIsDead = false;
 }
 
