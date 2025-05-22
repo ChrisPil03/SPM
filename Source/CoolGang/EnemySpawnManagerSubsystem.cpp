@@ -312,7 +312,7 @@ AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
 
 void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
 {
-    if (Enemy == nullptr)
+    if (Enemy == nullptr || Enemy->IsDead())
     {
         return;
     }
