@@ -23,6 +23,7 @@ public:
 	bool GetIsCompleted() const { return bIsCompleted; }
 	float GetProgress() const { return Progress; }
 	void GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSeconds) const;
+	float GetElapsedTime() const { return ElapsedTime; }
 
 	void SetCompletionDelegate(const FTimerCompletionDelegate& NewDelegate) { CompletionDelegate = NewDelegate; }
 

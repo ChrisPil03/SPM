@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -51,8 +49,6 @@ protected:
 	void SetObjectiveProgress(const float NewProgress);
 	void SetIsTimeBased(bool const bNewState) { bIsTimeBased = bNewState; }
 	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
-	// ASystemIntegrity* GetSystemIntegrity() const { return SystemIntegrity; }
-	float GetBaseIntegrityDamage() const { return BaseIntegrityDamage; }
 	
 	void EnqueueVoiceLineWithMessage(USoundBase* VoiceLine, const FString& Message) const;
 	void DisplayMessageForSeconds(const FString& Message, const float Seconds) const;
@@ -61,6 +57,12 @@ protected:
 
 	UPROPERTY()
 	UObjectiveManagerSubsystem* ObjectiveManager;
+
+	UPROPERTY(EditAnywhere, Category = "Main Objective")
+	float ShieldBaseDamage;
+
+	UPROPERTY(EditAnywhere, Category = "Main Objective")
+	float ShieldChunkDamage;
 
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -88,11 +90,21 @@ public:
 	virtual void ResetObjective();
 	virtual void FailObjective();
 
+	UFUNCTION(BlueprintPure)
+	int32 GetObjectiveTime() const { return ObjectiveTime; }
+
 	UFUNCTION(BlueprintCallable)
 	virtual FVector GetWaypointTargetLocation() const;
 
-	UFUNCTION(BlueprintCallable)
-	FString GetObjectiveName() const { return ObjectiveDescription; }
+	UFUNCTION(BlueprintPure)
+	FString GetObjectiveName() const { return ObjectiveName; }
+	UFUNCTION(BlueprintPure)
+	FString GetObjectiveInitialDescription() const { return ObjectiveInitialDescription; }
+	UFUNCTION(BlueprintPure)
+	FString GetObjectiveStartedDescription() const { return ObjectiveStartedDescription; }
+
+	UFUNCTION(BlueprintPure)
+	virtual TArray<FString> GetUniqueObjectiveProgress() const { return TArray<FString>(); }
 	
 	void SetObjectiveState(EObjectiveState const NewObjectiveState) { ObjectiveState = NewObjectiveState; }
 	
@@ -111,11 +123,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Active")
 	virtual void SetIsActive(const bool bNewState);
 
-	UFUNCTION(BlueprintCallable, Category = "Active")
-	virtual void StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage);
-	
-	UFUNCTION(BlueprintCallable, Category = "Active")
-	virtual void StopMalfunctioning();
+	// UFUNCTION(BlueprintCallable, Category = "Active")
+	// virtual void StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage);
+	//
+	// UFUNCTION(BlueprintCallable, Category = "Active")
+	// virtual void StopMalfunctioning();
 	
 	UFUNCTION(BlueprintCallable, Category = "Progress")
 	virtual float GetObjectiveProgress() const { return Progress; }
@@ -129,31 +141,42 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Message")
 	const FString& GetFailedMessage() const { return FailedMessage; }
 
-	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnObjectiveEvent OnWeakenSystemIntegrity;
+	// UPROPERTY(BlueprintAssignable, Category = "Events")
+	// FOnObjectiveEvent OnStartMalfunctioning;
+	//
+	// UPROPERTY(BlueprintAssignable, Category = "Events")
+	// FOnObjectiveEvent OnStopMalfunctioning;
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
-	FOnObjectiveEvent OnStopWeakeningSystemIntegrity;
+	FOnObjectiveEvent OnEnterObjectiveRoom;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveEvent OnExitObjectiveRoom;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveEvent OnObjectiveStarted;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveEvent OnUniqueProgressChanged;
 
 private:
 	void FindObjectiveManager();
 	void FindAnnouncementSubsystem();
 	void FindDisplayTextMessageSubsystem();
-	// void FindSystemIntegrity();
 	void BroadcastObjectiveInProgress();
 	void BroadcastObjectiveIsActive();
 	void BindPlayerLocationDetection();
 	void OnTriggerEnterRoom(APlayerLocationDetection* Room);
 	void OnTriggerExitRoom(APlayerLocationDetection* Room);
 
-	FTimerHandle MalfunctionTimerHandle;
-	FTimerDelegate MalfunctionTimerDelegate;
-
-	FTimerHandle MalfunctionIntervalHandle;
-	FTimerDelegate MalfunctionIntervalDelegate;
+	// FTimerHandle MalfunctionTimerHandle;
+	// FTimerDelegate MalfunctionTimerDelegate;
+	//
+	// FTimerHandle MalfunctionIntervalHandle;
+	// FTimerDelegate MalfunctionIntervalDelegate;
 	
-	UFUNCTION()
-	virtual void StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage);
+	// UFUNCTION()
+	// virtual void StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage);
 	
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	bool bIsActive;
@@ -161,25 +184,22 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	EObjectiveState ObjectiveState;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Objective")
-	FString ObjectiveDescription;
+	UPROPERTY(EditAnywhere, Category = "Objective")
+	FString ObjectiveName;
+
+	UPROPERTY(EditAnywhere, Category = "Objective")
+	FString ObjectiveInitialDescription;
+
+	UPROPERTY(EditAnywhere, Category = "Objective")
+	FString ObjectiveStartedDescription;
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"), Category = "Objective")
-	float ObjectiveTime;
+	int32 ObjectiveTime;
 	
 	bool bIsTimeBased;
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	float Progress;
-
-	// UPROPERTY()
-	// ASystemIntegrity* SystemIntegrity;
-	
-	UPROPERTY(EditAnywhere, Category = "System Integrity")
-	float BaseIntegrityDamage;
-
-	UPROPERTY(EditAnywhere, Category = "System Integrity")
-	float ObjectiveFailedIntegrityChunkDamage;
 
 	UPROPERTY(EditAnywhere, Category = "Message")
 	FString ActivatedMessage;
@@ -229,6 +249,7 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "Room")
 	AGate* RoomGate;
 
+	UPROPERTY(VisibleAnywhere, Category = "Room")
 	bool bPlayerInRoom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

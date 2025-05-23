@@ -82,6 +82,11 @@ void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
 	if (GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaSeconds);
+
+		if (OnUniqueProgressChanged.IsBound())
+		{
+			OnUniqueProgressChanged.Broadcast();
+		}
 	}
 }
 
@@ -134,6 +139,11 @@ void AObjectiveDefendGenerator::ResetObjective()
 	Super::ResetObjective();
 	bHalfHealthVoiceLinePlayed = false;
 	bLowHealthVoiceLinePlayed = false;
+
+	if (OnUniqueProgressChanged.IsBound())
+	{
+		OnUniqueProgressChanged.Broadcast();
+	}
 	
 	// if (GE_ResetGeneratorHealth)
 	// {
@@ -200,6 +210,41 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 			OnShieldChanged.Broadcast();
 		}
 	}
+}
+
+TArray<FString> AObjectiveDefendGenerator::GetUniqueObjectiveProgress() const
+{
+	int32 OutMinutes;
+	int32 OutSeconds;
+	GetTimeUntilShieldRestored(OutMinutes, OutSeconds);
+	FString Minutes;
+	FString Seconds;
+	if (OutMinutes <= 9)
+	{
+		Minutes = FString::Printf(TEXT("0%d"), OutMinutes);
+	}else
+	{
+		Minutes = FString::Printf(TEXT("%d"), OutMinutes);
+	}
+	if (OutSeconds <= 9)
+	{
+		Seconds = FString::Printf(TEXT("0%d"), OutSeconds);
+	}else
+	{
+		Seconds = FString::Printf(TEXT("%d"), OutSeconds);
+	}
+	
+	return {
+		FString::Printf(TEXT("Time until Shield restored: %s:%s"), *Minutes, *Seconds)
+	};
+}
+
+void AObjectiveDefendGenerator::GetTimeUntilShieldRestored(int32& OutMinutes, int32& OutSeconds) const
+{
+	int32 ElapsedTime = GetProgressTimer().GetElapsedTime();
+	int32 TimeLeft = GetObjectiveTime() - ElapsedTime;
+	OutMinutes = TimeLeft / 60;
+	OutSeconds = TimeLeft % 60;
 }
 
 float AObjectiveDefendGenerator::GetHealthPercentage() const

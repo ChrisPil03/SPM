@@ -48,9 +48,10 @@ void AObjectiveRestoreServers::Tick(float DeltaTime)
 
 		if (bServerFailing)
 		{
-			int32 OutMinutes;
-			int32 OutSeconds;
-			GetTimeUntilFailure(OutMinutes, OutSeconds);
+			if (OnUniqueProgressChanged.IsBound())
+			{
+				OnUniqueProgressChanged.Broadcast();
+			}
 			// UE_LOG(LogTemp, Display, TEXT("Elapsed seconds: %d"), OutSeconds);
 		}
 	}
@@ -190,6 +191,11 @@ void AObjectiveRestoreServers::ResetServerRoom()
 {
 	ActivateControlPanel(false);
 	ResetSelectedServers();
+	ServerInteractions = 0;
+	if (OnUniqueProgressChanged.IsBound())
+	{
+		OnUniqueProgressChanged.Broadcast();
+	}
 	// SetServerHallStatus(EServerHallStatus::Operating);
 	// ResetHeatBuildup();
 	// CoolingProgress = 0;
@@ -278,6 +284,11 @@ void AObjectiveRestoreServers::RegisterServerResumed(AObjectiveServer* Server)
 	{
 		bServerFailing = false;
 	}
+	++ServerInteractions;
+	if (OnUniqueProgressChanged.IsBound())
+	{
+		OnUniqueProgressChanged.Broadcast();
+	}
 }
 
 void AObjectiveRestoreServers::ResetObjective()
@@ -318,7 +329,40 @@ FVector AObjectiveRestoreServers::GetWaypointTargetLocation() const
 	return Super::GetWaypointTargetLocation();
 }
 
-void AObjectiveRestoreServers::GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds)
+TArray<FString> AObjectiveRestoreServers::GetUniqueObjectiveProgress() const
+{
+	if (!FailingServers.IsEmpty() && FailingServers[0])
+	{
+		int32 OutMinutes;
+		int32 OutSeconds;
+		GetTimeUntilFailure(OutMinutes, OutSeconds);
+		FString Minutes;
+		FString Seconds;
+		if (OutMinutes <= 9)
+		{
+			Minutes = FString::Printf(TEXT("0%d"), OutMinutes);
+		}else
+		{
+			Minutes = FString::Printf(TEXT("%d"), OutMinutes);
+		}
+		if (OutSeconds <= 9)
+		{
+			Seconds = FString::Printf(TEXT("0%d"), OutSeconds);
+		}else
+		{
+			Seconds = FString::Printf(TEXT("%d"), OutSeconds);
+		}
+		return{
+			FString::Printf(TEXT("Server reboots started: %d / %d"), GetServerInteractions(), GetNumberOfSelectedServers()),
+			FString::Printf(TEXT("Server malfunction detected (%s:%s)"), *Minutes, *Seconds)
+		};	
+	}
+	return{
+		FString::Printf(TEXT("Server reboots started: %d / %d"), GetServerInteractions(), GetNumberOfSelectedServers())
+	};	
+}
+
+void AObjectiveRestoreServers::GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds) const
 {
 	if (!FailingServers.IsEmpty() && FailingServers[0])
 	{

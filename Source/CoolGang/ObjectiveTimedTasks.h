@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -27,6 +25,16 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetIsActive(const bool bNewState) override;
 	virtual float GetObjectiveProgress() const override;
+	virtual TArray<FString> GetUniqueObjectiveProgress() const override;
+
+	UFUNCTION(BlueprintPure)
+	void GetTimeUntilFailure(int32& OutMinutes, int32& OutSeconds) const;
+	
+	UFUNCTION(BlueprintPure)
+	int32 GetInteractions() const { return InteractedTasks; }
+	UFUNCTION(BlueprintPure)
+	int32 GetTotalInteractables() const { return AllInteractableObjects.Num(); }
+	
 private:
 	UFUNCTION()
 	void RegisterInteraction(AInteractableObject* InteractableObject);
@@ -36,5 +44,5 @@ private:
 	TArray<AInteractableObject*> AllInteractableObjects;
 
 	UPROPERTY(VisibleAnywhere)
-	int InteractedTasks;
+	int32 InteractedTasks;
 };

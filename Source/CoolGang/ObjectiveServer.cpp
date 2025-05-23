@@ -89,7 +89,7 @@ void AObjectiveServer::StartRestoration()
 		MalfunctionTimerHandle,
 		this,
 		&AObjectiveServer::PauseRestoration,
-		FMath::RandRange(1, RestoreTime),
+		FMath::RandRange(1, RestoreTime - 1),
 		false);
 }
 
@@ -225,7 +225,7 @@ void AObjectiveServer::SetDebugMaterial() const
 {
 	if (RestoringMaterial)
 	{
-		GetMesh()->SetMaterial(0, RestoringMaterial);
+		GetMesh()->SetMaterial(1, RestoringMaterial);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Red meterial not set"));
@@ -236,7 +236,7 @@ void AObjectiveServer::ResetMaterial()
 {
 	if (StandardMaterial)
 	{
-		GetMesh()->SetMaterial(0, StandardMaterial);
+		GetMesh()->SetMaterial(1, StandardMaterial);
 	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Standard meterial not set"));

@@ -1,23 +1,22 @@
 #include "ObjectiveBase.h"
-
 #include "DisplayTextMessageSubsystem.h"
 #include "PlayerLocationDetection.h"
-#include "SystemIntegrity.h"
 #include "AnnouncementSubsystem.h"
 #include "Gate.h"
 #include "ObjectiveDefendGenerator.h"
-#include "Kismet/GameplayStatics.h"
 
 AObjectiveBase::AObjectiveBase() :
 	bIsActive(false),
 	ObjectiveState(EObjectiveState::NotStarted),
 	ObjectiveManager(nullptr),
-	ObjectiveDescription("MISSING DESCRIPTION"),
-	ObjectiveTime(30.f),
+	ObjectiveName("MISSING NAME"),
+	ObjectiveInitialDescription("MISSING DESCRIPTION ONE"),
+	ObjectiveStartedDescription("MISSING DESCRIPTION TWO"),
+	ObjectiveTime(30),
 	bIsTimeBased(false),
 	Progress(0.f),
-	BaseIntegrityDamage(100.f),
-	ObjectiveFailedIntegrityChunkDamage(5000.f),
+	ShieldBaseDamage(100.f),
+	ShieldChunkDamage(5000.f),
 	ActivatedMessage("MALFUNCTION DETECTED"),
 	StartedMessage("OBJECTIVE STARTED"),
 	CompletedMessage("OBJECTIVE COMPLETED"),
@@ -68,6 +67,14 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		{
 			EnableWaypoint.Broadcast(this, true);
 		}
+		if (bPlayerInRoom)
+		{
+			if (OnEnterObjectiveRoom.IsBound())
+			{
+				OnEnterObjectiveRoom.Broadcast();
+				UE_LOG(LogTemp, Warning, TEXT("Broadcasting OnEnterRoom"))
+			}
+		}
 	} else
 	{
 		if (OnObjectiveDeactivated.IsBound())
@@ -75,7 +82,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 			UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
 			OnObjectiveDeactivated.Broadcast(this);
 		}
-		StopMalfunctioning();
+		// StopMalfunctioning();
 		if (EnableWaypoint.IsBound())
 		{
 			EnableWaypoint.Broadcast(this, false);
@@ -87,55 +94,56 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 	}
 }
 
-void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
-{
-	if (!Cast<AObjectiveDefendGenerator>(this))
-	{
-		MalfunctionTimerDelegate.BindUFunction(
-			this,
-			FName("StartMalfunctioning"),
-			MalfunctionDamageInterval,
-			MalfunctionDamage);
-		GetWorldTimerManager().SetTimer(
-			MalfunctionTimerHandle,
-			MalfunctionTimerDelegate,
-			MalfunctionTimer,
-			false);
-	}
-}
+// void AObjectiveBase::StartMalfunctionTimer(const float MalfunctionTimer, const float MalfunctionDamageInterval, const float MalfunctionDamage)
+// {
+// 	if (!Cast<AObjectiveDefendGenerator>(this))
+// 	{
+// 		MalfunctionTimerDelegate.BindUFunction(
+// 			this,
+// 			FName("StartMalfunctioning"),
+// 			MalfunctionDamageInterval,
+// 			MalfunctionDamage);
+// 		GetWorldTimerManager().SetTimer(
+// 			MalfunctionTimerHandle,
+// 			MalfunctionTimerDelegate,
+// 			MalfunctionTimer,
+// 			false);
+// 	}
+// }
 
-void AObjectiveBase::StopMalfunctioning()
-{
-	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
-	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
-
-	if (OnStopWeakeningSystemIntegrity.IsBound())
-	{
-		OnStopWeakeningSystemIntegrity.Broadcast();
-	}
-}
-
-void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage)
-{
-	MalfunctionIntervalDelegate.BindUFunction(this, FName("DamageGeneratorShield"), MalfunctionDamage);
-	GetWorldTimerManager().SetTimer(MalfunctionIntervalHandle, MalfunctionIntervalDelegate, MalfunctionDamageInterval, true);
-}
+// void AObjectiveBase::StopMalfunctioning()
+// {
+// 	GetWorldTimerManager().ClearTimer(MalfunctionTimerHandle);
+// 	GetWorldTimerManager().ClearTimer(MalfunctionIntervalHandle);
+//
+// 	if (OnStopMalfunctioning.IsBound())
+// 	{
+// 		OnStopMalfunctioning.Broadcast();
+// 	}
+// }
+//
+// void AObjectiveBase::StartMalfunctioning(const float MalfunctionDamageInterval, const float MalfunctionDamage)
+// {
+// 	MalfunctionIntervalDelegate.BindUFunction(this, FName("DamageGeneratorShield"), MalfunctionDamage);
+// 	GetWorldTimerManager().SetTimer(MalfunctionIntervalHandle, MalfunctionIntervalDelegate, MalfunctionDamageInterval, true);
+//
+// 	if (OnStartMalfunctioning.IsBound())
+// 	{
+// 		OnStartMalfunctioning.Broadcast();
+// 	}
+// }
 
 void AObjectiveBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	// if (GetIsFailed())
-	// {
-	// 	DamageGeneratorShield(BaseIntegrityDamage * DeltaTime);
-	// }
 	if (bIsActive)
 	{
 		BroadcastObjectiveIsActive();
+		DamageGeneratorShield(DeltaTime * ShieldBaseDamage);
 	}
 	if (bIsTimeBased && GetIsInProgress())
 	{
-		// IncreaseObjectiveProgress(DeltaTime);
 		BroadcastObjectiveInProgress();
 	}
 }
@@ -145,13 +153,18 @@ void AObjectiveBase::StartObjective()
 	if (GetIsNotStarted())
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
-		StopMalfunctioning();
+		// StopMalfunctioning();
 		//DisplayMessageForSeconds(StartedMessage, 3.f);
 		EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
 
 		if (EnableWaypoint.IsBound())
 		{
 			EnableWaypoint.Broadcast(this, false);
+		}
+
+		if (OnObjectiveStarted.IsBound())
+		{
+			OnObjectiveStarted.Broadcast();
 		}
 	}
 }
@@ -198,7 +211,7 @@ void AObjectiveBase::FailObjective()
 		SetIsActive(false);
 		//DisplayMessageForSeconds(FailedMessage, 3.f);
 		EnqueueVoiceLineWithMessage(ObjectiveFailedVoiceLine, FailedMessage);
-		DamageGeneratorShield(ObjectiveFailedIntegrityChunkDamage);
+		DamageGeneratorShield(ShieldChunkDamage);
 
 		if (!bPlayerInRoom && RoomGate)
 		{
@@ -255,15 +268,11 @@ void AObjectiveBase::SetObjectiveProgress(const float NewProgress)
 
 void AObjectiveBase::DamageGeneratorShield(const float Damage)
 {
-	if (GetIsNotStarted() || GetIsFailed())
+	if (AObjectiveDefendGenerator* Generator = ObjectiveManager->GetMainObjective())
 	{
-		if (AObjectiveDefendGenerator* Generator = ObjectiveManager->GetMainObjective())
+		if (Generator != this)
 		{
-			Generator->DamageGeneratorShield(Damage);
-		}
-		if (OnWeakenSystemIntegrity.IsBound())
-		{
-			OnWeakenSystemIntegrity.Broadcast();
+			Generator->DamageGeneratorShield(Damage);	
 		}
 	}
 }
@@ -288,20 +297,6 @@ void AObjectiveBase::FindDisplayTextMessageSubsystem()
 {
 	DisplayTextMessageSubsystem = GetWorld()->GetSubsystem<UDisplayTextMessageSubsystem>();
 }
-
-// void AObjectiveBase::FindSystemIntegrity()
-// {
-// 	TArray<AActor*> SystemIntegrityActors;
-// 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASystemIntegrity::StaticClass(), SystemIntegrityActors);
-//
-// 	if (SystemIntegrityActors.Num() > 0)
-// 	{
-// 		SystemIntegrity = Cast<ASystemIntegrity>(SystemIntegrityActors[0]);
-// 	}else
-// 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("ObjectiveBase: SystemIntegrity not found"));
-// 	}
-// }
 
 void AObjectiveBase::BroadcastObjectiveInProgress()
 {
@@ -332,9 +327,12 @@ void AObjectiveBase::OnTriggerEnterRoom(APlayerLocationDetection* Room)
 {
 	bPlayerInRoom = true;
 	
-	if (GetIsActive() && GetIsNotStarted())
+	if (GetIsActive())
 	{
-		//EnqueueVoiceLineWithMessage(EnterRoomVoiceLine, "");
+		if (OnEnterObjectiveRoom.IsBound())
+		{
+			OnEnterObjectiveRoom.Broadcast();
+		}
 	}
 
 	if (GetIsInProgress())
@@ -355,6 +353,12 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 		if (RoomGate)
 		{
 			RoomGate->CloseGate();	
+		}
+	}else
+	{
+		if (OnExitObjectiveRoom.IsBound())
+		{
+			OnExitObjectiveRoom.Broadcast();
 		}
 	}
 	if (GetIsInProgress())

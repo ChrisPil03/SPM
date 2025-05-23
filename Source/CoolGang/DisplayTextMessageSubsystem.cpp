@@ -7,10 +7,10 @@ void UDisplayTextMessageSubsystem::Initialize(FSubsystemCollectionBase& Collecti
 
 void UDisplayTextMessageSubsystem::DisplayMessage(const FString& Message) const
 {
-	if (DisplayMessageDelegate.IsBound())
-	{
-		DisplayMessageDelegate.Broadcast(Message);
-	}
+	// if (DisplayMessageDelegate.IsBound())
+	// {
+	// 	DisplayMessageDelegate.Broadcast(Message);
+	// }
 }
 
 void UDisplayTextMessageSubsystem::DisplayMessageForSeconds(const FString& Message, float Seconds)
