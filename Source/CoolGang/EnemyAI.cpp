@@ -244,6 +244,7 @@ void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 	
 	if (!bChangedToTargetPlayer && AliveEnemies.Contains(this))
 	{
+		AttackRange = 2000.f;
 		CurrentTarget = Objective;
 		bChangedToTargetPlayer = true;
 	}
@@ -260,6 +261,7 @@ void AEnemyAI::GiveScore()
 
 void AEnemyAI::AttackPlayer(AObjectiveBase* Objective)
 {
+	AttackRange = 300.f;
 	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 }
 
