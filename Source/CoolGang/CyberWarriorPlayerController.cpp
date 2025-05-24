@@ -11,7 +11,7 @@ void ACyberWarriorPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsW
 {
 	Super::GameHasEnded(EndGameFocus, bIsWinner);
 	HUD->RemoveFromParent();
-	
+	FlushPressedKeys();
 	if (bIsWinner)
 	{
 		UUserWidget* WinScreen = CreateWidget(this, WinScreenClass);
@@ -31,7 +31,7 @@ void ACyberWarriorPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsW
 		if (LoseScreen != nullptr)
 		{
 			LoseScreen->AddToViewport();
-
+			
 			SetInputMode(FInputModeUIOnly());
 			SetShowMouseCursor(true);
 		}

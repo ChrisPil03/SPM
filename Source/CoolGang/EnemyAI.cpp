@@ -239,6 +239,10 @@ AActor* AEnemyAI::GetCurrentTarget() const
 
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 {
+	if (EnemyType == EEnemyType::Gloorb)
+	{
+		return;
+	}
 	const TArray<AEnemyAI*> AliveEnemies = EnemySpawnManager->GetAliveEnemiesMap().Find(GetClass())->Enemies;
 	if (AliveEnemies.Num() == 0) return;
 	
