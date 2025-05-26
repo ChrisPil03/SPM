@@ -37,7 +37,10 @@ public:
 	int32 GetScoreByType(const EScoreType ScoreType);
 
 	UFUNCTION(BlueprintPure, Category = "Score")
-	float GetScoreMultiplier() const { return BaseScoreMultiplier; }
+	int32 GetScoreValue(const EScoreType ScoreType) const;
+
+	UFUNCTION(BlueprintPure, Category = "Score")
+	float GetScoreMultiplier() const { return CurrentScoreMultiplier; }
 	
 	UPROPERTY(BlueprintAssignable, Category = "Score")
 	FOnScoreChanged OnScoreChanged;
@@ -46,7 +49,6 @@ protected:
 	virtual void BeginPlay() override;
 	
 private:
-	int32 GetScoreValue(const EScoreType ScoreType) const;
 	void HandleAddScore(const EScoreType ScoreType);
 	void BindOnMinutePassed();
 	

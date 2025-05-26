@@ -1,13 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ObjectiveTimedTasks.h"
 #include "InteractableObject.h"
-#include "ScoreManagerComponent.h"
 
 AObjectiveTimedTasks::AObjectiveTimedTasks()
 {
 	InteractedTasks = 0;
 	SetIsTimeBased(true);
+	ScoreType = EScoreType::ObjectiveButtonsCompleted;
 }
 
 void AObjectiveTimedTasks::BeginPlay()
@@ -44,8 +42,8 @@ void AObjectiveTimedTasks::ResetObjective()
 
 void AObjectiveTimedTasks::CompleteObjective()
 {
+	OnRequestAddScore.Broadcast(ScoreType);
 	Super::CompleteObjective();
-	OnRequestAddScore.Broadcast(EScoreType::ObjectiveButtonsCompleted);
 }
 
 void AObjectiveTimedTasks::IncreaseObjectiveProgress(float const DeltaTime)
