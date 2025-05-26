@@ -1,6 +1,5 @@
 #include "ObjectiveDefendGenerator.h"
 #include "HealthComponent.h"
-#include "ScoreManagerComponent.h"
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
 #include "Components/CapsuleComponent.h"
@@ -14,45 +13,48 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 	bLowHealthVoiceLinePlayed(false),
 	bIsActivating(false),
 	CurrentShield(0.f),
-	MaxShield(20000.f)
+	MaxShield(20000.f),
+	MaxHealth(10000.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
+	ScoreType = EScoreType::ObjectiveGeneratorCompleted;
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule Component"));
 	RootComponent = CapsuleComponent;
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	MeshComponent->SetupAttachment(RootComponent);
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health Component"));
-
+	
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 void AObjectiveDefendGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	CurrentShield = MaxShield;
+	Health = MaxHealth;
+	
 	BindControlPanel();
 	BindCompletionFunction();
 	InitStats();
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		UGeneratorAttributeSet::GetHealthAttribute()
 	).AddUObject(this, &AObjectiveDefendGenerator::OnCurrentHealthChanged);
-
-	CurrentShield = MaxShield;
 }
 
 void AObjectiveDefendGenerator::OnCurrentHealthChanged(const FOnAttributeChangeData& Data)
 {
-	float NewCurrentHealth = Data.NewValue;
-	OnGeneratorHealthChangedDelegate.Broadcast(NewCurrentHealth);
+	Health = Data.NewValue;
+	OnGeneratorHealthChangedDelegate.Broadcast(Health);
 	
-	if (!bHalfHealthVoiceLinePlayed && (NewCurrentHealth/ MaxHealth <= 0.5f))
+	if (!bHalfHealthVoiceLinePlayed && Health / MaxHealth <= 0.5f)
 	{
 		EnqueueVoiceLineWithMessage(DownToHalfHealthVoiceLine, "");
 		bHalfHealthVoiceLinePlayed = true;
 	}
 	if (!bLowHealthVoiceLinePlayed &&
-		HealthComponent->GetCurrentHealth() - (NewCurrentHealth/ MaxHealth <= 0.1f))
+		HealthComponent->GetCurrentHealth() - (Health / MaxHealth <= 0.1f))
 	{
 		EnqueueVoiceLineWithMessage(LowHealthVoiceLine, "");
 		bLowHealthVoiceLinePlayed = true;
@@ -66,8 +68,9 @@ void AObjectiveDefendGenerator::StartObjective()
 
 void AObjectiveDefendGenerator::CompleteObjective()
 {
+	OnRequestAddScore.Broadcast(ScoreType);
 	Super::CompleteObjective();
-	OnRequestAddScore.Broadcast(EScoreType::ObjectiveGeneratorCompleted);
+
 	CurrentShield = MaxShield;
 	if (OnShieldChanged.IsBound())
 	{
@@ -163,13 +166,13 @@ void AObjectiveDefendGenerator::SetIsActive(const bool bNewState)
 
 FVector AObjectiveDefendGenerator::GetWaypointTargetLocation() const
 {
-	if (ControlPanel)
-	{
-		// FVector Origin;
-		// FVector Extent;
-		// ControlPanel->GetActorBounds(false, Origin, Extent, false);
-		return ControlPanel->GetActorLocation();
-	}
+	// if (ControlPanel)
+	// {
+	// 	// FVector Origin;
+	// 	// FVector Extent;
+	// 	// ControlPanel->GetActorBounds(false, Origin, Extent, false);
+	// 	return ControlPanel->GetActorLocation();
+	// }
 	return Super::GetWaypointTargetLocation();
 }
 
@@ -202,6 +205,10 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 			if (ObjectiveManager)
 			{
 				ObjectiveManager->DeactivateAllSubObjectives();
+			}
+			if (OnShieldDestroyed.IsBound())
+			{
+				OnShieldDestroyed.Broadcast();
 			}
 		}
 
@@ -245,6 +252,16 @@ void AObjectiveDefendGenerator::GetTimeUntilShieldRestored(int32& OutMinutes, in
 	int32 TimeLeft = GetObjectiveTime() - ElapsedTime;
 	OutMinutes = TimeLeft / 60;
 	OutSeconds = TimeLeft % 60;
+}
+
+int32 AObjectiveDefendGenerator::GetSecondsUntilShieldDestroyed() const
+{
+	if (bIsActivating)
+	{
+		float ElapsedTime = GetWorld()->GetTimerManager().GetTimerElapsed(ActivationDelayTimerHandle);
+		return ActivationDelay - static_cast<int32>(ElapsedTime);
+	}
+	return ActivationDelay;
 }
 
 float AObjectiveDefendGenerator::GetHealthPercentage() const
