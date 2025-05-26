@@ -1,7 +1,6 @@
 
 #include "ObjectiveRestoreServers.h"
 #include "ObjectiveServer.h"
-#include "ScoreManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 AObjectiveRestoreServers::AObjectiveRestoreServers() :
@@ -19,6 +18,7 @@ AObjectiveRestoreServers::AObjectiveRestoreServers() :
 	// OverheatedMessage("SERVERS OVERHEATING")
 {
 	SetIsTimeBased(false);
+	ScoreType = EScoreType::ObjectiveServersCompleted;
 }
 
 void AObjectiveRestoreServers::BeginPlay()
@@ -299,10 +299,10 @@ void AObjectiveRestoreServers::ResetObjective()
 
 void AObjectiveRestoreServers::CompleteObjective()
 {
+	OnRequestAddScore.Broadcast(ScoreType);
 	Super::CompleteObjective();
 	// ResetHeatBuildup();
 	SetObjectiveProgress(1.f);
-	OnRequestAddScore.Broadcast(EScoreType::ObjectiveServersCompleted);
 	ActivateControlPanel(false);
 }
 
