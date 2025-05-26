@@ -1,6 +1,5 @@
 #include "ObjectiveDefendGenerator.h"
 #include "HealthComponent.h"
-#include "ScoreManagerComponent.h"
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
 #include "Components/CapsuleComponent.h"
@@ -18,6 +17,7 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
+	ScoreType = EScoreType::ObjectiveGeneratorCompleted;
 
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule Component"));
 	RootComponent = CapsuleComponent;
@@ -66,8 +66,9 @@ void AObjectiveDefendGenerator::StartObjective()
 
 void AObjectiveDefendGenerator::CompleteObjective()
 {
+	OnRequestAddScore.Broadcast(ScoreType);
 	Super::CompleteObjective();
-	OnRequestAddScore.Broadcast(EScoreType::ObjectiveGeneratorCompleted);
+
 	CurrentShield = MaxShield;
 	if (OnShieldChanged.IsBound())
 	{
