@@ -68,7 +68,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
 	class UNiagaraSystem* MuzzleFlashEffect;
 	
-	UPROPERTY(EditAnywhere, Category=Gameplay)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Gameplay)
 	USceneComponent* MuzzlePosition;
 	
 	UPROPERTY(EditAnywhere, Category = "Camera Shake")
