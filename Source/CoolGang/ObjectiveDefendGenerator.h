@@ -39,6 +39,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	void GetTimeUntilShieldRestored(int32& OutMinutes, int32& OutSeconds) const;
+
+	UFUNCTION(BlueprintPure)
+	int32 GetSecondsUntilShieldDestroyed() const;
 	
 	UFUNCTION(BlueprintCallable)
 	float GetHealthPercentage() const;
@@ -58,6 +61,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnObjectiveEvent OnShieldChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnObjectiveEvent OnShieldDestroyed;
+
 private:
 	void BindControlPanel();
 	void BindCompletionFunction();
@@ -74,7 +80,7 @@ private:
 	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess = "true"))
 	UHealthComponent* HealthComponent;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float ActivationDelay;
 
 	UPROPERTY(EditAnywhere, Category = "Audio")
