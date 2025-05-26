@@ -146,7 +146,7 @@ void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
 void UEnemySpawnManagerSubsystem::SpawnEnemy()
 {
     int32 AliveEnemies = 0;
-    for (const TTuple Pair : AliveEnemiesByTypeMap)
+    for (const TTuple<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> Pair : AliveEnemiesByTypeMap)
     {
         AliveEnemies += Pair.Value.Enemies.Num();
     }
@@ -342,7 +342,7 @@ void UEnemySpawnManagerSubsystem::CheckOutOfRange()
         return;
     }
     
-    for (const TTuple Pair : AliveEnemiesByTypeMap)
+    for (const TTuple<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> Pair : AliveEnemiesByTypeMap)
     {
         for (AEnemyAI* Enemy : Pair.Value.Enemies)
         {
@@ -447,17 +447,21 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
 
         for (AEnemySpawner* Spawner : SpawnerArray)
         {
-            for (TTuple Pair : CurrentSpawnersByType)
+            if (!Spawner)
             {
-                
-                if (Pair.Value.Contains(Spawner))
+                continue;
+            }
+            
+            for (auto It = CurrentSpawnersByType.CreateIterator(); It; ++It)
+            {
+                if (It.Value().Contains(Spawner))
                 {
-                    Pair.Value.Remove(Spawner);
+                    It.Value().Remove(Spawner);
                 }
 
-                if (Pair.Value.IsEmpty())
+                if (It.Value().IsEmpty())
                 {
-                    CurrentSpawnersByType.Remove(Pair.Key);
+                    It.RemoveCurrent();
                 }
             }
         }
