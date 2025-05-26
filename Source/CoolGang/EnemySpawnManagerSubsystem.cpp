@@ -56,8 +56,8 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 
 TSubclassOf<AEnemyAI> UEnemySpawnManagerSubsystem::GetRandomAvailableEnemyTypeToSpawn() const
 {
-    
     TArray<TSubclassOf<AEnemyAI>> AvailableEnemyClasses;
+    CurrentSpawnersByType.GetKeys(AvailableEnemyClasses);
     for (const TPair<TSubclassOf<AEnemyAI>, int32>& Pair : MaxEnemyCounts)
     {
         TSubclassOf<AEnemyAI> EnemyClass = Pair.Key;
@@ -70,11 +70,12 @@ TSubclassOf<AEnemyAI> UEnemySpawnManagerSubsystem::GetRandomAvailableEnemyTypeTo
         {
             CurrentCountForThisType = EnemyWrapperPtr->Enemies.Num();
         }
-        
-        if (CurrentCountForThisType < MaxCountForThisType)
+    
+        if (CurrentCountForThisType >= MaxCountForThisType)
         {
-            AvailableEnemyClasses.Add(EnemyClass);
+            AvailableEnemyClasses.Remove(EnemyClass);
         }
+        
     }
     if (AvailableEnemyClasses.Num() == 0)
     {
@@ -145,7 +146,7 @@ void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
 void UEnemySpawnManagerSubsystem::SpawnEnemy()
 {
     int32 AliveEnemies = 0;
-    for (const TTuple<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> Pair : AliveEnemiesByTypeMap)
+    for (const TTuple Pair : AliveEnemiesByTypeMap)
     {
         AliveEnemies += Pair.Value.Enemies.Num();
     }
@@ -154,23 +155,30 @@ void UEnemySpawnManagerSubsystem::SpawnEnemy()
     {
         return;
     }
-
+    
     if (CurrentEnemySpawners.IsEmpty())
     {
         return;
     }
-
-    AEnemySpawner* RandomSpawner = ChooseRandomSpawner();
+    
+    TSubclassOf<AEnemyAI> EnemyClass = GetRandomAvailableEnemyTypeToSpawn();
+    if (EnemyClass == nullptr)
+    {
+        return;
+    }
+    
+    AEnemySpawner* RandomSpawner = ChooseRandomSpawner(EnemyClass);
     if (RandomSpawner == nullptr)
     {
         return;
     }
     
-    AEnemyAI* Enemy = RandomSpawner->SpawnEnemy(GetRandomAvailableEnemyTypeToSpawn());
+    AEnemyAI* Enemy = RandomSpawner->SpawnEnemy(EnemyClass);
     if (Enemy == nullptr)
     {
         return;
     }
+    
     MarkEnemyAsAlive(Enemy);
 }
 
@@ -300,12 +308,12 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
         *Enemy->GetName(), *EnemyClass->GetName(), FinalAliveCountThisType, FinalDeadCountThisType);
 }
 
-AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
+AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner(const TSubclassOf<AEnemyAI>& EnemyClassToSpawn)
 {
-    if (CurrentEnemySpawners.Num() > 0)
+    if (CurrentSpawnersByType[EnemyClassToSpawn].Num() > 0)
     {
-        int32 RandomIndex = FMath::RandRange(0, CurrentEnemySpawners.Num() - 1);
-        return CurrentEnemySpawners[RandomIndex];
+        int32 RandomIndex = FMath::RandRange(0, CurrentSpawnersByType[EnemyClassToSpawn].Num() - 1);
+        return CurrentSpawnersByType[EnemyClassToSpawn][RandomIndex];
     }
     return nullptr;
 }
@@ -317,7 +325,7 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
         return;
     }
     
-    if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner())
+    if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner(Enemy->GetClass()))
     {
         AEnemyAIController* AIController = Cast<AEnemyAIController>(Enemy->GetController());
         AIController->BrainComponent->StopLogic("Relocating");
@@ -334,7 +342,7 @@ void UEnemySpawnManagerSubsystem::CheckOutOfRange()
         return;
     }
     
-    for (const TTuple<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> Pair : AliveEnemiesByTypeMap)
+    for (const TTuple Pair : AliveEnemiesByTypeMap)
     {
         for (AEnemyAI* Enemy : Pair.Value.Enemies)
         {
@@ -401,6 +409,11 @@ void UEnemySpawnManagerSubsystem::OnEnterTriggerBox(APlayerLocationDetection* Sp
             if (IsValid(Spawner))
             {
                 CurrentEnemySpawners.AddUnique(Spawner);
+
+                for (TSubclassOf<AEnemyAI> EnemyClass : Spawner->GetSpawnableEnemies())
+                {
+                    CurrentSpawnersByType.FindOrAdd(EnemyClass).AddUnique(Spawner);
+                }
             }
             else
             {
@@ -430,6 +443,23 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
         for (AEnemySpawner* Spawner : SpawnerArray)
         {
             CurrentEnemySpawners.Remove(Spawner);
+        }
+
+        for (AEnemySpawner* Spawner : SpawnerArray)
+        {
+            for (TTuple Pair : CurrentSpawnersByType)
+            {
+                
+                if (Pair.Value.Contains(Spawner))
+                {
+                    Pair.Value.Remove(Spawner);
+                }
+
+                if (Pair.Value.IsEmpty())
+                {
+                    CurrentSpawnersByType.Remove(Pair.Key);
+                }
+            }
         }
     }
     else
