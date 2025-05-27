@@ -60,6 +60,11 @@ void APlayerCharacter::BeginPlay()
 	
 }
 
+TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
+{
+	return EnemyTargetSpheres;
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
