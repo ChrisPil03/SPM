@@ -73,9 +73,6 @@ public:
 
 	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
 	class USoundBase* MovementSound;
-
-	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
-	class USoundBase* AttackSound;
 	
 
 	UFUNCTION(BlueprintCallable)
