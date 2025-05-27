@@ -1,7 +1,6 @@
 #include "ObjectiveBase.h"
-#include "DisplayTextMessageSubsystem.h"
 #include "PlayerLocationDetection.h"
-#include "AnnouncementSubsystem.h"
+#include "VoiceLineSubsystem.h"
 #include "Gate.h"
 #include "ObjectiveDefendGenerator.h"
 
@@ -27,8 +26,7 @@ AObjectiveBase::AObjectiveBase() :
 	ObjectiveStartedVoiceLine(nullptr),
 	ObjectiveCompletedVoiceLine(nullptr),
 	ObjectiveFailedVoiceLine(nullptr),
-	AnnouncementSubsystem(nullptr),
-	DisplayTextMessageSubsystem(nullptr),
+	VoiceLineSubsystem(nullptr),
 	RoomGate(nullptr)
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -40,7 +38,7 @@ void AObjectiveBase::BeginPlay()
 	SetIsActive(false);
 	FindObjectiveManager();
 	FindAnnouncementSubsystem();
-	FindDisplayTextMessageSubsystem();
+	// FindDisplayTextMessageSubsystem();
 	BindPlayerLocationDetection();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
 }
@@ -55,8 +53,8 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		{
 			RoomGate->OpenGate();
 		}
-		//DisplayMessageForSeconds(ActivatedMessage, 3.f);
-		EnqueueVoiceLineWithMessage(ObjectiveActivatedVoiceLine, ActivatedMessage);
+		// DisplayMessageForSeconds(ActivatedMessage, 3.f);
+		EnqueueVoiceLine(ObjectiveActivatedVoiceLine, 2);
 		
 		if (OnObjectiveActivated.IsBound())
 		{
@@ -154,8 +152,8 @@ void AObjectiveBase::StartObjective()
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
 		// StopMalfunctioning();
-		//DisplayMessageForSeconds(StartedMessage, 3.f);
-		EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
+		// DisplayMessageForSeconds(StartedMessage, 3.f);
+		EnqueueVoiceLine(ObjectiveStartedVoiceLine, 0);
 
 		if (EnableWaypoint.IsBound())
 		{
@@ -171,7 +169,7 @@ void AObjectiveBase::StartObjective()
 
 void AObjectiveBase::ResetObjective()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
+	// UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
 	ResetProgress();
 	SetObjectiveState(EObjectiveState::NotStarted);
 }
@@ -180,7 +178,7 @@ void AObjectiveBase::CompleteObjective()
 {
 	SetObjectiveState(EObjectiveState::Complete);
 	//DisplayMessageForSeconds(CompletedMessage, 3.f);
-	EnqueueVoiceLineWithMessage(ObjectiveCompletedVoiceLine, CompletedMessage);
+	EnqueueVoiceLine(ObjectiveCompletedVoiceLine, 1);
 	if (OnObjectiveCompleted.IsBound())
 	{
 		OnObjectiveCompleted.Broadcast();
@@ -189,14 +187,10 @@ void AObjectiveBase::CompleteObjective()
 	{
 		EnableWaypoint.Broadcast(this, false);
 	}
-
-	if (ObjectiveManager == nullptr)
+	if (ObjectiveManager)
 	{
-		UE_LOG(LogTemp, Error, TEXT("ObjectiveBase: ObjectiveManager is nullptr"));
-		return;
+		ObjectiveManager->RegisterCompletedObjective(this);
 	}
-	ObjectiveManager->RegisterCompletedObjective(this);
-
 	if (!bPlayerInRoom && RoomGate)
 	{
 		RoomGate->CloseGate();
@@ -210,7 +204,7 @@ void AObjectiveBase::FailObjective()
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
 		//DisplayMessageForSeconds(FailedMessage, 3.f);
-		EnqueueVoiceLineWithMessage(ObjectiveFailedVoiceLine, FailedMessage);
+		EnqueueVoiceLine(ObjectiveFailedVoiceLine, 1);
 		DamageGeneratorShield(ShieldChunkDamage);
 
 		if (!bPlayerInRoom && RoomGate)
@@ -290,13 +284,13 @@ void AObjectiveBase::FindObjectiveManager()
 
 void AObjectiveBase::FindAnnouncementSubsystem()
 {
-	AnnouncementSubsystem = GetGameInstance()->GetSubsystem<UAnnouncementSubsystem>();
+	VoiceLineSubsystem = GetGameInstance()->GetSubsystem<UVoiceLineSubsystem>();
 }
 
-void AObjectiveBase::FindDisplayTextMessageSubsystem()
-{
-	DisplayTextMessageSubsystem = GetWorld()->GetSubsystem<UDisplayTextMessageSubsystem>();
-}
+// void AObjectiveBase::FindDisplayTextMessageSubsystem()
+// {
+// 	DisplayTextMessageSubsystem = GetWorld()->GetSubsystem<UDisplayTextMessageSubsystem>();
+// }
 
 void AObjectiveBase::BroadcastObjectiveInProgress()
 {
@@ -370,18 +364,18 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 	}
 }
 
-void AObjectiveBase::EnqueueVoiceLineWithMessage(USoundBase* VoiceLine, const FString& Message) const
+void AObjectiveBase::EnqueueVoiceLine(USoundBase* VoiceLine, const int32 Priority) const
 {
-	if (VoiceLine && AnnouncementSubsystem)
+	if (VoiceLineSubsystem)
 	{
-		AnnouncementSubsystem->EnqueueVoiceLineWithMessage(VoiceLine, Message);
+		VoiceLineSubsystem->EnqueueVoiceLine(VoiceLine, Priority);
 	}
 }
 
-void AObjectiveBase::DisplayMessageForSeconds(const FString& Message, const float Seconds) const
-{
-	if (DisplayTextMessageSubsystem)
-	{
-		DisplayTextMessageSubsystem->DisplayMessageForSeconds(Message, Seconds);
-	}
-}
+// void AObjectiveBase::DisplayMessageForSeconds(const FString& Message, const float Seconds) const
+// {
+// 	if (DisplayTextMessageSubsystem)
+// 	{
+// 		DisplayTextMessageSubsystem->DisplayMessageForSeconds(Message, Seconds);
+// 	}
+// }

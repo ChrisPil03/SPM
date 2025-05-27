@@ -46,5 +46,6 @@ void ACyberWarriorPlayerController::BeginPlay()
 	if (HUD != nullptr)
 	{
 		HUD->AddToViewport();
+		OnHUDReadyDelegate.Broadcast();
 	}
 }

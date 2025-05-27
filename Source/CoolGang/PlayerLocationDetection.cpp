@@ -5,6 +5,7 @@
 
 #include "PlayerCharacter.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlayerLocationDetection::APlayerLocationDetection()
@@ -21,8 +22,33 @@ void APlayerLocationDetection::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &APlayerLocationDetection::OnBeginOverlap);
-	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &APlayerLocationDetection::OnEndOverlap);
+	if (TriggerBox)
+	{
+		TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &APlayerLocationDetection::OnBeginOverlap);
+		TriggerBox->OnComponentEndOverlap.AddDynamic(this, &APlayerLocationDetection::OnEndOverlap);
+
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		PlayerCharacter->OnPawnBeginPlay.AddUObject(this, &APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone);
+
+	}
+}
+
+void APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone(APawn* ControlledPawn)
+{
+	UE_LOG(LogTemp, Display, TEXT("FindPlayerAlreadyInsideDetectionZone"));
+	TArray<AActor*> OverlappingActors;
+	TriggerBox->GetOverlappingActors(OverlappingActors, APlayerCharacter::StaticClass());
+	for (AActor* OverlappingActor : OverlappingActors)
+	{
+		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(OverlappingActor);
+		if (PlayerCharacter)
+		{
+			if (OnTriggerEnter.IsBound())
+			{
+				OnTriggerEnter.Broadcast(this);
+			}
+		}
+	}
 }
 
 void APlayerLocationDetection::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
