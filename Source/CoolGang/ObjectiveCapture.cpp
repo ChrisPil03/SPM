@@ -1,7 +1,6 @@
 #include "ObjectiveCapture.h"
 #include "InteractableObject.h"
 #include "PlayerCharacter.h"
-#include "ScoreManagerComponent.h"
 #include "Components/SphereComponent.h"
 
 AObjectiveCapture::AObjectiveCapture()
@@ -13,6 +12,7 @@ AObjectiveCapture::AObjectiveCapture()
 	bCanInteractWith = false;
 	DestroyZoneDelay = 1;
 	FailObjectiveDelay = 5.f;
+	ScoreType = EScoreType::ObjectiveDownloadCompleted;
 	
 	SphereTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Trigger Component"));
 	SphereTrigger->InitSphereRadius(CaptureRadius);
@@ -81,10 +81,11 @@ void AObjectiveCapture::StartObjective()
 
 void AObjectiveCapture::CompleteObjective()
 {
+	OnRequestAddScore.Broadcast(ScoreType);
 	Super::CompleteObjective();
+	
 	GetWorld()->GetTimerManager().SetTimer(
 		DelayTimerHandle, this, &AObjectiveCapture::DestroyCaptureZone, DestroyZoneDelay, false);
-	OnRequestAddScore.Broadcast(EScoreType::ObjectiveDownloadCompleted);
 }
 
 void AObjectiveCapture::ResetObjective()
@@ -240,9 +241,5 @@ void AObjectiveCapture::OnSphereEndOverlap(
 	if (OtherActor == PlayerInZone)
 	{
 		PlayerInZone = nullptr;
-		if (GetIsInProgress())
-		{
-			EnqueueVoiceLineWithMessage(ExitZoneVoiceLine, "STAY IN THE ZONE");
-		}
 	}
 }

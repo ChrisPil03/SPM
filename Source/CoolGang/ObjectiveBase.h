@@ -4,6 +4,7 @@
 #include "FProgressTimer.h"
 #include "GameFramework/Actor.h"
 #include "ObjectiveManagerSubsystem.h"
+#include "ScoreManagerComponent.h"
 #include "ObjectiveBase.generated.h"
 
 class AGate;
@@ -63,6 +64,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Main Objective")
 	float ShieldChunkDamage;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	EScoreType ScoreType;
 
 public:
 	UPROPERTY(BlueprintAssignable)
