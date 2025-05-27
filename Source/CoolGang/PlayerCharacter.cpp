@@ -50,6 +50,12 @@ void APlayerCharacter::BeginPlay()
 		UPlayerAttributeSet::GetHealthAttribute()
 	).AddUObject(this, &APlayerCharacter::OnCurrentHealthChanged);
 
+	UE_LOG(LogTemp, Display, TEXT("Begin play for character"));
+	if (OnPlayerConstructed.IsBound())
+	{
+		OnPlayerConstructed.Broadcast();
+	}
+	
 }
 
 // Called every frame

@@ -9,6 +9,9 @@
 /**
  * 
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHUDWidgetReady);
+
 UCLASS()
 class COOLGANG_API ACyberWarriorPlayerController : public APlayerController
 {
@@ -20,6 +23,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UUserWidget* GetHUDWidget() const {return HUD;}
+	
+	UPROPERTY(BlueprintAssignable, Category = "HUD")
+	FOnHUDWidgetReady OnHUDReadyDelegate;
 	
 private:
 	UPROPERTY(EditAnywhere)

@@ -68,11 +68,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Spawning")
     double SpawnIntervalIncreaseTimer = 20.0;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Spawning")
-    int MaximumEnemies = 20;
     
     TMap<APlayerLocationDetection*, TArray<AEnemySpawner*>> SpawnersByLocation;
+    TMap<TSubclassOf<AEnemyAI>, TArray<AEnemySpawner*>> CurrentSpawnersByType;
     TArray<AEnemySpawner*> CurrentEnemySpawners;
 
     double UpdatedSpawnInterval;
@@ -92,6 +90,8 @@ private:
     
     UPROPERTY(VisibleInstanceOnly, Category = "Enemy Spawn Manager|Limits")
     TMap<TSubclassOf<AEnemyAI>, int32> MaxEnemyCounts;
+
+    int32 MaximumEnemies;
     
     UPROPERTY(VisibleInstanceOnly, Category = "Enemy Spawn Manager|Runtime")
     TMap<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> AliveEnemiesByTypeMap;
@@ -104,7 +104,7 @@ private:
     UFUNCTION(BlueprintCallable, meta = (AllowPrivateAccess = "true"))
     void RelocateToRandomSpawner(AEnemyAI* Enemy);
     
-    AEnemySpawner* ChooseRandomSpawner();
+    AEnemySpawner* ChooseRandomSpawner(const TSubclassOf<AEnemyAI>& EnemyClassToSpawn);
     
     UFUNCTION()
     void CheckOutOfRange();
