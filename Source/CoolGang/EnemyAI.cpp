@@ -42,7 +42,6 @@ AEnemyAI::AEnemyAI()
 void AEnemyAI::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionType = GetMesh()->GetCollisionEnabled();
 	
 	AIController = Cast<AEnemyAIController>(Controller);
 	AIController->RunBehaviorTree(BehaviorTree);
@@ -179,11 +178,8 @@ void AEnemyAI::Die()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Enemy dying"))
 
-	if (GetMesh())
-	{
-		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	
+	SetActorEnableCollision(false);
+
 	DropUpgrade();
 	UNiagaraComponent* NiComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 	  GetWorld(),
@@ -301,7 +297,7 @@ void AEnemyAI::SetAlive()
 	}
 	SetActorHiddenInGame(false);
 	AIController->RunBehaviorTree(BehaviorTree);
-	GetMesh()->SetCollisionEnabled(CollisionType);
+	SetActorEnableCollision(true);
 	//Should call this in BP
 	if (GE_ResetHealth)
 	{
