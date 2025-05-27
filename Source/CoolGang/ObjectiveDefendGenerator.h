@@ -114,6 +114,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	bool bIsActivating;
+	
 
 	// --------- Shield ------- //
 	UPROPERTY(EditAnywhere, Category = "Objective")
