@@ -10,6 +10,7 @@
 
 class IInteractInterface;
 class UScoreManagerComponent;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerConstructed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
 
@@ -133,6 +134,8 @@ private:
 	
 	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const;
 
+	FOnPlayerConstructed OnPlayerConstructed;
+	
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;
 

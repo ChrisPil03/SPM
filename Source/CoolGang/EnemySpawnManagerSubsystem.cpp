@@ -310,10 +310,17 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
 
 AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner(const TSubclassOf<AEnemyAI>& EnemyClassToSpawn)
 {
-    if (CurrentSpawnersByType[EnemyClassToSpawn].Num() > 0)
+    TArray<AEnemySpawner*>* SpawnersPtr = CurrentSpawnersByType.Find(EnemyClassToSpawn);
+    if (!SpawnersPtr)
     {
-        int32 RandomIndex = FMath::RandRange(0, CurrentSpawnersByType[EnemyClassToSpawn].Num() - 1);
-        return CurrentSpawnersByType[EnemyClassToSpawn][RandomIndex];
+        UE_LOG(LogTemp, Warning, TEXT("Something went wrong with choosing a random spawner"))
+        return nullptr;
+    }
+    
+    if (CurrentSpawnersByType.Find(EnemyClassToSpawn)->Num() > 0)
+    {
+        int32 RandomIndex = FMath::RandRange(0, CurrentSpawnersByType.Find(EnemyClassToSpawn)->Num() - 1);
+        return (*CurrentSpawnersByType.Find(EnemyClassToSpawn))[RandomIndex];
     }
     return nullptr;
 }
@@ -324,6 +331,8 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
     {
         return;
     }
+
+    UE_LOG(LogTemp, Warning, TEXT("Enemy class: %s"), *Enemy->GetClass()->GetName())
     
     if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner(Enemy->GetClass()))
     {
@@ -380,6 +389,7 @@ void UEnemySpawnManagerSubsystem::CheckOutOfRange()
 
 void UEnemySpawnManagerSubsystem::BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params)
 {
+    UE_LOG(LogTemp, Warning, TEXT("Binding Player Location Detection"));
     TArray<AActor*> FoundLocations;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerLocationDetection::StaticClass(), FoundLocations);
     
@@ -484,12 +494,12 @@ const TMap<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper>& UEnemySpawnManagerSubsyst
 
 TArray<AEnemyAI*> UEnemySpawnManagerSubsystem::GetAliveEnemiesByType(const TSubclassOf<AEnemyAI>& EnemyClass) const
 {
-    return AliveEnemiesByTypeMap[EnemyClass].Enemies;
+    return AliveEnemiesByTypeMap.Find(EnemyClass)->Enemies;
 }
 
 int32 UEnemySpawnManagerSubsystem::GetMaxEnemiesByType(const TSubclassOf<AEnemyAI>& EnemyClass) const
 {
-    return MaxEnemyCounts[EnemyClass];
+    return (*MaxEnemyCounts.Find(EnemyClass));
 }
 
 float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
