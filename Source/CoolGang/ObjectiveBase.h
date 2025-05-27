@@ -7,8 +7,8 @@
 #include "ScoreManagerComponent.h"
 #include "ObjectiveBase.generated.h"
 
+class UVoiceLineSubsystem;
 class AGate;
-class UAnnouncementSubsystem;
 class UDisplayTextMessageSubsystem;
 class APlayerLocationDetection;
 class ASystemIntegrity;
@@ -51,8 +51,8 @@ protected:
 	void SetIsTimeBased(bool const bNewState) { bIsTimeBased = bNewState; }
 	FProgressTimer& GetProgressTimer() const { return *ProgressTimer; }
 	
-	void EnqueueVoiceLineWithMessage(USoundBase* VoiceLine, const FString& Message) const;
-	void DisplayMessageForSeconds(const FString& Message, const float Seconds) const;
+	void EnqueueVoiceLine(USoundBase* VoiceLine, const int32 Priority) const;
+	// void DisplayMessageForSeconds(const FString& Message, const float Seconds) const;
 
 	void ResetProgress();
 
@@ -166,7 +166,7 @@ public:
 private:
 	void FindObjectiveManager();
 	void FindAnnouncementSubsystem();
-	void FindDisplayTextMessageSubsystem();
+	// void FindDisplayTextMessageSubsystem();
 	void BroadcastObjectiveInProgress();
 	void BroadcastObjectiveIsActive();
 	void BindPlayerLocationDetection();
@@ -236,10 +236,10 @@ private:
 	USoundBase* ObjectiveFailedVoiceLine;
 
 	UPROPERTY()
-	UAnnouncementSubsystem* AnnouncementSubsystem;
+	UVoiceLineSubsystem* VoiceLineSubsystem;
 
-	UPROPERTY()
-	UDisplayTextMessageSubsystem* DisplayTextMessageSubsystem;
+	// UPROPERTY()
+	// UDisplayTextMessageSubsystem* DisplayTextMessageSubsystem;
 	
 	TUniquePtr<FProgressTimer> ProgressTimer;
 
