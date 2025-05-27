@@ -56,8 +56,8 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
 
 TSubclassOf<AEnemyAI> UEnemySpawnManagerSubsystem::GetRandomAvailableEnemyTypeToSpawn() const
 {
-    
     TArray<TSubclassOf<AEnemyAI>> AvailableEnemyClasses;
+    CurrentSpawnersByType.GetKeys(AvailableEnemyClasses);
     for (const TPair<TSubclassOf<AEnemyAI>, int32>& Pair : MaxEnemyCounts)
     {
         TSubclassOf<AEnemyAI> EnemyClass = Pair.Key;
@@ -70,11 +70,12 @@ TSubclassOf<AEnemyAI> UEnemySpawnManagerSubsystem::GetRandomAvailableEnemyTypeTo
         {
             CurrentCountForThisType = EnemyWrapperPtr->Enemies.Num();
         }
-        
-        if (CurrentCountForThisType < MaxCountForThisType)
+    
+        if (CurrentCountForThisType >= MaxCountForThisType)
         {
-            AvailableEnemyClasses.Add(EnemyClass);
+            AvailableEnemyClasses.Remove(EnemyClass);
         }
+        
     }
     if (AvailableEnemyClasses.Num() == 0)
     {
@@ -154,23 +155,30 @@ void UEnemySpawnManagerSubsystem::SpawnEnemy()
     {
         return;
     }
-
+    
     if (CurrentEnemySpawners.IsEmpty())
     {
         return;
     }
-
-    AEnemySpawner* RandomSpawner = ChooseRandomSpawner();
+    
+    TSubclassOf<AEnemyAI> EnemyClass = GetRandomAvailableEnemyTypeToSpawn();
+    if (EnemyClass == nullptr)
+    {
+        return;
+    }
+    
+    AEnemySpawner* RandomSpawner = ChooseRandomSpawner(EnemyClass);
     if (RandomSpawner == nullptr)
     {
         return;
     }
     
-    AEnemyAI* Enemy = RandomSpawner->SpawnEnemy(GetRandomAvailableEnemyTypeToSpawn());
+    AEnemyAI* Enemy = RandomSpawner->SpawnEnemy(EnemyClass);
     if (Enemy == nullptr)
     {
         return;
     }
+    
     MarkEnemyAsAlive(Enemy);
 }
 
@@ -300,12 +308,19 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
         *Enemy->GetName(), *EnemyClass->GetName(), FinalAliveCountThisType, FinalDeadCountThisType);
 }
 
-AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner()
+AEnemySpawner* UEnemySpawnManagerSubsystem::ChooseRandomSpawner(const TSubclassOf<AEnemyAI>& EnemyClassToSpawn)
 {
-    if (CurrentEnemySpawners.Num() > 0)
+    TArray<AEnemySpawner*>* SpawnersPtr = CurrentSpawnersByType.Find(EnemyClassToSpawn);
+    if (!SpawnersPtr)
     {
-        int32 RandomIndex = FMath::RandRange(0, CurrentEnemySpawners.Num() - 1);
-        return CurrentEnemySpawners[RandomIndex];
+        UE_LOG(LogTemp, Warning, TEXT("Something went wrong with choosing a random spawner"))
+        return nullptr;
+    }
+    
+    if (CurrentSpawnersByType.Find(EnemyClassToSpawn)->Num() > 0)
+    {
+        int32 RandomIndex = FMath::RandRange(0, CurrentSpawnersByType.Find(EnemyClassToSpawn)->Num() - 1);
+        return (*CurrentSpawnersByType.Find(EnemyClassToSpawn))[RandomIndex];
     }
     return nullptr;
 }
@@ -316,8 +331,10 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
     {
         return;
     }
+
+    UE_LOG(LogTemp, Warning, TEXT("Enemy class: %s"), *Enemy->GetClass()->GetName())
     
-    if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner())
+    if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner(Enemy->GetClass()))
     {
         AEnemyAIController* AIController = Cast<AEnemyAIController>(Enemy->GetController());
         AIController->BrainComponent->StopLogic("Relocating");
@@ -372,6 +389,7 @@ void UEnemySpawnManagerSubsystem::CheckOutOfRange()
 
 void UEnemySpawnManagerSubsystem::BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params)
 {
+    UE_LOG(LogTemp, Warning, TEXT("Binding Player Location Detection"));
     TArray<AActor*> FoundLocations;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerLocationDetection::StaticClass(), FoundLocations);
     
@@ -401,6 +419,11 @@ void UEnemySpawnManagerSubsystem::OnEnterTriggerBox(APlayerLocationDetection* Sp
             if (IsValid(Spawner))
             {
                 CurrentEnemySpawners.AddUnique(Spawner);
+
+                for (TSubclassOf<AEnemyAI> EnemyClass : Spawner->GetSpawnableEnemies())
+                {
+                    CurrentSpawnersByType.FindOrAdd(EnemyClass).AddUnique(Spawner);
+                }
             }
             else
             {
@@ -431,6 +454,27 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
         {
             CurrentEnemySpawners.Remove(Spawner);
         }
+
+        for (AEnemySpawner* Spawner : SpawnerArray)
+        {
+            if (!Spawner)
+            {
+                continue;
+            }
+            
+            for (auto It = CurrentSpawnersByType.CreateIterator(); It; ++It)
+            {
+                if (It.Value().Contains(Spawner))
+                {
+                    It.Value().Remove(Spawner);
+                }
+
+                if (It.Value().IsEmpty())
+                {
+                    It.RemoveCurrent();
+                }
+            }
+        }
     }
     else
     {
@@ -450,12 +494,12 @@ const TMap<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper>& UEnemySpawnManagerSubsyst
 
 TArray<AEnemyAI*> UEnemySpawnManagerSubsystem::GetAliveEnemiesByType(const TSubclassOf<AEnemyAI>& EnemyClass) const
 {
-    return AliveEnemiesByTypeMap[EnemyClass].Enemies;
+    return AliveEnemiesByTypeMap.Find(EnemyClass)->Enemies;
 }
 
 int32 UEnemySpawnManagerSubsystem::GetMaxEnemiesByType(const TSubclassOf<AEnemyAI>& EnemyClass) const
 {
-    return MaxEnemyCounts[EnemyClass];
+    return (*MaxEnemyCounts.Find(EnemyClass));
 }
 
 float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)

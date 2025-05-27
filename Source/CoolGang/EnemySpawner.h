@@ -22,6 +22,8 @@ public:
 	AEnemyAI* SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) const;
 	
 	void RelocateEnemy(AEnemyAI* Enemy) const;
+
+	TArray<TSubclassOf<AEnemyAI>> GetSpawnableEnemies() const { return SpawnableEnemies; }
 	
 protected:
 	// Called when the game starts or when spawned
@@ -41,7 +43,9 @@ private:
 
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess=true))
+	TArray<TSubclassOf<AEnemyAI>> SpawnableEnemies;
 };
 
 
