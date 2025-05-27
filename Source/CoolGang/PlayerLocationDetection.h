@@ -50,9 +50,12 @@ public:
 		int32 OtherBodyIndex);
 
 private:
+	
+	void FindPlayerAlreadyInsideDetectionZone(APawn* ControlledPawn);
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	UBoxComponent* TriggerBox;
 	
 	FOnTriggerEnterDelegate OnTriggerEnter;
-	FOnTriggerEnterDelegate OnTriggerExit;
+	FOnTriggerExitDelegate OnTriggerExit;
 };

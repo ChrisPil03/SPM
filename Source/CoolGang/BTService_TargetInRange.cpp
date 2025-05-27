@@ -16,9 +16,6 @@ UBTService_TargetInRange::UBTService_TargetInRange()
 void UBTService_TargetInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
-
-	UE_LOG(LogTemp, Warning, TEXT("Distance to player according to blackboard: %f"), OwnerComp.GetBlackboardComponent()->GetValueAsFloat(GetSelectedBlackboardKey()));
-
 	
 	AEnemyAI* Enemy = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn());
 	if (Enemy == nullptr)

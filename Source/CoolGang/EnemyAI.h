@@ -112,9 +112,7 @@ private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
 	void GiveScore();
-
-	ECollisionEnabled::Type CollisionType;
-
+	
 	UPROPERTY()
 	AEnemyAIController* AIController;
 

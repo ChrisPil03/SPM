@@ -50,13 +50,13 @@ void AObjectiveDefendGenerator::OnCurrentHealthChanged(const FOnAttributeChangeD
 	
 	if (!bHalfHealthVoiceLinePlayed && Health / MaxHealth <= 0.5f)
 	{
-		EnqueueVoiceLineWithMessage(DownToHalfHealthVoiceLine, "");
+		EnqueueVoiceLine(DownToHalfHealthVoiceLine, -1);
 		bHalfHealthVoiceLinePlayed = true;
 	}
 	if (!bLowHealthVoiceLinePlayed &&
 		HealthComponent->GetCurrentHealth() - (Health / MaxHealth <= 0.1f))
 	{
-		EnqueueVoiceLineWithMessage(LowHealthVoiceLine, "");
+		EnqueueVoiceLine(LowHealthVoiceLine, -1);
 		bLowHealthVoiceLinePlayed = true;
 	}
 }
