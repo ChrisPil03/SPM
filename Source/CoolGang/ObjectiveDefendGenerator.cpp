@@ -32,6 +32,8 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 void AObjectiveDefendGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetComponents<USphereComponent>(EnemyTargetSpheres);
 	
 	CurrentShield = MaxShield;
 	Health = MaxHealth;

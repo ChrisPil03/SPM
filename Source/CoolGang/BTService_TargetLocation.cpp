@@ -35,16 +35,16 @@ void UBTService_TargetLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	}
 
 	TScriptInterface<IAttackable> TargetInterface = EnemyAI->GetTarget();
-	UObject* MovementNodes = TargetInterface.GetObject();
+	TArray<USphereComponent*> MovementNodes = TargetInterface->GetMovementNodes();
 
+	int32 RandomIndex = FMath::RandRange(0, MovementNodes.Num() - 1);
+	USphereComponent* MovementNode = MovementNodes[RandomIndex];
 
-
-
-	if (MovementNodes == nullptr)
+	if (MovementNode == nullptr)
 	{
 		UE_LOG(LogTemp, Verbose, TEXT("UBTService_TargetLocation: TargetObject is null (EnemyAI has no current target)."));
 		OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
 		return;
 	}
-	OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), MovementNodes);
+	OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), MovementNode);
 }

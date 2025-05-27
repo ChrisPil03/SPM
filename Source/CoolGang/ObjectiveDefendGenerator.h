@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Attackable.h"
+#include "EnemyAI.h"
 #include "HealthComponent.h"
 #include "ObjectiveBase.h"
 #include "ObjectiveDefendGenerator.generated.h"
@@ -29,8 +30,8 @@ protected:
 	virtual void CompleteObjective() override;
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Objective")
-	TArray<USphereComponent*> EnemyTargetSpheres;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+    TArray<USphereComponent*> EnemyTargetSpheres;
 	
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ResetObjective() override;
@@ -119,9 +120,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	bool bIsActivating;
-
-	
-	
 
 	// --------- Shield ------- //
 	UPROPERTY(EditAnywhere, Category = "Objective")
