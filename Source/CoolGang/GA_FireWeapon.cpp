@@ -309,13 +309,13 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
 	
     FVector CurrentHitLocation = InitialHit.Location;
     
-    // Chain process (limited by MaxChainDepth)
+    // Chain process limited by MaxChainDepth
     for (int32 ChainIndex = 0; ChainIndex < MaxChainDepth - 1; ChainIndex++)
     {
         // Visual debugging for the sphere overlap
         DrawDebugSphere(GetWorld(), CurrentHitLocation, SphereRadius, 30, FColor::Blue, false, 2.0f);
         
-        // Find nearby potential targets
+        // Find nearby targets
         TArray<FOverlapResult> OverlapResults;
         bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
             OverlapResults,
@@ -337,6 +337,7 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
         
         for (const FOverlapResult& OverlapResult : OverlapResults)
         {
+        	// Check if already chained to 
             AActor* PotentialTarget = OverlapResult.GetActor();
             if (!PotentialTarget || HitActors.Contains(PotentialTarget))
             {

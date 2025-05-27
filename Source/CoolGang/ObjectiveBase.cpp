@@ -55,7 +55,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		{
 			RoomGate->OpenGate();
 		}
-		//DisplayMessageForSeconds(ActivatedMessage, 3.f);
+		// DisplayMessageForSeconds(ActivatedMessage, 3.f);
 		EnqueueVoiceLineWithMessage(ObjectiveActivatedVoiceLine, ActivatedMessage);
 		
 		if (OnObjectiveActivated.IsBound())
@@ -154,7 +154,7 @@ void AObjectiveBase::StartObjective()
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
 		// StopMalfunctioning();
-		//DisplayMessageForSeconds(StartedMessage, 3.f);
+		// DisplayMessageForSeconds(StartedMessage, 3.f);
 		EnqueueVoiceLineWithMessage(ObjectiveStartedVoiceLine, StartedMessage);
 
 		if (EnableWaypoint.IsBound())
@@ -171,7 +171,7 @@ void AObjectiveBase::StartObjective()
 
 void AObjectiveBase::ResetObjective()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
+	// UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
 	ResetProgress();
 	SetObjectiveState(EObjectiveState::NotStarted);
 }
@@ -189,14 +189,10 @@ void AObjectiveBase::CompleteObjective()
 	{
 		EnableWaypoint.Broadcast(this, false);
 	}
-
-	if (ObjectiveManager == nullptr)
+	if (ObjectiveManager)
 	{
-		UE_LOG(LogTemp, Error, TEXT("ObjectiveBase: ObjectiveManager is nullptr"));
-		return;
+		ObjectiveManager->RegisterCompletedObjective(this);
 	}
-	ObjectiveManager->RegisterCompletedObjective(this);
-
 	if (!bPlayerInRoom && RoomGate)
 	{
 		RoomGate->CloseGate();
