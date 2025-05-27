@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "HealthComponent.h"
 #include "AbilitySystemComponent.h"
 #include "PlayerCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "Components/SphereComponent.h"
 #include "EnemyAI.generated.h"
 
 class AObjectiveBase;
@@ -107,7 +107,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetJumpingState(bool IsJumping) {bIsJumping = IsJumping;}
 
-
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
@@ -165,6 +164,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TScriptInterface<IAttackable> CurrentTarget;
 
+	UPROPERTY(VisibleAnywhere)
+	USphereComponent* MovementTarget;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> AttackAbilityClass;
 

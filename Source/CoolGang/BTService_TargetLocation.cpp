@@ -1,6 +1,5 @@
 #include "BTService_TargetLocation.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Pawn.h"
 #include "AIController.h"
 #include "EnemyAI.h"
@@ -36,13 +35,16 @@ void UBTService_TargetLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	}
 
 	TScriptInterface<IAttackable> TargetInterface = EnemyAI->GetTarget();
-	UObject* TargetObject = TargetInterface.GetObject();
+	TArray<USphereComponent*> MovementNodes = TargetInterface->GetMovementNodes();
 
-	if (TargetObject == nullptr)
+	int32 RandomIndex = FMath::RandRange(0, MovementNodes.Num() - 1);
+	USphereComponent* MovementNode = MovementNodes[RandomIndex];
+
+	if (MovementNode == nullptr)
 	{
 		UE_LOG(LogTemp, Verbose, TEXT("UBTService_TargetLocation: TargetObject is null (EnemyAI has no current target)."));
 		OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
 		return;
 	}
-	OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), TargetObject);
+	OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), MovementNode);
 }
