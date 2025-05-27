@@ -46,5 +46,7 @@ void UBTService_TargetLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		OwnerComp.GetBlackboardComponent()->ClearValue(GetSelectedBlackboardKey());
 		return;
 	}
-	OwnerComp.GetBlackboardComponent()->SetValueAsObject(GetSelectedBlackboardKey(), MovementNode);
+
+	UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *MovementNode->GetComponentLocation().ToString())
+	OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), MovementNode->GetComponentLocation());
 }
