@@ -2,8 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "NavNode.h" // Ensure this is the updated NavNode.h
+#include "NavNode.h"
+#include <atomic> // For std::atomic
 #include "NavigationVolume3D.generated.h" // MUST BE LAST INCLUDE
+
+// Standard library includes
+
 
 class UProceduralMeshComponent;
 class UMaterialInterface;
@@ -18,6 +22,8 @@ enum class ENavigationVolumeResult : uint8
     ENVR_EndNodeBlocked          UMETA(DisplayName = "End Node Blocked"),
     ENVR_NoPathExists            UMETA(DisplayName = "No Path Found Between Valid Nodes"),
     ENVR_PathToSelf              UMETA(DisplayName = "Path to self"),
+    ENVR_VolumeNotReady          UMETA(DisplayName = "Navigation Volume Not Ready"),
+    ENVR_RequestingActorInvalid  UMETA(DisplayName = "Requesting Actor Invalid"),
     ENVR_UnknownError            UMETA(DisplayName = "Unknown Error")
 };
 
@@ -39,6 +45,9 @@ struct FDebugSphereData {
     int32 Segments;
 };
 
+// Delegate for async pathfinding completion
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnPathfindingComplete, ENavigationVolumeResult, Result, const TArray<FVector>&, Path);
+
 UCLASS()
 class NAVIGATION3D_API ANavigationVolume3D : public AActor
 {
@@ -47,8 +56,8 @@ class NAVIGATION3D_API ANavigationVolume3D : public AActor
 public:
     ANavigationVolume3D();
 
-// ... (Your existing UPROPERTY declarations for Divisions, Size, Material, etc.) ...
-// Keep these as they are:
+// Existing UPROPERTY declarations (Divisions, Size, Material, etc.)
+// ... (Ensure all your existing UPROPERTIES are here) ...
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Display", meta=(AllowPrivateAccess="true"))
     bool bDrawGridLinesInEditor = true;
@@ -99,19 +108,16 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pathfinding|Debug", meta=(EditCondition="bDrawPathfindingDebug"))
     float DebugNodeSphereRadius = 15.0f;
 
-    // New Properties for conditional debugging
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pathfinding|Debug", meta=(EditCondition="bDrawPathfindingDebug"))
     bool bPauseOnLongPath = false;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pathfinding|Debug", meta=(EditCondition="bDrawPathfindingDebug && bPauseOnLongPath", ClampMin="1", UIMin="1"))
-    int32 LongPathThreshold = 80; // Path length to trigger pause and detailed drawing
+    int32 LongPathThreshold = 80;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pathfinding|Debug", meta=(EditCondition="bDrawPathfindingDebug"))
-    bool bOnlyDrawDebugForLongPaths = false; // If true, only draws debug if path > LongPathThreshold (and bPauseOnLongPath is true)
+    bool bOnlyDrawDebugForLongPaths = false;
 
-    
-    // ... (Your UFUNCTION declarations for FindRandomValidLocationInRadius, OnConstruction, Tick, Getters) ...
-    // Keep these:
+public:
     UFUNCTION(BlueprintCallable, Category = "NavigationVolume3D", meta = (DisplayName = "Find Random Valid Location In Radius"))
     bool FindRandomValidLocationInRadius(
         const FVector& Origin,
@@ -122,10 +128,15 @@ public:
     ) const;
     
     virtual void OnConstruction(const FTransform& Transform) override;
-    virtual void Tick(float DeltaTime) override;
 
-    UFUNCTION(BlueprintCallable, Category = "NavigationVolume3D", meta = (DisplayName = "Find Path"))
-    ENavigationVolumeResult FindPath(const AActor* Actor, const FVector& StartLocation, const FVector& DestinationLocation, TArray<FVector>& OutPath);
+    // New async pathfinding function
+    UFUNCTION(BlueprintCallable, Category = "NavigationVolume3D", meta = (DisplayName = "Find Path Async"))
+    void FindPathAsync(
+        const AActor* RequestingActor,
+        const FVector& StartLocation,
+        const FVector& DestinationLocation,
+        FOnPathfindingComplete OnCompleteCallback
+    );
 
     UFUNCTION(BlueprintPure, Category = "NavigationVolume3D")
     FIntVector ConvertLocationToCoordinates(const FVector& Location) const;
@@ -135,7 +146,6 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "NavigationVolume3D|Grid Dimensions")
     FORCEINLINE int32 GetTotalDivisions() const { return DivisionsX * DivisionsY * DivisionsZ; }
-    // ... other getters ...
 
 protected:
     virtual void BeginPlay() override;
@@ -143,27 +153,42 @@ protected:
 
 private:
     TArray<NavNode> Nodes;
-
-    UPROPERTY() // Keep alive if this actor persists across PIE sessions with debug drawing on
-    TArray<FDebugSphereData> DebugSpheresToDraw;
-    UPROPERTY()
-    TArray<FDebugLineData> DebugLinesToDraw;
-
-    void AddDebugSphere(const FVector& Center, float Radius, const FColor& InSphereColor, int32 Segments = 12);
-    void AddDebugLine(const FVector& Start, const FVector& End, const FColor& InLineColor, float Thickness = 1.f);
-    void FlushDebugDraws(UWorld* World, float Lifetime);
+    bool bNodesInitializedAndFinalized = false;
     
-    bool bNodesInitializedAndFinalized;
-    // --- Search ID for A* data in NavNodes ---
-    uint32_t CurrentPathfindingSearchID = 0; // Initialize to 0
+    // Atomic counter for unique search IDs
+    std::atomic<uint32_t> AtomicPathfindingSearchIDCounter{0};
 
-    // Making GetNode non-const only, as it returns a non-const pointer
-    // to allow modification of NavNode members like FScore_Pathfinding during search.
-    // If a truly const version is needed elsewhere, it should return const NavNode*
-    // and not allow modification of pathfinding-specific data.
+    // Internal struct to bundle results from the async task
+    struct FPathfindingInternalResultBundle
+    {
+        ENavigationVolumeResult ResultCode = ENavigationVolumeResult::ENVR_UnknownError;
+        TArray<FVector> PathPoints;
+        TArray<FDebugSphereData> DebugSpheresToDraw_TaskLocal;
+        TArray<FDebugLineData> DebugLinesToDraw_TaskLocal;
+        bool bShouldDrawThisPathAndExploration_TaskLocal = false;
+        bool bIsLongPath_TaskLocal = false;
+        FString ActorNameForLog; // For logging if actor becomes invalid
+
+        FPathfindingInternalResultBundle(const FString& InActorName = TEXT("UnknownActor")) : ActorNameForLog(InActorName) {}
+    };
+
+    // The core pathfinding logic, designed to be run off-thread
+    FPathfindingInternalResultBundle ExecutePathfindingOnThread(
+        TWeakObjectPtr<ANavigationVolume3D> WeakThis, // Pass weak ptr to self
+        TWeakObjectPtr<const AActor> WeakRequestingActor,
+        const FVector& StartLocation,
+        const FVector& DestinationLocation,
+        uint32_t PathSearchID // The unique ID for this specific search
+    );
+    
+    // Modified debug helpers to populate local arrays for the task
+    void AddDebugSphere_TaskLocal(TArray<FDebugSphereData>& DebugSpheresArray, const FVector& Center, float Radius, const FColor& InSphereColor, int32 Segments = 12) const;
+    void AddDebugLine_TaskLocal(TArray<FDebugLineData>& DebugLinesArray, const FVector& Start, const FVector& End, const FColor& InLineColor, float Thickness = 1.f) const;
+    
+    // Actual drawing function, called on game thread
+    void FlushCollectedDebugDraws(UWorld* World, float Lifetime, const TArray<FDebugSphereData>& Spheres, const TArray<FDebugLineData>& Lines, bool bIsLongPathContext = false) const;
+
     NavNode* GetNode(FIntVector Coordinates); 
-    
-    // Const version for read-only access
     const NavNode* GetConstNode(FIntVector Coordinates) const;
 
     void CreateLine(const FVector& Start, const FVector& End, const FVector& Normal, TArray<FVector>& Vertices, TArray<int32>& Triangles);
