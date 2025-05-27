@@ -3,6 +3,7 @@
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "GeneratorAttributeSet.h"
 #include "InteractableObject.h"
 #include "Kismet/GameplayStatics.h"
@@ -244,6 +245,11 @@ TArray<FString> AObjectiveDefendGenerator::GetUniqueObjectiveProgress() const
 	return {
 		FString::Printf(TEXT("Time until Shield restored: %s:%s"), *Minutes, *Seconds)
 	};
+}
+
+TArray<USphereComponent*> AObjectiveDefendGenerator::GetMovementNodes()
+{
+	return EnemyTargetSpheres;
 }
 
 void AObjectiveDefendGenerator::GetTimeUntilShieldRestored(int32& OutMinutes, int32& OutSeconds) const
