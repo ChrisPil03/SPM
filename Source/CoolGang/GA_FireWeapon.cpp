@@ -134,7 +134,6 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 				if (Hit.GetActor()->IsA(AEnemyAI::StaticClass()))
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *Hit.GetActor()->GetName());
-					DrawImpactPointDeBug(Hit.Location);
 					
 					NewTargetData =
 					new FGameplayAbilityTargetData_SingleTargetHit(Hit);
@@ -189,7 +188,6 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 				{
 					if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
 					{
-						DrawImpactPointDeBug(HitResult.Location);
 						ValidHits.Add(HitResult);
 					}
 				}
@@ -237,13 +235,12 @@ bool UGA_FireWeapon::LaserBulletTrace(TArray<FHitResult>& HitResults, const FVec
 			{
 				if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
 				{
-					DrawImpactPointDeBug(HitResult.Location);
 					ValidHits.Add(HitResult);
 				}
 			}
 			else
 			{
-				//SpawnImpactEffect(HitResult);
+				SpawnImpactEffect(HitResult);
 			}
 		}
 		if (!ValidHits.IsEmpty())
