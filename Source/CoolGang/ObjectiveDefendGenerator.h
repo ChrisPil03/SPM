@@ -4,6 +4,7 @@
 #include "Attackable.h"
 #include "EnemyAI.h"
 #include "HealthComponent.h"
+#include "Components/SphereComponent.h"
 #include "ObjectiveBase.h"
 #include "ObjectiveDefendGenerator.generated.h"
 
@@ -30,9 +31,6 @@ protected:
 	virtual void CompleteObjective() override;
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-    TArray<USphereComponent*> EnemyTargetSpheres;
-	
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ResetObjective() override;
 	virtual void SetIsActive(const bool bNewState) override;
@@ -41,7 +39,8 @@ public:
 	virtual void DamageGeneratorShield(const float Damage) override;
 	virtual TArray<FString> GetUniqueObjectiveProgress() const override;
 
-	TArray<USphereComponent*> GetMovementNodes();
+	UFUNCTION()
+	virtual TArray<USphereComponent*> GetMovementNodes() override;
 	
 	UFUNCTION(BlueprintPure)
 	void GetTimeUntilShieldRestored(int32& OutMinutes, int32& OutSeconds) const;
@@ -71,6 +70,10 @@ public:
 	FOnObjectiveEvent OnShieldDestroyed;
 
 private:
+
+	UPROPERTY()
+	TArray<USphereComponent*> EnemyTargetSpheres;
+	
 	void BindControlPanel();
 	void BindCompletionFunction();
 	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);

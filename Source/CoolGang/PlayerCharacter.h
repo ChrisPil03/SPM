@@ -31,6 +31,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UFUNCTION()
 	virtual TArray<USphereComponent*> GetMovementNodes() override;
 	
 	// Called every frame
@@ -93,7 +94,7 @@ private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class USpringArmComponent* SpringArmComponent;
 
-	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	TArray<USphereComponent*> EnemyTargetSpheres;
 	
 	UPROPERTY(EditAnywhere, Category=Interact)

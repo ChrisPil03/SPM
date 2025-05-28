@@ -9,7 +9,6 @@
 #include "GunBase.h"
 #include "AbilitySystemComponent.h"
 #include "DiveGameMode.h"
-#include "InterchangeResult.h"
 #include "PlayerAttributeSet.h"
 #include "ScoreManagerComponent.h"
 #include "Blueprint/UserWidget.h"
@@ -40,7 +39,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	GetComponents<USphereComponent>(EnemyTargetSpheres);
-	UE_LOG(LogTemp, Warning, TEXT("Amount of movement spheres: %d"), EnemyTargetSpheres.Num())
+
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		UPlayerAttributeSet::GetHealthAttribute()
 	).AddUObject(this, &APlayerCharacter::OnCurrentHealthChanged);
