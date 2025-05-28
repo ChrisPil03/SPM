@@ -37,6 +37,10 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+		UPlayerAttributeSet::GetHealthAttribute()
+	).AddUObject(this, &APlayerCharacter::OnCurrentHealthChanged);
+	
 	InitPlayerStats();
 	GiveGun(Pistol);
 	GiveGun(Shotgun);
@@ -46,9 +50,7 @@ void APlayerCharacter::BeginPlay()
 	
 	EquippedGun->SetActorHiddenInGame(false);
 
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
-		UPlayerAttributeSet::GetHealthAttribute()
-	).AddUObject(this, &APlayerCharacter::OnCurrentHealthChanged);
+	
 
 	UE_LOG(LogTemp, Display, TEXT("Begin play for character"));
 	if (OnPlayerConstructed.IsBound())
@@ -56,6 +58,11 @@ void APlayerCharacter::BeginPlay()
 		OnPlayerConstructed.Broadcast();
 	}
 	
+}
+
+TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
+{
+	return EnemyTargetSpheres;
 }
 
 // Called every frame

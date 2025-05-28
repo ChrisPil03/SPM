@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SphereComponent.h"
 #include "UObject/Interface.h"
 #include "Attackable.generated.h"
 
@@ -20,6 +21,7 @@ class IAttackable
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	UFUNCTION()
+	virtual TArray<USphereComponent*> GetMovementNodes() = 0;
 };

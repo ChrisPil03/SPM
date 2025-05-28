@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Attackable.h"
 #include "GameFramework/Character.h"
-#include "HealthComponent.h"
+#include "Components/SphereComponent.h"
 #include "PlayerCharacter.generated.h"
 
 class IInteractInterface;
@@ -29,7 +29,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	TArray<USphereComponent*> GetMovementNodes();
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -56,6 +58,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void Dash();
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnDash();
 	
@@ -64,6 +67,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AGunBase* GetEquippedGun() const{ return EquippedGun;};
+	
 	UFUNCTION(BlueprintCallable)
 	void EquipWeapon(AGunBase* NewWeapon);
 
@@ -85,6 +89,8 @@ private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class USpringArmComponent* SpringArmComponent;
 
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	TArray<USphereComponent*> EnemyTargetSpheres;
 	
 	UPROPERTY(EditAnywhere, Category=Interact)
 	float InteractRange = 200;

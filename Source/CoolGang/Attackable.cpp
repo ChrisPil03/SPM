@@ -2,5 +2,3 @@
 
 
 #include "Attackable.h"
-
-// Add default functionality here for any IAttackable functions that are not pure virtual.

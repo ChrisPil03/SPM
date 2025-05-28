@@ -62,7 +62,7 @@ void AGunBase::CancelReload()
 		FGameplayTagContainer CancelTags;
 		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("Status.Reload"));
 		AbilitySystemComponent->CancelAbilities(&CancelTags);
-
+		OnReloadCancelDelegate.Broadcast();
 		// Optional: remove reload cue
 	UAudioComponent* AudioComponent = FindComponentByClass<UAudioComponent>();
 	if (AudioComponent)

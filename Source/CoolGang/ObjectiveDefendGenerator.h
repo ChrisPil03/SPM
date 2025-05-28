@@ -29,6 +29,9 @@ protected:
 	virtual void CompleteObjective() override;
 
 public:
+	UPROPERTY(EditAnywhere, Category = "Objective")
+	TArray<USphereComponent*> EnemyTargetSpheres;
+	
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void ResetObjective() override;
 	virtual void SetIsActive(const bool bNewState) override;
@@ -37,6 +40,8 @@ public:
 	virtual void DamageGeneratorShield(const float Damage) override;
 	virtual TArray<FString> GetUniqueObjectiveProgress() const override;
 
+	TArray<USphereComponent*> GetMovementNodes();
+	
 	UFUNCTION(BlueprintPure)
 	void GetTimeUntilShieldRestored(int32& OutMinutes, int32& OutSeconds) const;
 
@@ -114,6 +119,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Objective")
 	bool bIsActivating;
+
+	
+	
 
 	// --------- Shield ------- //
 	UPROPERTY(EditAnywhere, Category = "Objective")
