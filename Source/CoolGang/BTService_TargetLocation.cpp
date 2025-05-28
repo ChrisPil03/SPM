@@ -38,6 +38,10 @@ void UBTService_TargetLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 	TArray<USphereComponent*> MovementNodes = TargetInterface->GetMovementNodes();
 
 	int32 RandomIndex = FMath::RandRange(0, MovementNodes.Num() - 1);
+	if (RandomIndex >= MovementNodes.Num() )
+	{
+		return;
+	}
 	USphereComponent* MovementNode = MovementNodes[RandomIndex];
 
 	if (MovementNode == nullptr)
@@ -47,6 +51,6 @@ void UBTService_TargetLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Vector: %s"), *MovementNode->GetComponentLocation().ToString())
+	
 	OwnerComp.GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), MovementNode->GetComponentLocation());
 }

@@ -27,6 +27,7 @@
 #include "ScoreManagerComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/AudioComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
 
 
 // Sets default values
@@ -202,7 +203,24 @@ void AEnemyAI::Die()
 		Controller->StopMovement();
 		
 		Cast<AEnemyAIController>(Controller)->BrainComponent->StopLogic("Dead");
-		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(BehaviorTree->BlackboardAsset));
+		
+		UBlackboardComponent* Blackboard = Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent();
+		if (!Blackboard)
+		{
+			return;
+		}
+		
+		UBlackboardData* BlackboardData = Blackboard->GetBlackboardAsset();
+		if (!BlackboardData)
+		{
+			return;
+		}
+
+		for (auto BlackboardValue : BlackboardData->Keys)
+		{
+			Blackboard->ClearValue(BlackboardValue.EntryName);
+		}
+		GetMovementComponent()->Velocity.Set(0.f,0.f,0.f);
 		Cast<AEnemyAIController>(Controller)->BrainComponent->Cleanup();
 		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 100000000000000.f);
 	}

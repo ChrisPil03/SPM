@@ -14,6 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerConstructed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
 
+
 class AGunBase;
 struct FOnAttributeChangeData;
 UCLASS(BlueprintType)
@@ -30,7 +31,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	TArray<USphereComponent*> GetMovementNodes();
+	virtual TArray<USphereComponent*> GetMovementNodes() override;
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -74,6 +75,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Events");
 	FOnPlayerTakeDamage OnPlayerTakeDamage;
 
+	UPROPERTY(BlueprintAssignable, Category="Events");
+	FOnPlayerConstructed OnPlayerConstructed;
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void SaveScore();
 	
@@ -139,8 +143,6 @@ private:
 	void InitPlayerStats();
 	
 	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const;
-
-	FOnPlayerConstructed OnPlayerConstructed;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;

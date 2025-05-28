@@ -53,9 +53,7 @@ void APlayerCharacter::BeginPlay()
 	bDead = false;
 	
 	EquippedGun->SetActorHiddenInGame(false);
-
 	
-
 	UE_LOG(LogTemp, Display, TEXT("Begin play for character"));
 	if (OnPlayerConstructed.IsBound())
 	{
