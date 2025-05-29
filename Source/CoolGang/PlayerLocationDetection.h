@@ -50,8 +50,8 @@ public:
 		int32 OtherBodyIndex);
 
 private:
-	
-	void FindPlayerAlreadyInsideDetectionZone(APawn* ControlledPawn);
+	UFUNCTION()
+	void FindPlayerAlreadyInsideDetectionZone();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	UBoxComponent* TriggerBox;
