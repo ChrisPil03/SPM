@@ -107,6 +107,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetJumpingState(bool IsJumping) {bIsJumping = IsJumping;}
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetTargetInRange(bool IsInRange);
+	
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
@@ -133,6 +136,8 @@ private:
 	bool bIsJumping = false;
 	bool bIsAttacking = false;
 
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bTargetInRange = false;
 	bool bDeathVFXComplete = false;
 
 	UFUNCTION()

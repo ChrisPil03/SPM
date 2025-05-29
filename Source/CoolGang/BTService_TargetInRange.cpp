@@ -31,7 +31,14 @@ void UBTService_TargetInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 		return;
 	}
 
-	
+	if (Enemy->GetSquaredDistanceTo(Target) <= Enemy->GetAttackRange())
+	{
+		Enemy->SetTargetInRange(true);
+	}
+	else
+	{
+		Enemy->SetTargetInRange(false);
+	}
 	
 	OwnerComp.GetBlackboardComponent()->SetValueAsFloat(GetSelectedBlackboardKey(), Enemy->GetSquaredDistanceTo(Target));
 }
