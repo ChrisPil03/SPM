@@ -32,6 +32,9 @@ AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
 void AObjectiveDefendGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+
+	EnemyTargetSpheres.Empty();
+	GetComponents<USphereComponent>(EnemyTargetSpheres);
 	
 	CurrentShield = MaxShield;
 	Health = MaxHealth;
@@ -82,7 +85,7 @@ void AObjectiveDefendGenerator::CompleteObjective()
 void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
+	
 	if (GetIsInProgress())
 	{
 		IncreaseObjectiveProgress(DeltaSeconds);

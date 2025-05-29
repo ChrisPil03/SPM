@@ -28,12 +28,11 @@ void APlayerLocationDetection::BeginPlay()
 		TriggerBox->OnComponentEndOverlap.AddDynamic(this, &APlayerLocationDetection::OnEndOverlap);
 
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-		PlayerCharacter->OnPawnBeginPlay.AddUObject(this, &APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone);
-
+		PlayerCharacter->OnPlayerConstructed.AddDynamic(this, &APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone);
 	}
 }
 
-void APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone(APawn* ControlledPawn)
+void APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone()
 {
 	UE_LOG(LogTemp, Display, TEXT("FindPlayerAlreadyInsideDetectionZone"));
 	TArray<AActor*> OverlappingActors;
