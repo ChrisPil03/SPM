@@ -186,8 +186,9 @@ void APlayerCharacter::GiveGun(const TSubclassOf<AGunBase>& GunClass)
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
 	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	EquippedGun->SetOwner(this);
-	EquippedGun->SetActorHiddenInGame(true);
 	EquippedGun->Initialize();
+	EquippedGun->SetActorHiddenInGame(true);
+	
 	Guns.Add(EquippedGun);
 }
 
