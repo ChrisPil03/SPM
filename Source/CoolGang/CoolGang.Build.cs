@@ -13,7 +13,8 @@ public class CoolGang : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", "UMG", "EnhancedInput", "Niagara", "AIModule",
 			"GameplayAbilities",
 			"GameplayTasks",
-			"GameplayTags"
+			"GameplayTags",
+			"NavigationSystem"
 		});
 
 		// Uncomment if you are using Slate UI

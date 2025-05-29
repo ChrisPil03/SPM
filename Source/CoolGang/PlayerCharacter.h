@@ -23,21 +23,43 @@ class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	APlayerCharacter();
 	
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	bool IsPlayerConsideredNearGround(float& OutGroundDistance) const;
+	
+	bool IsNodeInsideSolid(const USphereComponent* Node) const;
+	
+	bool GetNodeDistanceToGround(const USphereComponent* Node, float& OutDistanceToGround) const;
 
+	UPROPERTY(EditAnywhere, Category = "AI Targeting|Movement Nodes")
+	float PlayerNearGroundThreshold; // Max distance for player to be "near ground" (e.g., your jump height)
+
+	UPROPERTY(EditAnywhere, Category = "AI Targeting|Movement Nodes")
+	float NodeMaxAerialGroundDistance; // If player is near ground, a node is invalid if its distance to ground is > this
+
+	UPROPERTY(EditAnywhere, Category = "AI Targeting|Movement Nodes")
+	float GroundCheckTraceDistance; // How far down to trace for ground checks
+
+	UPROPERTY(EditAnywhere, Category = "AI Targeting|Movement Nodes")
+	TEnumAsByte<ECollisionChannel> GroundTraceChannel;
+
+	// Object types to consider "solid" for the IsNodeInsideSolid check
+	UPROPERTY(EditAnywhere, Category = "AI Targeting|Movement Nodes")
+	TArray<TEnumAsByte<EObjectTypeQuery>> SolidObjectTypes;
+
+	UPROPERTY(EditAnywhere, Category = "AI Targeting|Movement Nodes", meta = (DisplayName = "Draw Debug Traces"))
+	bool bDrawMovementNodeDebugTraces;
+	
 public:
 	UFUNCTION()
 	virtual TArray<USphereComponent*> GetMovementNodes() override;
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
+	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintPure)
@@ -128,7 +150,6 @@ private:
 
 	UPROPERTY()
 	AGunBase* EquippedGun;
-	
 
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	UStaticMeshComponent* GunComponent;

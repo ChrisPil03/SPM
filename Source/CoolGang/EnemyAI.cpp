@@ -1,15 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "EnemyAI.h"
-
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/Character.h"
 #include "EnemySpawnManagerSubsystem.h"
-
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
 #include "GameplayEffect.h"
 #include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
@@ -19,8 +14,6 @@
 #include "Attackable.h"
 #include "BrainComponent.h"
 #include "EnemyAIController.h"
-#include "Components/CapsuleComponent.h"
-#include "EnemyAIController.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "ObjectiveDefendGenerator.h"
@@ -28,7 +21,6 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/AudioComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
-
 
 // Sets default values
 AEnemyAI::AEnemyAI()
@@ -46,7 +38,7 @@ void AEnemyAI::BeginPlay()
 	
 	AIController = Cast<AEnemyAIController>(Controller);
 	AIController->RunBehaviorTree(BehaviorTree);
-	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	SetCurrentTarget(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
 
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
@@ -243,12 +235,17 @@ void AEnemyAI::DropUpgrade()
 		UE_LOG(LogTemp, Warning, TEXT("Drop"));
 		GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation);
 	}
-	
 }
 
 AActor* AEnemyAI::GetCurrentTarget() const
 {
 	return  Cast<AActor>(CurrentTarget.GetObject());
+}
+
+void AEnemyAI::SetCurrentTarget(AActor* Target)
+{
+	CurrentTarget = Target;
+	OnTargetChanged(Cast<AActor>(CurrentTarget.GetObject()));
 }
 
 void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
@@ -262,7 +259,7 @@ void AEnemyAI::AttackObjective(AObjectiveBase* Objective)
 	
 	if (!bChangedToTargetPlayer && AliveEnemies.Contains(this))
 	{
-		CurrentTarget = Objective;
+		SetCurrentTarget(Objective);
 		bChangedToTargetPlayer = true;
 	}
 }
@@ -278,7 +275,7 @@ void AEnemyAI::GiveScore()
 
 void AEnemyAI::AttackPlayer(AObjectiveBase* Objective)
 {
-	CurrentTarget = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	SetCurrentTarget(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void AEnemyAI::Tick(float DeltaTime)
