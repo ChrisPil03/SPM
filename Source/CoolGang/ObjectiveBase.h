@@ -59,10 +59,10 @@ protected:
 	UPROPERTY()
 	UObjectiveManagerSubsystem* ObjectiveManager;
 
-	UPROPERTY(EditAnywhere, Category = "Main Objective")
+	UPROPERTY(EditAnywhere, Category = "Damage")
 	float ShieldBaseDamage;
 
-	UPROPERTY(EditAnywhere, Category = "Main Objective")
+	UPROPERTY(EditAnywhere, Category = "Damage")
 	float ShieldChunkDamage;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -173,6 +173,12 @@ private:
 	void OnTriggerEnterRoom(APlayerLocationDetection* Room);
 	void OnTriggerExitRoom(APlayerLocationDetection* Room);
 
+	void StartDamageShield();
+	void StopDamageShield();
+	void BaseDamageGeneratorShield();
+	
+	FTimerHandle DamageShieldTimerHandle;
+
 	// FTimerHandle MalfunctionTimerHandle;
 	// FTimerDelegate MalfunctionTimerDelegate;
 	//
@@ -258,4 +264,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UMaterialInstance* IconMaterialInstance;
+
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	float ShieldDamageInterval;
 };
