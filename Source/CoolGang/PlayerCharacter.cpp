@@ -37,6 +37,9 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetComponents<USphereComponent>(EnemyTargetSpheres);
+
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
 		UPlayerAttributeSet::GetHealthAttribute()
 	).AddUObject(this, &APlayerCharacter::OnCurrentHealthChanged);
@@ -49,9 +52,7 @@ void APlayerCharacter::BeginPlay()
 	bDead = false;
 	
 	EquippedGun->SetActorHiddenInGame(false);
-
 	
-
 	UE_LOG(LogTemp, Display, TEXT("Begin play for character"));
 	if (OnPlayerConstructed.IsBound())
 	{

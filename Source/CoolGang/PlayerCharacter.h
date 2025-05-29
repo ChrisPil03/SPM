@@ -14,6 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerConstructed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
 
+
 class AGunBase;
 struct FOnAttributeChangeData;
 UCLASS(BlueprintType)
@@ -24,13 +25,14 @@ class COOLGANG_API APlayerCharacter : public ACharacter, public IAttackable
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
-
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	TArray<USphereComponent*> GetMovementNodes();
+	UFUNCTION()
+	virtual TArray<USphereComponent*> GetMovementNodes() override;
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -74,6 +76,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Events");
 	FOnPlayerTakeDamage OnPlayerTakeDamage;
 
+	UPROPERTY(BlueprintAssignable, Category="Events");
+	FOnPlayerConstructed OnPlayerConstructed;
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void SaveScore();
 	
@@ -89,7 +94,7 @@ private:
 	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess="true"), Category="Component")
 	class USpringArmComponent* SpringArmComponent;
 
-	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	TArray<USphereComponent*> EnemyTargetSpheres;
 	
 	UPROPERTY(EditAnywhere, Category=Interact)
@@ -139,8 +144,6 @@ private:
 	void InitPlayerStats();
 	
 	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data) const;
-
-	FOnPlayerConstructed OnPlayerConstructed;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;
