@@ -220,6 +220,16 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 		{
 			OnShieldChanged.Broadcast();
 		}
+	}else
+	{
+		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
+		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_DamageGeneratorHealth, 1.f, Context);
+
+		if (Spec.IsValid())
+		{
+			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), -Damage);  // negative Damage
+			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+		}
 	}
 }
 

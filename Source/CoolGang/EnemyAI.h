@@ -36,7 +36,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetAlive();
-	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -44,6 +44,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PerformPreDeathActions();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnTargetChanged(AActor* Target);
+	
 	void Die();
 	
 public:
@@ -85,7 +88,7 @@ public:
 
 	AActor* GetCurrentTarget() const;
 
-	void SetCurrentTarget(AActor* Target) {CurrentTarget = Target;}
+	void SetCurrentTarget(AActor* Target);
 
 	UBehaviorTree* GetBehaviorTree() const {return BehaviorTree;}
 
@@ -99,11 +102,17 @@ public:
 	bool IsAttacking() const {return bIsAttacking;}
 
 	UFUNCTION(BlueprintCallable)
+	bool IsTargetInRange() const {return bTargetInRange;}
+	
+	UFUNCTION(BlueprintCallable)
 	void SetAttackingState(bool IsAttacking) {bIsAttacking = IsAttacking;}
 
 	UFUNCTION(BlueprintCallable)
 	void SetJumpingState(bool IsJumping) {bIsJumping = IsJumping;}
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetTargetInRange(bool IsInRange);
+	
 private:
 	UFUNCTION()
 	void AttackObjective(AObjectiveBase* Objective);
@@ -130,6 +139,8 @@ private:
 	bool bIsJumping = false;
 	bool bIsAttacking = false;
 
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bTargetInRange = false;
 	bool bDeathVFXComplete = false;
 
 	UFUNCTION()
@@ -140,9 +151,9 @@ private:
 
 	void ReleaseToPool();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float AttackRange;
-
+	
 	UPROPERTY()
 	UEnemySpawnManagerSubsystem* EnemySpawnManager;
 	

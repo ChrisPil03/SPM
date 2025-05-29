@@ -113,6 +113,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<class UGameplayEffect> GE_ResetGeneratorHealth;
 
+	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
+	TSubclassOf<class UGameplayEffect> GE_DamageGeneratorHealth;
+
 	void OnCurrentHealthChanged(const FOnAttributeChangeData& Data);
 
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")

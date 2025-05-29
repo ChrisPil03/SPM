@@ -5,17 +5,18 @@
 #include "ObjectiveDefendGenerator.h"
 
 AObjectiveBase::AObjectiveBase() :
+	ObjectiveManager(nullptr),
+	ShieldBaseDamage(500.f),
+	ShieldChunkDamage(5000.f),
+	ScoreType(EScoreType::ObjectiveGeneratorCompleted),
 	bIsActive(false),
 	ObjectiveState(EObjectiveState::NotStarted),
-	ObjectiveManager(nullptr),
 	ObjectiveName("MISSING NAME"),
 	ObjectiveInitialDescription("MISSING DESCRIPTION ONE"),
 	ObjectiveStartedDescription("MISSING DESCRIPTION TWO"),
 	ObjectiveTime(30),
 	bIsTimeBased(false),
 	Progress(0.f),
-	ShieldBaseDamage(100.f),
-	ShieldChunkDamage(5000.f),
 	ActivatedMessage("MALFUNCTION DETECTED"),
 	StartedMessage("OBJECTIVE STARTED"),
 	CompletedMessage("OBJECTIVE COMPLETED"),
@@ -27,7 +28,10 @@ AObjectiveBase::AObjectiveBase() :
 	ObjectiveCompletedVoiceLine(nullptr),
 	ObjectiveFailedVoiceLine(nullptr),
 	VoiceLineSubsystem(nullptr),
-	RoomGate(nullptr)
+	RoomGate(nullptr),
+	bPlayerInRoom(false),
+	IconMaterialInstance(nullptr),
+	ShieldDamageInterval(5.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -55,6 +59,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		}
 		// DisplayMessageForSeconds(ActivatedMessage, 3.f);
 		EnqueueVoiceLine(ObjectiveActivatedVoiceLine, 2);
+		StartDamageShield();
 		
 		if (OnObjectiveActivated.IsBound())
 		{
@@ -75,6 +80,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		}
 	} else
 	{
+		StopDamageShield();
 		if (OnObjectiveDeactivated.IsBound())
 		{
 			UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
@@ -138,9 +144,8 @@ void AObjectiveBase::Tick(float DeltaTime)
 	if (bIsActive)
 	{
 		BroadcastObjectiveIsActive();
-		DamageGeneratorShield(DeltaTime * ShieldBaseDamage);
 	}
-	if (bIsTimeBased && GetIsInProgress())
+	if (GetIsInProgress())
 	{
 		BroadcastObjectiveInProgress();
 	}
@@ -151,6 +156,7 @@ void AObjectiveBase::StartObjective()
 	if (GetIsNotStarted())
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
+		StopDamageShield();
 		// StopMalfunctioning();
 		// DisplayMessageForSeconds(StartedMessage, 3.f);
 		EnqueueVoiceLine(ObjectiveStartedVoiceLine, 0);
@@ -177,6 +183,7 @@ void AObjectiveBase::ResetObjective()
 void AObjectiveBase::CompleteObjective()
 {
 	SetObjectiveState(EObjectiveState::Complete);
+	StopDamageShield();
 	//DisplayMessageForSeconds(CompletedMessage, 3.f);
 	EnqueueVoiceLine(ObjectiveCompletedVoiceLine, 1);
 	if (OnObjectiveCompleted.IsBound())
@@ -362,6 +369,26 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 			EnableWaypoint.Broadcast(this, true);
 		}
 	}
+}
+
+void AObjectiveBase::StartDamageShield()
+{
+	GetWorld()->GetTimerManager().SetTimer(
+		DamageShieldTimerHandle,
+		this,
+		&AObjectiveBase::BaseDamageGeneratorShield,
+		ShieldDamageInterval,
+		true);
+}
+
+void AObjectiveBase::StopDamageShield()
+{
+	GetWorld()->GetTimerManager().ClearTimer(DamageShieldTimerHandle);
+}
+
+void AObjectiveBase::BaseDamageGeneratorShield()
+{
+	DamageGeneratorShield(ShieldBaseDamage);
 }
 
 void AObjectiveBase::EnqueueVoiceLine(USoundBase* VoiceLine, const int32 Priority) const
