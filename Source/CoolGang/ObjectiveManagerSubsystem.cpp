@@ -28,7 +28,7 @@ void UObjectiveManagerSubsystem::DeactivateAllSubObjectives()
 {
 	for (AObjectiveBase* SubObjective : SubObjectivesInLevel)
 	{
-		if (SubObjective->GetIsActive())
+		if (SubObjective->GetIsActive() && SubObjective->GetIsNotStarted())
 		{
 			SubObjective->ResetObjective();
 			SubObjective->SetIsActive(false);
