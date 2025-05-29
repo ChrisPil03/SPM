@@ -31,7 +31,7 @@ void UBTService_TargetInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 		return;
 	}
 
-	if (Enemy->GetSquaredDistanceTo(Target) <= Enemy->GetAttackRange())
+	if (Enemy->GetSquaredDistanceTo(Target) <= FMath::Pow(Enemy->GetAttackRange(), 2) )
 	{
 		Enemy->SetTargetInRange(true);
 	}

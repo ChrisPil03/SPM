@@ -102,6 +102,9 @@ public:
 	bool IsAttacking() const {return bIsAttacking;}
 
 	UFUNCTION(BlueprintCallable)
+	bool IsTargetInRange() const {return bTargetInRange;}
+	
+	UFUNCTION(BlueprintCallable)
 	void SetAttackingState(bool IsAttacking) {bIsAttacking = IsAttacking;}
 
 	UFUNCTION(BlueprintCallable)
