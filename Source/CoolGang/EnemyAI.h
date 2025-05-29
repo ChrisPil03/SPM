@@ -68,10 +68,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Stats")
 	const class UEnemyAttributeSet* EnemyAttributeSet;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent* AbilitySystemComponent;
 
-	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
 	class UAudioComponent* AudioComponent;
 
 	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
