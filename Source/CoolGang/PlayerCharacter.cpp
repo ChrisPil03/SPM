@@ -1,25 +1,35 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerCharacter.h"
-
 #include "DashComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "InteractInterface.h"
 #include "GunBase.h"
 #include "AbilitySystemComponent.h"
+#include "CharacterMovementComponentAsync.h"
 #include "DiveGameMode.h"
 #include "PlayerAttributeSet.h"
 #include "ScoreManagerComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	PlayerNearGroundThreshold = 150.0f;
+	NodeMaxAerialGroundDistance = 200.0f;
+	GroundCheckTraceDistance = 5000.0f;
+	GroundTraceChannel = ECC_Visibility;
+	bDrawMovementNodeDebugTraces = false;
+	
+	SolidObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
+	SolidObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
+	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
 	CameraComponent->bUsePawnControlRotation = true;
@@ -61,18 +71,135 @@ void APlayerCharacter::BeginPlay()
 	
 }
 
-TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
+bool APlayerCharacter::IsPlayerConsideredNearGround(float& OutGroundDistance) const
 {
-	return EnemyTargetSpheres;
+	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	if (!MoveComp)
+	{
+		OutGroundDistance = PlayerNearGroundThreshold + 1.f;
+		return false;
+	}
+
+	if (MoveComp->IsMovingOnGround())
+	{
+		const FFindFloorResult& FloorResult = MoveComp->CurrentFloor;
+		if (FloorResult.IsWalkableFloor())
+		{
+			OutGroundDistance = FloorResult.GetDistanceToFloor();
+			return true;
+		}
+	}
+
+	OutGroundDistance = PlayerNearGroundThreshold + 1.f;
+	return false;
 }
 
-// Called every frame
+bool APlayerCharacter::IsNodeInsideSolid(const USphereComponent* Node) const
+{
+    if (!Node) return true;
+
+    UWorld* World = GetWorld();
+    if (!World) return true;
+
+    TArray<AActor*> OverlappingActors;
+    TArray<AActor*> ActorsToIgnore;
+	
+    bool bOverlapped = UKismetSystemLibrary::SphereOverlapActors(
+        World,
+        Node->GetComponentLocation(),
+        Node->GetScaledSphereRadius(),
+        SolidObjectTypes,
+        nullptr,
+        ActorsToIgnore,
+        OverlappingActors
+    );
+
+    if (bDrawMovementNodeDebugTraces && bOverlapped && OverlappingActors.Num() > 0)
+    {
+        DrawDebugSphere(World, Node->GetComponentLocation(), Node->GetScaledSphereRadius() + 5.f, 12, FColor::Red, false, 1.0f, 0, 2.f);
+    }
+    else if (bDrawMovementNodeDebugTraces && !bOverlapped)
+    {
+         DrawDebugSphere(World, Node->GetComponentLocation(), Node->GetScaledSphereRadius() + 5.f, 12, FColor::Green, false, 1.0f, 0, 1.f);
+    }
+
+
+    return bOverlapped && OverlappingActors.Num() > 0;
+}
+
+bool APlayerCharacter::GetNodeDistanceToGround(const USphereComponent* Node, float& OutDistanceToGround) const
+{
+    if (!Node) return false;
+
+    UWorld* World = GetWorld();
+    if (!World) return false;
+
+    FVector Start = Node->GetComponentLocation();
+    FVector End = Start - FVector(0.f, 0.f, GroundCheckTraceDistance);
+
+    FHitResult HitResult;
+    FCollisionQueryParams Params;
+    Params.AddIgnoredActor(this);
+    if (Node->GetOwner())
+    {
+        Params.AddIgnoredActor(Node->GetOwner());
+    }
+
+
+    bool bHit = World->LineTraceSingleByChannel(HitResult, Start, End, GroundTraceChannel, Params);
+
+    if (bDrawMovementNodeDebugTraces)
+    {
+        DrawDebugLine(World, Start, bHit ? HitResult.ImpactPoint : End, bHit ? FColor::Blue : FColor::Orange, false, 1.0f, 0, 1.f);
+    }
+
+    if (bHit)
+    {
+        OutDistanceToGround = HitResult.Distance;
+        return true;
+    }
+
+    OutDistanceToGround = GroundCheckTraceDistance + 1.f;
+    return false;
+}
+
+TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
+{
+    TArray<TObjectPtr<USphereComponent>> ValidMovementNodes;
+    ValidMovementNodes.Reserve(EnemyTargetSpheres.Num());
+
+    float PlayerGroundDist;
+    bool bPlayerIsNearGround = IsPlayerConsideredNearGround(PlayerGroundDist);
+
+    for (TObjectPtr<USphereComponent> Node : EnemyTargetSpheres)
+    {
+        if (!Node) continue;
+    	
+        if (IsNodeInsideSolid(Node))
+        {
+            continue;
+        }
+    	
+        float NodeToGroundDist;
+        bool bNodeHasGround = GetNodeDistanceToGround(Node, NodeToGroundDist);
+
+        if (bPlayerIsNearGround)
+        {
+            if (!bNodeHasGround || NodeToGroundDist > NodeMaxAerialGroundDistance)
+            {
+                continue;
+            }
+        }
+        ValidMovementNodes.Add(Node);
+    }
+	return ValidMovementNodes;
+}
+
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-// Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
