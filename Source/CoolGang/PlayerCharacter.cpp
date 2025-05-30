@@ -288,6 +288,7 @@ void APlayerCharacter::Die()
 	if (!IsDead())
 	{
 		bDead = true;
+		OnPlayerDeathDelegate.Broadcast();
 		ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
 		if (GameMode != nullptr)
 		{
@@ -342,9 +343,12 @@ void APlayerCharacter::InitPlayerStats()
 // ----------------- Interact ----------------- //
 // -------------------------------------------- //
 
-void APlayerCharacter::SetAvailableInteractable(IInteractInterface* Interactable)
+void APlayerCharacter::AddAvailableInteractable(IInteractInterface* Interactable)
 {
-	AvailableInteractable = Interactable;
+	if (!AvailableInteractions.Contains(Interactable))
+	{
+		AvailableInteractions.Add(Interactable);	
+	}
 	
 	if (InteractWidget)
 	{
@@ -352,13 +356,13 @@ void APlayerCharacter::SetAvailableInteractable(IInteractInterface* Interactable
 	}
 }
 
-void APlayerCharacter::ClearAvailableInteractable(const IInteractInterface* Interactable)
+void APlayerCharacter::ClearAvailableInteractable(IInteractInterface* Interactable)
 {
-	if (AvailableInteractable == Interactable)
+	if (AvailableInteractions.Contains(Interactable))
 	{
-		AvailableInteractable = nullptr;
+		AvailableInteractions.Remove(Interactable);
 
-		if (InteractWidget)
+		if (AvailableInteractions.IsEmpty() && InteractWidget)
 		{
 			InteractWidget->SetVisibility(ESlateVisibility::Hidden);
 		}
@@ -367,8 +371,11 @@ void APlayerCharacter::ClearAvailableInteractable(const IInteractInterface* Inte
 
 void APlayerCharacter::Interact()
 {
-	if (AvailableInteractable)
+	if (!AvailableInteractions.IsEmpty())
 	{
-		AvailableInteractable->Interact(this);
+		if (IInteractInterface* Interactable = AvailableInteractions.Last())
+		{
+			Interactable->Interact(this);
+		}	
 	}
 }
