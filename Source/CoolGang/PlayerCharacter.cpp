@@ -288,6 +288,7 @@ void APlayerCharacter::Die()
 	if (!IsDead())
 	{
 		bDead = true;
+		OnPlayerDeathDelegate.Broadcast();
 		ADiveGameMode *GameMode = GetWorld()->GetAuthGameMode<ADiveGameMode>();
 		if (GameMode != nullptr)
 		{
