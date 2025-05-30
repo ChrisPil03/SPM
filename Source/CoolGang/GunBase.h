@@ -134,12 +134,14 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly )
 	UMaterialInstance* PickupMat;
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintNativeEvent,BlueprintCallable )
 	void StartFire();
-	
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	virtual void StartFire_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void StopFire();
-	
+	virtual void StopFire_Implementation();
+
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void Fire();
 

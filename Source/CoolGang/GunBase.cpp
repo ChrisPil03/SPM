@@ -171,3 +171,14 @@ void AGunBase::GiveAbilities()
 	}
 	
 }
+
+void AGunBase::StopFire_Implementation()
+{
+	
+}
+
+
+void AGunBase::StartFire_Implementation()
+{
+	
+}
