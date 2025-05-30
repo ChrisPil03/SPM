@@ -13,7 +13,7 @@ class UScoreManagerComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerConstructed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
 class AGunBase;
 struct FOnAttributeChangeData;
@@ -168,6 +168,8 @@ private:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnPlayerDeath OnPlayerDeathDelegate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite ,meta = (AllowPrivateAccess = "true"), Category = "Component")
 	UScoreManagerComponent* ScoreManagerComponent;
