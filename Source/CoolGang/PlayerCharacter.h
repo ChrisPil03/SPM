@@ -106,8 +106,8 @@ public:
 	
 	void Die();
 
-	void SetAvailableInteractable(IInteractInterface* Interactable);
-	void ClearAvailableInteractable(const IInteractInterface* Interactable);
+	void AddAvailableInteractable(IInteractInterface* Interactable);
+	void ClearAvailableInteractable(IInteractInterface* Interactable);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess="true"), Category="Component")
@@ -172,7 +172,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite ,meta = (AllowPrivateAccess = "true"), Category = "Component")
 	UScoreManagerComponent* ScoreManagerComponent;
 	
-	IInteractInterface* AvailableInteractable;
+	// IInteractInterface* AvailableInteractable;
+	TArray<IInteractInterface*> AvailableInteractions;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UUserWidget* InteractWidget;

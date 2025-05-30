@@ -95,23 +95,30 @@ public:
 		}
 	}
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetServerLightColor(const bool bMalfunctioning);
+
 private:
-	void SetDebugMaterial() const;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	UMaterialInstanceDynamic* RestoringMaterial;
-	void ResetMaterial();
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	UMaterialInterface* StandardMaterial;
-	
 	void IncreaseRestorationProgress(float DeltaTime);
 	void IncreaseFailProgress(float DeltaTime);
 	void BroadcastServerFailed();
 	void BroadcastServerPaused();
 	void BroadcastServerResumed();
+	void SetPausedMaterials();
+	void ResetMaterial();
 	// void GenerateHeat(float DeltaTime);
 	
 	UFUNCTION()
 	void CompleteRestoration();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UMaterialInstanceDynamic* CablePausedMaterial;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UMaterialInstanceDynamic* ServerMaterial;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UMaterialInterface* StandardMaterial;
 	
 	UPROPERTY(EditAnywhere, Category = "Server")
 	int32 RestoreTime;
