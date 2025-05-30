@@ -3,10 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "NavNode.h"
-#include <atomic> // For std::atomic
-#include "NavigationVolume3D.generated.h" // MUST BE LAST INCLUDE
-
-// Standard library includes
+#include <atomic>
+#include "NavigationVolume3D.generated.h"
 
 
 class UProceduralMeshComponent;
@@ -45,7 +43,6 @@ struct FDebugSphereData {
     int32 Segments;
 };
 
-// Delegate for async pathfinding completion
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnPathfindingComplete, ENavigationVolumeResult, Result, const TArray<FVector>&, Path);
 
 UCLASS()
@@ -56,8 +53,6 @@ class NAVIGATION3D_API ANavigationVolume3D : public AActor
 public:
     ANavigationVolume3D();
 
-// Existing UPROPERTY declarations (Divisions, Size, Material, etc.)
-// ... (Ensure all your existing UPROPERTIES are here) ...
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Display", meta=(AllowPrivateAccess="true"))
     bool bDrawGridLinesInEditor = true;
@@ -128,8 +123,7 @@ public:
     ) const;
     
     virtual void OnConstruction(const FTransform& Transform) override;
-
-    // New async pathfinding function
+    
     UFUNCTION(BlueprintCallable, Category = "NavigationVolume3D", meta = (DisplayName = "Find Path Async"))
     void FindPathAsync(
         const AActor* RequestingActor,
@@ -155,10 +149,8 @@ private:
     TArray<NavNode> Nodes;
     bool bNodesInitializedAndFinalized = false;
     
-    // Atomic counter for unique search IDs
     std::atomic<uint32_t> AtomicPathfindingSearchIDCounter{0};
-
-    // Internal struct to bundle results from the async task
+    
     struct FPathfindingInternalResultBundle
     {
         ENavigationVolumeResult ResultCode = ENavigationVolumeResult::ENVR_UnknownError;
@@ -167,25 +159,22 @@ private:
         TArray<FDebugLineData> DebugLinesToDraw_TaskLocal;
         bool bShouldDrawThisPathAndExploration_TaskLocal = false;
         bool bIsLongPath_TaskLocal = false;
-        FString ActorNameForLog; // For logging if actor becomes invalid
+        FString ActorNameForLog;
 
         FPathfindingInternalResultBundle(const FString& InActorName = TEXT("UnknownActor")) : ActorNameForLog(InActorName) {}
     };
 
-    // The core pathfinding logic, designed to be run off-thread
     FPathfindingInternalResultBundle ExecutePathfindingOnThread(
-        TWeakObjectPtr<ANavigationVolume3D> WeakThis, // Pass weak ptr to self
+        TWeakObjectPtr<ANavigationVolume3D> WeakThis,
         TWeakObjectPtr<const AActor> WeakRequestingActor,
         const FVector& StartLocation,
         const FVector& DestinationLocation,
-        uint32_t PathSearchID // The unique ID for this specific search
+        uint32_t PathSearchID
     );
     
-    // Modified debug helpers to populate local arrays for the task
     void AddDebugSphere_TaskLocal(TArray<FDebugSphereData>& DebugSpheresArray, const FVector& Center, float Radius, const FColor& InSphereColor, int32 Segments = 12) const;
     void AddDebugLine_TaskLocal(TArray<FDebugLineData>& DebugLinesArray, const FVector& Start, const FVector& End, const FColor& InLineColor, float Thickness = 1.f) const;
     
-    // Actual drawing function, called on game thread
     void FlushCollectedDebugDraws(UWorld* World, float Lifetime, const TArray<FDebugSphereData>& Spheres, const TArray<FDebugLineData>& Lines, bool bIsLongPathContext = false) const;
 
     NavNode* GetNode(FIntVector Coordinates); 
