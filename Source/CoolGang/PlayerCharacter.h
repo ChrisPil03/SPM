@@ -13,7 +13,7 @@ class UScoreManagerComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerConstructed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
 
 class AGunBase;
 struct FOnAttributeChangeData;
@@ -106,8 +106,8 @@ public:
 	
 	void Die();
 
-	void SetAvailableInteractable(IInteractInterface* Interactable);
-	void ClearAvailableInteractable(const IInteractInterface* Interactable);
+	void AddAvailableInteractable(IInteractInterface* Interactable);
+	void ClearAvailableInteractable(IInteractInterface* Interactable);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess="true"), Category="Component")
@@ -168,11 +168,14 @@ private:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnCurrentHealthChangedDelegate OnCurrentHealthChangedDelegate;
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnPlayerDeath OnPlayerDeathDelegate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite ,meta = (AllowPrivateAccess = "true"), Category = "Component")
 	UScoreManagerComponent* ScoreManagerComponent;
 	
-	IInteractInterface* AvailableInteractable;
+	// IInteractInterface* AvailableInteractable;
+	TArray<IInteractInterface*> AvailableInteractions;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	UUserWidget* InteractWidget;
