@@ -58,12 +58,12 @@ void AGunBase::BeginPlay()
 
 void AGunBase::CancelReload()
 {
-		// Cancel reload GA
-		FGameplayTagContainer CancelTags;
-		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("Status.Reload"));
-		AbilitySystemComponent->CancelAbilities(&CancelTags);
-		OnReloadCancelDelegate.Broadcast();
-		// Optional: remove reload cue
+	
+	FGameplayTagContainer CancelTags;
+	CancelTags.AddTag(FGameplayTag::RequestGameplayTag("Status.Reload"));
+	AbilitySystemComponent->CancelAbilities(&CancelTags);
+	OnReloadCancelDelegate.Broadcast();
+	
 	UAudioComponent* AudioComponent = FindComponentByClass<UAudioComponent>();
 	if (AudioComponent)
 	{
@@ -169,5 +169,16 @@ void AGunBase::GiveAbilities()
 		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(UltimateAbilityClass, 1, 0, this));
 		
 	}
+	
+}
+
+void AGunBase::StopFire_Implementation()
+{
+	
+}
+
+
+void AGunBase::StartFire_Implementation()
+{
 	
 }

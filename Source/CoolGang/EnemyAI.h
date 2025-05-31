@@ -23,6 +23,7 @@ enum class EEnemyType : uint8
 	Wasp UMETA(DisplayName = "Wasp"),
 	Gloorb UMETA(DisplayName = "Gloorb")
 };
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackDelegate);
 
 UCLASS()
 class COOLGANG_API AEnemyAI : public ACharacter
@@ -51,7 +52,9 @@ protected:
 	
 public:
 	void Attack();
-
+	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
+	FOnAttackDelegate OnAttackDelegate;
+	
 	void StartDeathSequence();
 	
 	UFUNCTION(BlueprintCallable)

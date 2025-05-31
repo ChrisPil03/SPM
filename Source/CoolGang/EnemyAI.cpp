@@ -128,7 +128,7 @@ void AEnemyAI::Attack()
 	{
 		return;
 	}
-
+	OnAttackDelegate.Broadcast();
 	if (EnemyAttributeSet != nullptr)
 	{
 		AttackDamage = EnemyAttributeSet->Damage.GetBaseValue();
@@ -138,6 +138,8 @@ void AEnemyAI::Attack()
 	// {
 	// 	//Reduce damage here ???
 	// }
+
+	
 }
 
 bool AEnemyAI::IsPlayerShieldActive(AActor* PlayerActor)
