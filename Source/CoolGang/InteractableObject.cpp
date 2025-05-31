@@ -43,7 +43,11 @@ void AInteractableObject::Interact(AActor* Interactor)
 		PerformDelegate.Broadcast(this);
 		SetCanInteractWith(false);
 
-		
+		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
+		UGameplayStatics::GetPlayerCharacter(this, 0)))
+		{
+			Player->ClearAvailableInteractable(this);
+		}
 	}
 }
 
@@ -86,7 +90,7 @@ void AInteractableObject::InteractionAvailable(APlayerLocationDetection* Trigger
 		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
 			UGameplayStatics::GetPlayerCharacter(this, 0)))
 		{
-			Player->SetAvailableInteractable(this);
+			Player->AddAvailableInteractable(this);
 		}
 	}
 }

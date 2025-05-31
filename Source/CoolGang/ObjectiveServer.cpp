@@ -70,7 +70,7 @@ void AObjectiveServer::SetServerState(const EServerState NewState)
 
 	if (GetNeedsRestoring())
 	{
-		SetDebugMaterial();
+		SetPausedMaterials();
 	}
 }
 
@@ -174,7 +174,7 @@ void AObjectiveServer::PauseRestoration()
 		SetServerState(EServerState::Paused);
 		ProgressTimer->SetIsPaused(true);
 		SetCanInteractWith(true);
-		SetDebugMaterial();
+		SetPausedMaterials();
 		BroadcastServerPaused();
 		// UE_LOG(LogTemp, Warning, TEXT("Pause Restoration"));
 	}
@@ -221,11 +221,12 @@ void AObjectiveServer::SetSmokeEffectActive(const bool bNewState) const
 	}
 }
 
-void AObjectiveServer::SetDebugMaterial() const 
+void AObjectiveServer::SetPausedMaterials()
 {
-	if (RestoringMaterial)
+	if (CablePausedMaterial)
 	{
-		GetMesh()->SetMaterial(1, RestoringMaterial);
+		GetMesh()->SetMaterial(1, CablePausedMaterial);
+		SetServerLightColor(false);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Red meterial not set"));
@@ -237,6 +238,7 @@ void AObjectiveServer::ResetMaterial()
 	if (StandardMaterial)
 	{
 		GetMesh()->SetMaterial(1, StandardMaterial);
+		SetServerLightColor(true);
 	} else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Standard meterial not set"));
