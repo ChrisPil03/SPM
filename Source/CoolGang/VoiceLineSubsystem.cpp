@@ -51,7 +51,7 @@ void UVoiceLineSubsystem::OnWorldInitialized(const UWorld::FActorsInitializedPar
 	
 	if (UWorld* World = GetWorld())
 	{
-		AudioComponent = NewObject<UAudioComponent>(World);
+		AudioComponent = NewObject<UAudioComponent>(this);
 		AudioComponent->RegisterComponentWithWorld(World);
 	}
 }

@@ -73,13 +73,14 @@ void AObjectiveDefendGenerator::StartObjective()
 void AObjectiveDefendGenerator::CompleteObjective()
 {
 	OnRequestAddScore.Broadcast(ScoreType);
-	Super::CompleteObjective();
 
 	CurrentShield = MaxShield;
 	if (OnShieldChanged.IsBound())
 	{
 		OnShieldChanged.Broadcast();
 	}
+
+	Super::CompleteObjective();
 }
 
 void AObjectiveDefendGenerator::Tick(float DeltaSeconds)
