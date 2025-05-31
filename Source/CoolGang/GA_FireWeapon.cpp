@@ -215,12 +215,13 @@ bool UGA_FireWeapon::LaserBulletTrace(TArray<FHitResult>& HitResults, const FVec
 	
 	bool bHit = GetWorld()->SweepMultiByChannel(LaserHitResults,
 	StartPoint, EndPoint, FQuat::Identity, PIERCING_TRACE, FCollisionShape::MakeSphere(50), QueryParams);
+	FVector BlockedPoint = LaserHitResults.Last().Location;
 	DrawDebugCapsule(
 	GetWorld(),
-	(StartPoint + EndPoint) * 0.5f,         // Capsule center = midpoint
-	(EndPoint - StartPoint).Size() * 0.5f,  // Half-height = half length
+	(StartPoint + BlockedPoint) * 0.5f,         // Capsule center = midpoint
+	(BlockedPoint - StartPoint).Size() * 0.5f,  // Half-height = half length
 	50.f,                                   // Radius (matches FCollisionShape)
-	FRotationMatrix::MakeFromZ(EndPoint - StartPoint).ToQuat(),  // Rotation to align with trace
+	FRotationMatrix::MakeFromZ(BlockedPoint - StartPoint).ToQuat(),  // Rotation to align with trace
 	FColor::Red,
 	false,
 	2.0f
