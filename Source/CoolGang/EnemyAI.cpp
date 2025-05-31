@@ -138,6 +138,7 @@ void AEnemyAI::Attack()
 	// {
 	// 	//Reduce damage here ???
 	// }
+	AbilitySystemComponent->TryActivateAbilityByClass(AttackAbilityClass);
 }
 
 bool AEnemyAI::IsPlayerShieldActive(AActor* PlayerActor)
