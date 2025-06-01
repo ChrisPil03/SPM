@@ -2,18 +2,18 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Services/BTService_BlackboardBase.h"
-#include "BTService_TargetLocation.generated.h"
+#include "BTService_TargetLocationGround.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class COOLGANG_API UBTService_TargetLocation : public UBTService_BlackboardBase
+class COOLGANG_API UBTService_TargetLocationGround : public UBTService_BlackboardBase
 {
 	GENERATED_BODY()
 
 public:
-	UBTService_TargetLocation();
+	UBTService_TargetLocationGround();
 protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 	

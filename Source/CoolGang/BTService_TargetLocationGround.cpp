@@ -1,4 +1,4 @@
-#include "BTService_TargetLocation.h"
+#include "BTService_TargetLocationGround.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Pawn.h"
@@ -12,9 +12,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NavFilters/NavigationQueryFilter.h"
 
-UBTService_TargetLocation::UBTService_TargetLocation()
+UBTService_TargetLocationGround::UBTService_TargetLocationGround()
 {
-    NodeName = "Update Target Location On Ground (Airborne Uses Movement Node Trace)"; // Clarified Name
+    NodeName = "Update Target Location On Ground";
 
     bPreferNavMeshProjectionForAirborneTarget = true; // This flag now controls whether to use movement node trace for airborne
     NavMeshProjectionVerticalThreshold = 500.0f;
@@ -29,7 +29,7 @@ UBTService_TargetLocation::UBTService_TargetLocation()
     DebugTraceDuration = 2.0f;
 }
 
-void UBTService_TargetLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
