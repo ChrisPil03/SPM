@@ -26,6 +26,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadTimeChangedDelegate, float,
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUltimateReadyDelegate);
 
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReloadCancelDelegate);
 
 class UGameplayAbility;
@@ -47,7 +48,7 @@ public:
 	virtual void BeginPlay() override;
 	
 	// maybe need to change later
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 	
 	UPROPERTY(EditAnywhere)
