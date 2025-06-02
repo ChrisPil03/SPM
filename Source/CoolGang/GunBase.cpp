@@ -77,6 +77,16 @@ void AGunBase::OnUltimateReady()
 	bIsUltimateReady = true;
 }
 
+void AGunBase::OnUltimateStart()
+{
+	OnUltimateStartDelegate.Broadcast();
+}
+
+void AGunBase::OnUltimateEnd()
+{
+	OnUltimateEndDelegate.Broadcast();
+}
+
 void AGunBase::Initialize()
 {
 	GiveAbilities();
