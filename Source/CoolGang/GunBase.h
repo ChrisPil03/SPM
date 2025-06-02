@@ -26,6 +26,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadTimeChangedDelegate, float,
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUltimateReadyDelegate);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUltimateStartDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUltimateEndDelegate);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReloadCancelDelegate);
 
 class UGameplayAbility;
@@ -47,7 +50,7 @@ public:
 	virtual void BeginPlay() override;
 	
 	// maybe need to change later
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 	
 	UPROPERTY(EditAnywhere)
@@ -65,13 +68,16 @@ public:
 	
 	
 	///   Effect   ///
-	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Gun | Effect" )
 	UNiagaraSystem* ImpactEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Effect" )
+	UNiagaraSystem* UltimateImpactEffect;
 	
-	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Effect" )
 	 UNiagaraSystem* MuzzleFlashEffect;
 
-	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Effect" )
 	UNiagaraSystem* UltimateMuzzleFlashEffect;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Gameplay)
@@ -164,6 +170,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnUltimateReady();
 
+	UFUNCTION(BlueprintCallable)
+	void OnUltimateStart();
+
+	UFUNCTION(BlueprintCallable)
+	void OnUltimateEnd();
+	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite )
 	bool bIsUltimateReady;
 	
@@ -220,9 +232,15 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category = "Weapon Stats")
 	FOnReloadTimeChangedDelegate OnReloadTimeChangedDelegate;
 
-	UPROPERTY(BlueprintAssignable, Category = "Weapon")
+	UPROPERTY(BlueprintAssignable, Category = "WeaponUltimate")
 	FOnUltimateReadyDelegate OnUltimateReadyDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category = "WeaponUltimate")
+	FOnUltimateStartDelegate OnUltimateStartDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "WeaponUltimate")
+	FOnUltimateEndDelegate OnUltimateEndDelegate;
+	
 	UPROPERTY(BlueprintAssignable, Category = "Weapon")
 	FOnReloadCancelDelegate OnReloadCancelDelegate;
 };
