@@ -165,34 +165,60 @@ bool APlayerCharacter::GetNodeDistanceToGround(const USphereComponent* Node, flo
 
 TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
 {
-    TArray<TObjectPtr<USphereComponent>> ValidMovementNodes;
-    ValidMovementNodes.Reserve(EnemyTargetSpheres.Num());
+    TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_PC_GetMovementNodes_Total"));
+
+    TArray<TObjectPtr<USphereComponent>> TempValidMovementNodes;
+    TempValidMovementNodes.Reserve(EnemyTargetSpheres.Num());
 
     float PlayerGroundDist;
-    bool bPlayerIsNearGround = IsPlayerConsideredNearGround(PlayerGroundDist);
-
-    for (TObjectPtr<USphereComponent> Node : EnemyTargetSpheres)
+    bool bPlayerIsNearGround;
     {
-        if (!Node) continue;
-    	
-        if (IsNodeInsideSolid(Node))
-        {
-            continue;
-        }
-    	
-        float NodeToGroundDist;
-        bool bNodeHasGround = GetNodeDistanceToGround(Node, NodeToGroundDist);
+        TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_PC_GetMovementNodes_IsPlayerNearGround"));
+        bPlayerIsNearGround = IsPlayerConsideredNearGround(PlayerGroundDist);
+    }
 
-        if (bPlayerIsNearGround)
+    {
+        TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_PC_GetMovementNodes_Loop"));
+        for (TObjectPtr<USphereComponent> Node : EnemyTargetSpheres)
         {
-            if (!bNodeHasGround || NodeToGroundDist > NodeMaxAerialGroundDistance)
+            if (!Node) continue;
+        
+            bool bIsInsideSolid;
+            {
+                TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_PC_GetMovementNodes_IsNodeInsideSolid"));
+                bIsInsideSolid = IsNodeInsideSolid(Node.Get());
+            }
+            if (bIsInsideSolid)
             {
                 continue;
             }
+        
+            float NodeToGroundDist;
+            bool bNodeHasGround;
+            {
+                TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_PC_GetMovementNodes_GetNodeDistToGround"));
+                bNodeHasGround = GetNodeDistanceToGround(Node.Get(), NodeToGroundDist);
+            }
+
+            if (bPlayerIsNearGround)
+            {
+                if (!bNodeHasGround || NodeToGroundDist > NodeMaxAerialGroundDistance)
+                {
+                    continue;
+                }
+            }
+            TempValidMovementNodes.Add(Node);
         }
-        ValidMovementNodes.Add(Node);
     }
-	return ValidMovementNodes;
+
+    TArray<USphereComponent*> ResultArray;
+    ResultArray.Reserve(TempValidMovementNodes.Num());
+    for (const TObjectPtr<USphereComponent>& NodePtr : TempValidMovementNodes)
+    {
+        ResultArray.Add(NodePtr.Get());
+    }
+    
+	return ResultArray;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
