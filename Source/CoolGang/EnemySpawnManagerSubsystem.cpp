@@ -9,7 +9,10 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "EnemySpawnConfigurationDataAsset.h"
+#include "ObjectiveDefendGenerator.h"
+#include "ObjectiveManagerSubsystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
+
 
 DEFINE_LOG_CATEGORY_STATIC(LogEnemySpawnSub, Log, All);
 
@@ -38,6 +41,7 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
     {
         UE_LOG(LogTemp, Warning, TEXT("SpawnConfigurationDataAssetPath is not set in EnemySpawnManagerSettings or settings are invalid."));
     }
+    MainObjectiveActive = false;
     UpdatedSpawnInterval = BaselineSpawnInterval;
     SpawnInterval = BaselineSpawnInterval;
     SpawnIntervalIncreaseCount = 0;
@@ -49,9 +53,83 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
     SpawnersByLocation.Empty();
     CurrentEnemySpawners.Empty();
 
+    FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::FetchEnemySpawnerCount);
     FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::BindPlayerLocationDetection);
     
     UE_LOG(LogEnemySpawnSub, Log, TEXT("EnemySpawnSubsystem Initialized."));
+}
+
+
+void UEnemySpawnManagerSubsystem::ChangeEnemySpawnersToMainObjective(AObjectiveBase* MainObjective)
+{
+    UE_LOG(LogTemp, Warning, TEXT("ChangeEnemySpawnersToMainObjective"));
+
+    MainObjectiveActive = true;
+    
+    CurrentEnemySpawners = MainObjectiveEnemySpawners;
+    CurrentSpawnersByType = MainObjectiveSpawnersByType;
+}
+
+void UEnemySpawnManagerSubsystem::ChangeEnemySpawnersToPlayer(AObjectiveBase* MainObjective)
+{
+    UE_LOG(LogTemp, Warning, TEXT("ChangeEnemySpawnersToPlayer"));
+
+    MainObjectiveActive = false;
+    
+    CurrentEnemySpawners = PlayerEnemySpawners;
+    CurrentSpawnersByType = PlayerSpawnersByType;
+}
+
+void UEnemySpawnManagerSubsystem::FetchEnemySpawnerCount(const UWorld::FActorsInitializedParams& Params)
+{
+    if (UWorld* World = GetWorld())
+    {
+        TArray<AActor*> FoundActors;
+        UGameplayStatics::GetAllActorsOfClass(World, AEnemySpawner::StaticClass(), FoundActors);
+
+        UE_LOG(LogTemp, Log, TEXT("Found %d total actors of AEnemySpawner class."), FoundActors.Num());
+
+        for (AActor* Actor : FoundActors)
+        {
+            AEnemySpawner* Spawner = Cast<AEnemySpawner>(Actor);
+            if (Spawner)
+            {
+                UE_LOG(LogTemp, Log, TEXT("Processing Enemy Spawner: %s"), *Spawner->GetName());
+                if (Spawner->GetConnectedPlayerLocationDetection()) { TotalSpawnersCount++; }
+            }
+        }
+    }
+}
+
+void UEnemySpawnManagerSubsystem::RegisterMainObjectiveEnemySpawners()
+{
+    UObjectiveManagerSubsystem* ObjectiveManager = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>();
+    if (!ObjectiveManager) return;
+
+    AObjectiveDefendGenerator* MainObjective = ObjectiveManager->GetMainObjective();
+    if (!MainObjective) return;
+
+    APlayerLocationDetection* ObjectivePlayerDetection = MainObjective->GetObjectivePlayerDetection();
+    if (!ObjectivePlayerDetection) return;
+
+    TArray<AEnemySpawner*>* MainObjectiveSpawnerPtr = SpawnersByLocation.Find(ObjectivePlayerDetection);
+    if (!MainObjectiveSpawnerPtr) return;
+    
+    MainObjectiveEnemySpawners = *MainObjectiveSpawnerPtr;
+
+
+    for (AEnemySpawner* Spawner : MainObjectiveEnemySpawners)
+    {
+        if (IsValid(Spawner))
+        {
+            for (TSubclassOf<AEnemyAI> EnemyClass : Spawner->GetSpawnableEnemies())
+            {
+                MainObjectiveSpawnersByType.FindOrAdd(EnemyClass).AddUnique(Spawner);
+            }
+        }
+    }
+    MainObjective->AddOnObjectiveActivatedFunction(this, &UEnemySpawnManagerSubsystem::ChangeEnemySpawnersToMainObjective);
+    MainObjective->AddOnObjectiveDeactivatedFunction(this, &UEnemySpawnManagerSubsystem::ChangeEnemySpawnersToPlayer);
 }
 
 TSubclassOf<AEnemyAI> UEnemySpawnManagerSubsystem::GetRandomAvailableEnemyTypeToSpawn() const
@@ -187,6 +265,12 @@ void UEnemySpawnManagerSubsystem::RegisterSpawner(APlayerLocationDetection* Spaw
     if (SpawnLocation && Spawner)
     {
         SpawnersByLocation.FindOrAdd(SpawnLocation).AddUnique(Spawner);
+        CurrentSpawnersCount++;
+        UE_LOG(LogTemp, Warning, TEXT("Total EnemySpawners: %d\nCurrentSpawnersCount: %d"), TotalSpawnersCount, CurrentSpawnersCount)
+        if (CurrentSpawnersCount == TotalSpawnersCount)
+        {
+            RegisterMainObjectiveEnemySpawners();
+        }
     }
 }
 
@@ -418,11 +502,18 @@ void UEnemySpawnManagerSubsystem::OnEnterTriggerBox(APlayerLocationDetection* Sp
         {
             if (IsValid(Spawner))
             {
-                CurrentEnemySpawners.AddUnique(Spawner);
-
+                PlayerEnemySpawners.AddUnique(Spawner);
+                UE_LOG(LogTemp, Warning, TEXT("Just before main objective is checked"))
+                
                 for (TSubclassOf<AEnemyAI> EnemyClass : Spawner->GetSpawnableEnemies())
                 {
-                    CurrentSpawnersByType.FindOrAdd(EnemyClass).AddUnique(Spawner);
+                    PlayerSpawnersByType.FindOrAdd(EnemyClass).AddUnique(Spawner);
+                }
+
+                if (!MainObjectiveActive)
+                {
+                    CurrentEnemySpawners.AddUnique(Spawner);
+                    CurrentSpawnersByType = PlayerSpawnersByType;
                 }
             }
             else
@@ -452,7 +543,7 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
         TArray<AEnemySpawner*>& SpawnerArray = *SpawnerArrayPtr;
         for (AEnemySpawner* Spawner : SpawnerArray)
         {
-            CurrentEnemySpawners.Remove(Spawner);
+            PlayerEnemySpawners.Remove(Spawner);
         }
 
         for (AEnemySpawner* Spawner : SpawnerArray)
@@ -462,7 +553,7 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
                 continue;
             }
             
-            for (auto It = CurrentSpawnersByType.CreateIterator(); It; ++It)
+            for (auto It = PlayerSpawnersByType.CreateIterator(); It; ++It)
             {
                 if (It.Value().Contains(Spawner))
                 {
@@ -474,6 +565,12 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
                     It.RemoveCurrent();
                 }
             }
+        }
+
+        if (!MainObjectiveActive)
+        {
+            CurrentEnemySpawners = PlayerEnemySpawners;
+            CurrentSpawnersByType = PlayerSpawnersByType;
         }
     }
     else
