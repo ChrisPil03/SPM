@@ -16,7 +16,7 @@ UBTService_TargetLocationGround::UBTService_TargetLocationGround()
 {
     NodeName = "Update Target Location On Ground";
 
-    bPreferNavMeshProjectionForAirborneTarget = true; // This flag now controls whether to use movement node trace for airborne
+    bPreferNavMeshProjectionForAirborneTarget = true; 
     NavMeshProjectionVerticalThreshold = 500.0f;
     NavMeshProjectionHorizontalExtent = 500.0f;
 
@@ -31,6 +31,8 @@ UBTService_TargetLocationGround::UBTService_TargetLocationGround()
 
 void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_TickTotal")); // Profile the entire TickNode function
+
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
     UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
@@ -64,21 +66,26 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
     FVector BaseTargetLocation;
     bool bBaseTargetFound = false;
     
-    // This is the original block that checks if the target is airborne/off-mesh
+    FHitResult HitResult; // Declare commonly used out params outside tight scopes
+    FNavLocation ProjectedGroundPoint, ProjectedNodeLocation, ProjectedImpactLocation, ProjectedNodeLoc;
+
     if (bPreferNavMeshProjectionForAirborneTarget && NavSys && DefaultNavData)
     {
-        ACharacter* TargetCharacter = Cast<ACharacter>(TargetActor);
-        bool bTargetIsLikelyOffNavMesh = true; // Default assumption
-        if (TargetCharacter && TargetCharacter->GetCharacterMovement() &&
-            TargetCharacter->GetCharacterMovement()->IsMovingOnGround() &&
-            !TargetCharacter->GetCharacterMovement()->IsFalling())
+        bool bTargetIsLikelyOffNavMesh = true; 
         {
-            bTargetIsLikelyOffNavMesh = false; // Target seems to be on ground and not falling
+            TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_AirborneTargetCheckLogic"));
+            ACharacter* TargetCharacter = Cast<ACharacter>(TargetActor);
+            if (TargetCharacter && TargetCharacter->GetCharacterMovement() &&
+                TargetCharacter->GetCharacterMovement()->IsMovingOnGround() &&
+                !TargetCharacter->GetCharacterMovement()->IsFalling())
+            {
+                bTargetIsLikelyOffNavMesh = false; 
+            }
         }
 
-        if (bTargetIsLikelyOffNavMesh) // If target is airborne or off-mesh
+        if (bTargetIsLikelyOffNavMesh) 
         {
-            // --- MODIFIED: Use Movement Node + Downward Trace logic here ---
+            TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_AirbornePath_MovementNodeProcessing"));
             TArray<USphereComponent*> MovementNodes = TargetInterface->GetMovementNodes();
             if (MovementNodes.Num() > 0)
             {
@@ -88,68 +95,70 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
                 if (SelectedNode)
                 {
                     FVector NodeLocation = SelectedNode->GetComponentLocation();
-                    FHitResult HitResult;
                     FCollisionQueryParams CollisionParams;
                     CollisionParams.AddIgnoredActor(OwnerPawn);
                     CollisionParams.AddIgnoredActor(TargetActor);
 
                     FVector StartTrace = NodeLocation;
                     FVector EndTrace = NodeLocation - FVector(0.f, 0.f, GroundTraceDistance + SelectedNode->GetScaledSphereRadius());
-
-                    if (bDrawDebugTraceForDuration)
+                    
+                    bool bGroundTraceSucceeded;
+                    {
+                        TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_LineTrace_GroundSearch"));
+                        bGroundTraceSucceeded = World->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, GroundTraceChannel, CollisionParams);
+                    }
+                     if (bDrawDebugTraceForDuration)
                     {
                         DrawDebugLine(World, StartTrace, EndTrace, FColor::Green, false, DebugTraceDuration, 0, 1.f);
                     }
 
-                    if (World->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, GroundTraceChannel, CollisionParams))
+                    if (bGroundTraceSucceeded)
                     {
-                        // We found a point on the ground below the movement node.
-                        // Now, project THIS point to the NavMesh to ensure it's navigable.
-                        FNavLocation ProjectedGroundPoint;
-                        FVector QueryExtent(NavMeshProjectionHorizontalExtent * 0.25f, NavMeshProjectionHorizontalExtent * 0.25f, NavMeshProjectionVerticalThreshold); // Smaller extent for precise projection
+                        FVector QueryExtent(NavMeshProjectionHorizontalExtent * 0.25f, NavMeshProjectionHorizontalExtent * 0.25f, NavMeshProjectionVerticalThreshold);
                         TSubclassOf<UNavigationQueryFilter> FilterClass = OwnerController->GetDefaultNavigationFilterClass();
                         FSharedConstNavQueryFilter NavQueryFilter = UNavigationQueryFilter::GetQueryFilter(*DefaultNavData, OwnerController, FilterClass);
-
-                        if (NavSys->ProjectPointToNavigation(HitResult.ImpactPoint, ProjectedGroundPoint, QueryExtent, DefaultNavData, NavQueryFilter))
+                        
+                        bool bNavProjectionSucceeded;
+                        {
+                            TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_NavMeshProjection_Call"));
+                            bNavProjectionSucceeded = NavSys->ProjectPointToNavigation(HitResult.ImpactPoint, ProjectedGroundPoint, QueryExtent, DefaultNavData, NavQueryFilter);
+                        }
+                        if (bNavProjectionSucceeded)
                         {
                             BaseTargetLocation = ProjectedGroundPoint.Location;
                             bBaseTargetFound = true;
                             if (bDrawDebugTraceForDuration)
                             {
-                                DrawDebugSphere(World, HitResult.ImpactPoint, 10.f, 12, FColor::Red, false, DebugTraceDuration, 0, 1.5f); // Original hit
-                                DrawDebugSphere(World, BaseTargetLocation, 15.f, 12, FColor::Cyan, false, DebugTraceDuration, 0, 2.f); // Projected hit
+                                DrawDebugSphere(World, HitResult.ImpactPoint, 10.f, 12, FColor::Red, false, DebugTraceDuration, 0, 1.5f); 
+                                DrawDebugSphere(World, BaseTargetLocation, 15.f, 12, FColor::Cyan, false, DebugTraceDuration, 0, 2.f); 
                             }
                         }
-                        // If projection of hit point fails, bBaseTargetFound remains false
                     }
                     else
                     {
-                        // If ground trace from node fails, try projecting the node's original location.
-                        FNavLocation ProjectedNodeLocation;
                         FVector QueryExtent(NavMeshProjectionHorizontalExtent * 0.5f, NavMeshProjectionHorizontalExtent * 0.5f, NavMeshProjectionVerticalThreshold);
                         TSubclassOf<UNavigationQueryFilter> FilterClass = OwnerController->GetDefaultNavigationFilterClass();
                         FSharedConstNavQueryFilter NavQueryFilter = UNavigationQueryFilter::GetQueryFilter(*DefaultNavData, OwnerController, FilterClass);
-                        if (NavSys->ProjectPointToNavigation(NodeLocation, ProjectedNodeLocation, QueryExtent, DefaultNavData, NavQueryFilter))
+                        
+                        bool bNavProjectionSucceeded;
+                        {
+                             TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_NavMeshProjection_Call"));
+                             bNavProjectionSucceeded = NavSys->ProjectPointToNavigation(NodeLocation, ProjectedNodeLocation, QueryExtent, DefaultNavData, NavQueryFilter);
+                        }
+                        if (bNavProjectionSucceeded)
                         {
                              BaseTargetLocation = ProjectedNodeLocation.Location;
                              bBaseTargetFound = true;
                         }
-                        // If this also fails, bBaseTargetFound remains false
                     }
                 }
             }
-            // If no movement nodes, or selected node invalid, or all attempts failed, bBaseTargetFound is still false.
-            // It will then fall through to the next `if (!bBaseTargetFound)` block.
-            // --- END OF MOVEMENT NODE LOGIC FOR AIRBORNE ---
         }
-        // If bTargetIsLikelyOffNavMesh was false (target is on ground), this block is skipped,
-        // and bBaseTargetFound is still false, so it will proceed to the logic below.
     }
 
-    // This is the original fallback logic that uses movement nodes if the above didn't find anything OR
-    // if bPreferNavMeshProjectionForAirborneTarget was false OR if target was on ground.
     if (!bBaseTargetFound) 
     {
+        TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_FallbackPath_MovementNodeProcessing"));
         TArray<USphereComponent*> MovementNodes = TargetInterface->GetMovementNodes();
         if (MovementNodes.Num() > 0)
         {
@@ -159,7 +168,6 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
             if (SelectedNode)
             {
                 FVector NodeLocation = SelectedNode->GetComponentLocation();
-                FHitResult HitResult;
                 FCollisionQueryParams CollisionParams;
                 CollisionParams.AddIgnoredActor(OwnerPawn);
                 CollisionParams.AddIgnoredActor(TargetActor);
@@ -167,36 +175,50 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
                 FVector StartTrace = NodeLocation;
                 FVector EndTrace = NodeLocation - FVector(0.f, 0.f, GroundTraceDistance + SelectedNode->GetScaledSphereRadius());
 
-                if (World->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, GroundTraceChannel, CollisionParams))
+                bool bGroundTraceSucceeded;
                 {
-                    // Project this impact point to ensure navigability
+                    TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_LineTrace_GroundSearch"));
+                    bGroundTraceSucceeded = World->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, GroundTraceChannel, CollisionParams);
+                }
+
+                if (bGroundTraceSucceeded)
+                {
                      if (NavSys && DefaultNavData) {
-                        FNavLocation ProjectedImpactLocation;
                         FVector QueryExtent(NavMeshProjectionHorizontalExtent * 0.25f, NavMeshProjectionHorizontalExtent * 0.25f, NavMeshProjectionVerticalThreshold);
                         TSubclassOf<UNavigationQueryFilter> FilterClass = OwnerController->GetDefaultNavigationFilterClass();
                         FSharedConstNavQueryFilter NavQueryFilter = UNavigationQueryFilter::GetQueryFilter(*DefaultNavData, OwnerController, FilterClass);
-                        if (NavSys->ProjectPointToNavigation(HitResult.ImpactPoint, ProjectedImpactLocation, QueryExtent, DefaultNavData, NavQueryFilter)) {
+                        
+                        bool bNavProjectionSucceeded;
+                        {
+                            TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_NavMeshProjection_Call"));
+                            bNavProjectionSucceeded = NavSys->ProjectPointToNavigation(HitResult.ImpactPoint, ProjectedImpactLocation, QueryExtent, DefaultNavData, NavQueryFilter);
+                        }
+                        if (bNavProjectionSucceeded) {
                             BaseTargetLocation = ProjectedImpactLocation.Location;
                             bBaseTargetFound = true;
                         }
-                    } else { // No navsys, use raw impact point
+                    } else { 
                         BaseTargetLocation = HitResult.ImpactPoint;
                         bBaseTargetFound = true;
                     }
                 }
-                else // Trace failed
+                else 
                 {
-                    // Project the original node location
                     if (NavSys && DefaultNavData) {
-                        FNavLocation ProjectedNodeLoc;
                         FVector QueryExtent(NavMeshProjectionHorizontalExtent * 0.5f, NavMeshProjectionHorizontalExtent * 0.5f, NavMeshProjectionVerticalThreshold);
                         TSubclassOf<UNavigationQueryFilter> FilterClass = OwnerController->GetDefaultNavigationFilterClass();
                         FSharedConstNavQueryFilter NavQueryFilter = UNavigationQueryFilter::GetQueryFilter(*DefaultNavData, OwnerController, FilterClass);
-                        if (NavSys->ProjectPointToNavigation(NodeLocation, ProjectedNodeLoc, QueryExtent, DefaultNavData, NavQueryFilter)) {
+                        
+                        bool bNavProjectionSucceeded;
+                        {
+                            TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_NavMeshProjection_Call"));
+                            bNavProjectionSucceeded = NavSys->ProjectPointToNavigation(NodeLocation, ProjectedNodeLoc, QueryExtent, DefaultNavData, NavQueryFilter);
+                        }
+                        if (bNavProjectionSucceeded) {
                             BaseTargetLocation = ProjectedNodeLoc.Location;
                             bBaseTargetFound = true;
                         }
-                    } else { // No navsys, use raw node location
+                    } else { 
                         BaseTargetLocation = NodeLocation;
                         bBaseTargetFound = true;
                     }
@@ -205,15 +227,9 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
         }
     }
     
-    // Final fallback if absolutely nothing was found yet (e.g., no movement nodes, target is on ground but previous logic didn't set BaseTargetLocation)
-    // This is where it would project the TargetActor's location itself if it's considered on ground by the logic
-    // or if bPreferNavMeshProjectionForAirborneTarget was false and the movement node logic above didn't run or failed.
-    // To ensure we don't re-project if the airborne section already failed, we check `bBaseTargetFound` again.
     if (!bBaseTargetFound && NavSys && DefaultNavData)
     {
-        // This will usually only run if the target was considered "on ground" initially,
-        // and the movement node logic in the second `if(!bBaseTargetFound)` block also failed.
-        // Or if bPreferNavMeshProjectionForAirborneTarget was false.
+        TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_FinalFallback_TargetActorNavProjection"));
         FNavLocation ProjectedNavLocation;
         FVector QueryExtent(NavMeshProjectionHorizontalExtent, NavMeshProjectionHorizontalExtent, NavMeshProjectionVerticalThreshold);
         FVector TargetActorLocation = TargetActor->GetActorLocation();
@@ -221,17 +237,21 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
         TSubclassOf<UNavigationQueryFilter> FilterClass = OwnerController->GetDefaultNavigationFilterClass();
         FSharedConstNavQueryFilter NavQueryFilter = UNavigationQueryFilter::GetQueryFilter(*DefaultNavData, OwnerController, FilterClass);
 
-        if (NavSys->ProjectPointToNavigation(TargetActorLocation,
-                                            ProjectedNavLocation,
-                                            QueryExtent,
-                                            DefaultNavData,
-                                            NavQueryFilter))
+        bool bNavProjectionSucceeded;
+        {
+            TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_NavMeshProjection_Call"));
+            bNavProjectionSucceeded = NavSys->ProjectPointToNavigation(TargetActorLocation,
+                                                ProjectedNavLocation,
+                                                QueryExtent,
+                                                DefaultNavData,
+                                                NavQueryFilter);
+        }
+        if (bNavProjectionSucceeded)
         {
             BaseTargetLocation = ProjectedNavLocation.Location;
             bBaseTargetFound = true;
         }
     }
-
 
     if (!bBaseTargetFound)
     {
@@ -245,9 +265,9 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
     
     FVector FinalTargetLocation = BaseTargetLocation;
 
-    // Apply Random Offset (this will project the offset point to NavMesh if possible)
     if (bApplyRandomOffset && NavSys && DefaultNavData)
     {
+        TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_RandomOffsetLogic"));
         FVector RandomDirection = FMath::VRand();
         RandomDirection.Z = 0.0f;
         if (RandomDirection.IsNearlyZero()) RandomDirection = FVector(1.0f,0.0f,0.0f);
@@ -261,11 +281,16 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
         TSubclassOf<UNavigationQueryFilter> FilterClass = OwnerController->GetDefaultNavigationFilterClass();
         FSharedConstNavQueryFilter OffsetNavQueryFilter = UNavigationQueryFilter::GetQueryFilter(*DefaultNavData, OwnerController, FilterClass);
 
-        if (NavSys->ProjectPointToNavigation(OffsetAttemptLocation,
-                                            ProjectedOffsetNavLocation,
-                                            OffsetProjectionExtent,
-                                            DefaultNavData,
-                                            OffsetNavQueryFilter))
+        bool bNavProjectionSucceeded;
+        {
+            TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_TLG_NavMeshProjection_Call"));
+            bNavProjectionSucceeded = NavSys->ProjectPointToNavigation(OffsetAttemptLocation,
+                                                ProjectedOffsetNavLocation,
+                                                OffsetProjectionExtent,
+                                                DefaultNavData,
+                                                OffsetNavQueryFilter);
+        }
+        if (bNavProjectionSucceeded)
         {
             FinalTargetLocation = ProjectedOffsetNavLocation.Location;
         }
