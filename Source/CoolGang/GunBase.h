@@ -26,11 +26,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadTimeChangedDelegate, float,
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUltimateReadyDelegate);
 
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReloadCancelDelegate);
 
 class UGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
+class UNiagaraSystem;
 
 struct FOnAttributeChangeData;
 UCLASS()
@@ -46,7 +48,7 @@ public:
 	virtual void BeginPlay() override;
 	
 	// maybe need to change later
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 	
 	UPROPERTY(EditAnywhere)
@@ -65,10 +67,13 @@ public:
 	
 	///   Effect   ///
 	UPROPERTY(EditAnywhere,BlueprintReadOnly)
-	class UNiagaraSystem* ImpactEffect;
+	UNiagaraSystem* ImpactEffect;
 	
 	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
-	class UNiagaraSystem* MuzzleFlashEffect;
+	 UNiagaraSystem* MuzzleFlashEffect;
+
+	UPROPERTY(EditAnywhere, Category = "Gun | Effect" )
+	UNiagaraSystem* UltimateMuzzleFlashEffect;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Gameplay)
 	USceneComponent* MuzzlePosition;
