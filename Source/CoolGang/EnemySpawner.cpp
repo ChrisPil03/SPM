@@ -15,7 +15,10 @@ void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
+
+    if (!SpawnArea) return;
 	EnemySpawnManager->RegisterSpawner(SpawnArea, this);
+    UE_LOG(LogTemp, Warning, TEXT("EnemySpawner Registering"))
 }
 
 
