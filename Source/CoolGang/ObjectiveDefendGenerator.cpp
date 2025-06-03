@@ -183,6 +183,7 @@ FVector AObjectiveDefendGenerator::GetWaypointTargetLocation() const
 
 void AObjectiveDefendGenerator::FailObjective()
 {
+	UE_LOG(LogTemp, Display, TEXT("FailObjective"));
 	if (!GetIsFailed())
 	{
 		SetObjectiveState(EObjectiveState::Failed);
