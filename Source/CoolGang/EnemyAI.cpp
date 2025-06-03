@@ -215,7 +215,7 @@ void AEnemyAI::Die()
 		}
 		GetMovementComponent()->Velocity.Set(0.f,0.f,0.f);
 		Cast<AEnemyAIController>(Controller)->BrainComponent->Cleanup();
-		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 100000000000000.f);
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 5000.f * 5000.f);
 	}
 
 	AudioComponent->FadeOut(0.5f, 0.0f);
