@@ -68,8 +68,6 @@ int32 UScoreManagerComponent::GetScoreValue(const EScoreType ScoreType) const
 
 void UScoreManagerComponent::HandleAddScore(const EScoreType ScoreType)
 {
-
-	
 	AddScore(ScoreType, GetScoreValue(ScoreType));
 }
 
