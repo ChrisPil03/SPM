@@ -27,6 +27,11 @@ AGunBase::AGunBase()
 	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
 	MuzzlePosition->SetupAttachment(Mesh);
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+
+	if (NormalImpactEffect)
+	{
+		ImpactEffect = NormalImpactEffect;
+	}
 }
 
 // Called when the game starts or when spawned
