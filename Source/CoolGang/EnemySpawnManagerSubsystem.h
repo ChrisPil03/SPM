@@ -85,7 +85,7 @@ protected:
     double SpawnIntervalIncreaseProgress;
 
     UPROPERTY()
-    float RelocateDistanceThreshold = 5000.f * 5000.f;
+    float RelocateDistanceThreshold = 6500.f * 6500.f;
 
     FTimerDelegate OutOfRangeDelegate;
     FTimerHandle OutOfRangeCheckTimer;
