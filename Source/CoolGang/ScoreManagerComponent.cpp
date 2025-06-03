@@ -35,6 +35,8 @@ void UScoreManagerComponent::AddScore(const EScoreType ScoreType, const int32 Sc
 	{
 		OnScoreChanged.Broadcast(TotalScore);
 	}
+	OnScoreChangedWithType.Broadcast(ScoreType, TotalScore); // <-- NEW
+
 }
 
 int32 UScoreManagerComponent::GetTotalScore() const
@@ -66,6 +68,8 @@ int32 UScoreManagerComponent::GetScoreValue(const EScoreType ScoreType) const
 
 void UScoreManagerComponent::HandleAddScore(const EScoreType ScoreType)
 {
+
+	
 	AddScore(ScoreType, GetScoreValue(ScoreType));
 }
 
