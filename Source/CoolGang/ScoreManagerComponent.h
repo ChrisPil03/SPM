@@ -16,8 +16,10 @@ enum class EScoreType : uint8
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnScoreChangedWithType, EScoreType, ScoreType, int32, NewScore);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnRequestAddScore, EScoreType);
 inline FOnRequestAddScore OnRequestAddScore;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class COOLGANG_API UScoreManagerComponent : public UActorComponent
@@ -44,6 +46,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Score")
 	FOnScoreChanged OnScoreChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Score")
+	FOnScoreChangedWithType OnScoreChangedWithType; // Sends ScoreType + NewScore
 
 protected:
 	virtual void BeginPlay() override;
