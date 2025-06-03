@@ -95,6 +95,9 @@ public:
 	virtual void FailObjective();
 
 	UFUNCTION(BlueprintPure)
+	APlayerLocationDetection* GetObjectivePlayerDetection() const { return InPlayerLocationDetection; }
+	
+	UFUNCTION(BlueprintPure)
 	int32 GetObjectiveTime() const { return ObjectiveTime; }
 
 	UFUNCTION(BlueprintCallable)
