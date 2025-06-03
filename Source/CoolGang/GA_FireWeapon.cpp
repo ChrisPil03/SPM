@@ -222,7 +222,7 @@ bool UGA_FireWeapon::LaserBulletTrace(TArray<FHitResult>& HitResults, const FVec
 		DrawDebugCapsule(
 			GetWorld(),
 			(StartPoint + BlockedPoint) * 0.5f,         // Capsule center = midpoint
-			(BlockedPoint - StartPoint).Size() * 0.5f,  // Half-height = half length
+			(BlockedPoint - StartPoint).Size() * 0.5f,  // Half-height = half-length
 			50.f,                                   // Radius (matches FCollisionShape)
 			FRotationMatrix::MakeFromZ(BlockedPoint - StartPoint).ToQuat(),  // Rotation to align with trace
 			FColor::Red,
