@@ -166,6 +166,16 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnObjectiveEvent OnUniqueProgressChanged;
 
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundCue* ObjectiveFailSound;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundCue* ObjectiveStartSound;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundCue* ObjectiveCompletedSound;
+	
+
 private:
 	void FindObjectiveManager();
 	void FindAnnouncementSubsystem();
