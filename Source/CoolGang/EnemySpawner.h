@@ -24,6 +24,8 @@ public:
 	void RelocateEnemy(AEnemyAI* Enemy) const;
 
 	TArray<TSubclassOf<AEnemyAI>> GetSpawnableEnemies() const { return SpawnableEnemies; }
+
+	APlayerLocationDetection* GetConnectedPlayerLocationDetection() const { return SpawnArea; }
 	
 protected:
 	// Called when the game starts or when spawned

@@ -95,6 +95,9 @@ public:
 	virtual void FailObjective();
 
 	UFUNCTION(BlueprintPure)
+	APlayerLocationDetection* GetObjectivePlayerDetection() const { return InPlayerLocationDetection; }
+	
+	UFUNCTION(BlueprintPure)
 	int32 GetObjectiveTime() const { return ObjectiveTime; }
 
 	UFUNCTION(BlueprintCallable)
@@ -162,6 +165,16 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnObjectiveEvent OnUniqueProgressChanged;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundCue* ObjectiveFailSound;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundCue* ObjectiveStartSound;
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	USoundCue* ObjectiveCompletedSound;
+	
 
 private:
 	void FindObjectiveManager();
