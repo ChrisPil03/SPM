@@ -9,6 +9,8 @@
 void UGeneratorAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
+
+	UE_LOG(LogTemp, Error, TEXT("PostGameplayEffectExecute"));
 	
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
@@ -17,19 +19,15 @@ void UGeneratorAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		
 		const UGameplayEffect* AppliedEffect = Data.EffectSpec.Def;
 
-		if (AppliedEffect->GetName() == TEXT("Default__GE_ApplyDamageToGenerator_C"))
+		UE_LOG(LogTemp, Error, TEXT("Generator health being subtract by %f"), Magnitude);
+		
+		if (CurrentHealth <= 0.0f)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Generator health being subtract by %f"), Magnitude);
-			
-			if (CurrentHealth <= 0.0f)
+			AActor* OwnerActor = GetOwningActor();
+		
+			if (AObjectiveDefendGenerator* Generator = Cast<AObjectiveDefendGenerator>(OwnerActor))
 			{
-				AActor* OwnerActor = GetOwningActor();
-			
-				if (AObjectiveDefendGenerator* Generator = Cast<AObjectiveDefendGenerator>(OwnerActor))
-				{
-					Generator->FailObjective();
-					
-				}
+				Generator->FailObjective();
 			}
 		}
 	}

@@ -128,10 +128,10 @@ private:
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess))
 	bool bDead;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	float Health;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	float MaxHealth;
 	
 	UPROPERTY(EditAnywhere, Category=Gameplay)
