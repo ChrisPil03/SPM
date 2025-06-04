@@ -41,7 +41,7 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 			{
 				FDamageEvent DmgEvent(DamageTypeClass);
 				Enemy->TakeDamage(FMath::Abs(Magnitude), DmgEvent, UGameplayStatics::GetPlayerController(GetWorld(), 0), UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-			
+				
 			}
 			
 			if (AppliedEffect->GetName() == TEXT("Default__GE_ApplyDamageToEnemy_C"))
