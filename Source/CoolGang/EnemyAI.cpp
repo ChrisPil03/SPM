@@ -78,18 +78,20 @@ void AEnemyAI::BeginPlay()
 	InitEnemyStats();
 }
 
-void AEnemyAI::StartDeathSequence()
+void AEnemyAI::StartDeathSequence(AActor* DeathCauser)
 {
 	if (bIsDead)
 	{
 		return;
 	}
 	
+	UE_LOG(LogTemp, Warning, TEXT("Enemy is dead now"))
 	bIsDead = true;
 
-	PerformPreDeathActions();
-	Die();
+	PerformPreDeathActions(DeathCauser);
 }
+
+
 
 void AEnemyAI::InitEnemyStats()
 {
@@ -306,6 +308,7 @@ void AEnemyAI::Tick(float DeltaTime)
 
 void AEnemyAI::SetAlive()
 {
+	OnSetAlive();
 	SetActorTickEnabled(true);
 	if (FadeDMI)
 	{

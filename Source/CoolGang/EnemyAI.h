@@ -38,16 +38,20 @@ public:
 
 	void SetAlive();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSetAlive();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void PerformPreDeathActions();
+	void PerformPreDeathActions(AActor* DeathCauser);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTargetChanged(AActor* Target);
-	
+
+	UFUNCTION(BlueprintCallable)
 	void Die();
 	
 public:
@@ -55,7 +59,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Gameplay")
 	FOnAttackDelegate OnAttackDelegate;
 	
-	void StartDeathSequence();
+	void StartDeathSequence(AActor* DeathCauser);
 	
 	UFUNCTION(BlueprintCallable)
 	float GetAttackRange() const;
