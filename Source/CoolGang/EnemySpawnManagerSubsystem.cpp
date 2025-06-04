@@ -14,7 +14,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 
 
-
+DEFINE_LOG_CATEGORY_STATIC(LogEnemySpawnSub, Log, All);
 
 void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -213,6 +213,12 @@ void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
 
         SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
     }
+}
+
+TStatId UEnemySpawnManagerSubsystem::GetStatId() const
+{
+   
+    RETURN_QUICK_DECLARE_CYCLE_STAT(UEnemySpawnSubsystem, STATGROUP_Tickables);
 }
 
 void UEnemySpawnManagerSubsystem::SpawnEnemy()
