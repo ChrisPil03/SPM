@@ -34,7 +34,7 @@ public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     
     virtual void Tick(float DeltaTime) override;
-    
+    virtual TStatId GetStatId() const override;
     void RegisterSpawner(APlayerLocationDetection* SpawnLocation, AEnemySpawner* Spawner);
     void MarkEnemyAsAlive(AEnemyAI* Enemy);
     void MarkEnemyAsDead(AEnemyAI* Enemy);
