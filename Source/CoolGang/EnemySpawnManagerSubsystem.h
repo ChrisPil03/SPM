@@ -35,7 +35,6 @@ public:
     
     virtual void Tick(float DeltaTime) override;
     virtual TStatId GetStatId() const override;
-    
     void RegisterSpawner(APlayerLocationDetection* SpawnLocation, AEnemySpawner* Spawner);
     void MarkEnemyAsAlive(AEnemyAI* Enemy);
     void MarkEnemyAsDead(AEnemyAI* Enemy);
@@ -85,7 +84,7 @@ protected:
     double SpawnIntervalIncreaseProgress;
 
     UPROPERTY()
-    float RelocateDistanceThreshold = 5000.f * 5000.f;
+    float RelocateDistanceThreshold = 6500.f * 6500.f;
 
     FTimerDelegate OutOfRangeDelegate;
     FTimerHandle OutOfRangeCheckTimer;

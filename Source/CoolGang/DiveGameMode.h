@@ -42,7 +42,6 @@ private:
 	static float ComputeTimer(int cycleIndex, float T0 = 180.0f, float Tmin = 50.0f, float k  = 20.0f);
 	void HandleElapsedTime(const float DeltaTime);
 	
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	float BaselineObjectiveTimer = 30.f;
 
