@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Sound/SoundCue.h" 
 #include "GunBase.generated.h"
 
 UENUM(BlueprintType)
