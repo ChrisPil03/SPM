@@ -2,6 +2,8 @@
 #include "PlayerLocationDetection.h"
 #include "VoiceLineSubsystem.h"
 #include "Gate.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "ObjectiveDefendGenerator.h"
 
 AObjectiveBase::AObjectiveBase() :
@@ -202,6 +204,10 @@ void AObjectiveBase::CompleteObjective()
 	{
 		RoomGate->CloseGate();
 	}
+	if (ObjectiveCompletedSound)
+	{
+		UGameplayStatics::PlaySound2D(this, ObjectiveCompletedSound);
+	}
 }
 
 void AObjectiveBase::FailObjective()
@@ -227,6 +233,10 @@ void AObjectiveBase::FailObjective()
 		if (ObjectiveManager)
 		{
 			ObjectiveManager->RegisterFailedObjective(this);
+		}
+		if (ObjectiveFailSound)
+		{
+			UGameplayStatics::PlaySound2D(this, ObjectiveFailSound);
 		}
 	}
 }

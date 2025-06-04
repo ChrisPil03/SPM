@@ -68,9 +68,12 @@ public:
 	
 	
 	///   Effect   ///
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Gun | Effect" )
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Effect" )
 	UNiagaraSystem* ImpactEffect;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Effect" )
+	UNiagaraSystem* NormalImpactEffect;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Effect" )
 	UNiagaraSystem* UltimateImpactEffect;
 	

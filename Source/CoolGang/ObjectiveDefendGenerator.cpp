@@ -38,14 +38,14 @@ void AObjectiveDefendGenerator::BeginPlay()
 	
 	CurrentShield = MaxShield;
 	Health = MaxHealth;
-	
-	BindControlPanel();
-	BindCompletionFunction();
-	InitStats();
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
-		UGeneratorAttributeSet::GetHealthAttribute()
-	).AddUObject(this, &AObjectiveDefendGenerator::OnCurrentHealthChanged);
-}
+			
+			BindControlPanel();
+			BindCompletionFunction();
+			InitStats();
+			AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(
+				UGeneratorAttributeSet::GetHealthAttribute()
+			).AddUObject(this, &AObjectiveDefendGenerator::OnCurrentHealthChanged);
+		}
 
 void AObjectiveDefendGenerator::OnCurrentHealthChanged(const FOnAttributeChangeData& Data)
 {
@@ -183,6 +183,7 @@ FVector AObjectiveDefendGenerator::GetWaypointTargetLocation() const
 
 void AObjectiveDefendGenerator::FailObjective()
 {
+	UE_LOG(LogTemp, Display, TEXT("FailObjective"));
 	if (!GetIsFailed())
 	{
 		SetObjectiveState(EObjectiveState::Failed);
