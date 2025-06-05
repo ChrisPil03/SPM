@@ -51,10 +51,10 @@ void UObjectiveManagerSubsystem::ActivateRandomObjective(float MalfunctionTimer,
 			AvailableObjectives.Add(Objective);
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Available objectives: %d"), AvailableObjectives.Num());
+	// UE_LOG(LogTemp, Warning, TEXT("Available objectives: %d"), AvailableObjectives.Num());
 	if (AvailableObjectives.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No available objectives to activate"));
+		// UE_LOG(LogTemp, Warning, TEXT("No available objectives to activate"));
 		return;
 	}
 	if (AvailableObjectives.Num() > 1 && LastCompletedObjective)
@@ -133,7 +133,7 @@ void UObjectiveManagerSubsystem::FindObjectivesInLevel()
 
 	if (FoundObjectives.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ObjectiveManager: No objectives found!"));
+		// UE_LOG(LogTemp, Warning, TEXT("ObjectiveManager: No objectives found!"));
 		return;
 	}
 
@@ -150,7 +150,7 @@ void UObjectiveManagerSubsystem::FindObjectivesInLevel()
 			}
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("MainObjective: %hd"), MainObjective != nullptr);
+	// UE_LOG(LogTemp, Warning, TEXT("MainObjective: %hd"), MainObjective != nullptr);
 }
 
 void UObjectiveManagerSubsystem::BroadcastCompletedObjective(AObjectiveBase* Objective) const

@@ -61,6 +61,12 @@ void AInteractableObject::SetCanInteractWith(bool const bNewState)
 	if (!bNewState)
 	{
 		InteractionNotAvailable(nullptr);
+	}else
+	{
+		if (OnActivated.IsBound())
+		{
+			OnActivated.Broadcast();
+		}
 	}
 	bCanInteractWith = bNewState;
 	ShowInteractableOutline(bNewState);

@@ -10,7 +10,7 @@ void UGeneratorAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 {
 	Super::PostGameplayEffectExecute(Data);
 
-	UE_LOG(LogTemp, Error, TEXT("PostGameplayEffectExecute"));
+	// UE_LOG(LogTemp, Error, TEXT("PostGameplayEffectExecute"));
 	
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
@@ -19,7 +19,7 @@ void UGeneratorAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 		
 		const UGameplayEffect* AppliedEffect = Data.EffectSpec.Def;
 
-		UE_LOG(LogTemp, Error, TEXT("Generator health being subtract by %f"), Magnitude);
+		// UE_LOG(LogTemp, Error, TEXT("Generator health being subtract by %f"), Magnitude);
 		
 		if (CurrentHealth <= 0.0f)
 		{
