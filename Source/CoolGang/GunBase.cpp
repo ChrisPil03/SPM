@@ -27,6 +27,11 @@ AGunBase::AGunBase()
 	MuzzlePosition = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Position"));
 	MuzzlePosition->SetupAttachment(Mesh);
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+
+	if (NormalImpactEffect)
+	{
+		ImpactEffect = NormalImpactEffect;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -77,6 +82,16 @@ void AGunBase::OnUltimateReady()
 	bIsUltimateReady = true;
 }
 
+void AGunBase::OnUltimateStart()
+{
+	OnUltimateStartDelegate.Broadcast();
+}
+
+void AGunBase::OnUltimateEnd()
+{
+	OnUltimateEndDelegate.Broadcast();
+}
+
 void AGunBase::Initialize()
 {
 	GiveAbilities();
@@ -91,7 +106,7 @@ void AGunBase::CalculateTimeBetweenShots(float NewFireRate)
 void AGunBase::OnDamageChanged(const FOnAttributeChangeData& Data) const
 {
 	float NewDamage = Data.NewValue;
-	UE_LOG(LogTemp, Warning, TEXT("NEw damage: %f"), NewDamage);
+	// UE_LOG(LogTemp, Warning, TEXT("NEw damage: %f"), NewDamage);
 	OnDamageChangedDelegate.Broadcast(NewDamage);
 }
 

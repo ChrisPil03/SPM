@@ -55,6 +55,7 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 
 void ADiveGameMode::EndGame()
 {
+	UE_LOG(LogTemp, Display, TEXT("EndGame"));
 	bGameHasEnded = true;
 	AController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	Controller->GameHasEnded(Controller->GetPawn(), false);

@@ -40,7 +40,7 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 			if (Magnitude <= 0)
 			{
 				FDamageEvent DmgEvent(DamageTypeClass);
-				Enemy->TakeDamage(FMath::Abs(Magnitude), DmgEvent, UGameplayStatics::GetPlayerController(GetWorld(), 0), UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+				Enemy->TakeDamage(FMath::Abs(Magnitude), DmgEvent, Data.EffectSpec.GetContext().GetInstigator()->GetInstigatorController(), Data.EffectSpec.GetContext().GetEffectCauser());
 			
 			}
 			
@@ -48,7 +48,7 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 			{
 				if (Health.GetCurrentValue() <= MaxHealth.GetBaseValue() / 3)
 				{
-					UE_LOG(LogTemp, Error, TEXT("Enemy health being subtract by %f"), Magnitude);
+					// UE_LOG(LogTemp, Error, TEXT("Enemy health being subtract by %f"), Magnitude);
 					
 					
 					TScriptInterface<IAttackable> TargetInterface = Enemy->GetTarget();
@@ -65,7 +65,8 @@ void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallb
 		
 			if (CurrentHealth <= 0.0f)
 			{
-				Enemy->StartDeathSequence(); 
+				// UE_LOG(LogTemp, Error, TEXT("Enemy health being subtract by %s"), *Data.EffectSpec.GetContext().GetInstigator()->GetActorNameOrLabel());
+				Enemy->StartDeathSequence(Data.EffectSpec.GetContext().GetInstigator()); 
 			}
 		}
 	}

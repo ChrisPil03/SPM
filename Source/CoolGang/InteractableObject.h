@@ -11,6 +11,7 @@ class APlayerCharacter;
 class APlayerLocationDetection;
 DECLARE_MULTICAST_DELEGATE_OneParam(FPerformDelegate, AInteractableObject*)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInteractDelegate, AInteractableObject*, Object);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInteractableEvent);
 
 UCLASS()
 class COOLGANG_API AInteractableObject : public AActor, public IInteractInterface
@@ -46,6 +47,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FInteractDelegate InteractDelegate;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnInteractableEvent OnActivated;
 private:
 	void ShowInteractableOutline(const bool bNewState);
 	void BindInteractTrigger();

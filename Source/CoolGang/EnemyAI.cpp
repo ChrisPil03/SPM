@@ -78,18 +78,20 @@ void AEnemyAI::BeginPlay()
 	InitEnemyStats();
 }
 
-void AEnemyAI::StartDeathSequence()
+void AEnemyAI::StartDeathSequence(AActor* DeathCauser)
 {
 	if (bIsDead)
 	{
 		return;
 	}
 	
+	// UE_LOG(LogTemp, Warning, TEXT("Enemy is dead now"))
 	bIsDead = true;
 
-	PerformPreDeathActions();
-	Die();
+	PerformPreDeathActions(DeathCauser);
 }
+
+
 
 void AEnemyAI::InitEnemyStats()
 {
@@ -149,7 +151,7 @@ bool AEnemyAI::IsPlayerShieldActive(AActor* PlayerActor)
 		UAbilitySystemComponent* PlayerASC = PlayerActor->FindComponentByClass<UAbilitySystemComponent>();
 		if (PlayerASC)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Found PlayerActor"));
+			// UE_LOG(LogTemp, Warning, TEXT("Found PlayerActor"));
 			FGameplayTag ShieldTag = FGameplayTag::RequestGameplayTag(TEXT("State.ShieldActive"));
 			return PlayerASC->HasMatchingGameplayTag(ShieldTag);
 		}
@@ -170,7 +172,7 @@ TScriptInterface<IAttackable> AEnemyAI::GetTarget() const
 
 void AEnemyAI::Die()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Enemy dying"))
+	// UE_LOG(LogTemp, Warning, TEXT("Enemy dying"))
 
 	SetActorEnableCollision(false);
 
@@ -215,7 +217,7 @@ void AEnemyAI::Die()
 		}
 		GetMovementComponent()->Velocity.Set(0.f,0.f,0.f);
 		Cast<AEnemyAIController>(Controller)->BrainComponent->Cleanup();
-		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 100000000000000.f);
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 5000.f * 5000.f);
 	}
 
 	AudioComponent->FadeOut(0.5f, 0.0f);
@@ -233,7 +235,7 @@ void AEnemyAI::DropUpgrade()
 	{
 		FVector SpawnLocation = GetActorLocation();
 		FRotator SpawnRotation = GetActorRotation();
-		UE_LOG(LogTemp, Warning, TEXT("Drop"));
+		// UE_LOG(LogTemp, Warning, TEXT("Drop"));
 		GetWorld()->SpawnActor<AActor>(Drop, SpawnLocation, SpawnRotation);
 	}
 }
@@ -306,6 +308,7 @@ void AEnemyAI::Tick(float DeltaTime)
 
 void AEnemyAI::SetAlive()
 {
+	OnSetAlive();
 	SetActorTickEnabled(true);
 	if (FadeDMI)
 	{

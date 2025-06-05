@@ -401,7 +401,7 @@ ANavigationVolume3D::FPathfindingInternalResultBundle ANavigationVolume3D::Execu
         }
         Algo::Reverse(TempPath);
         ResultBundle.PathPoints = TempPath;
-        UE_LOG(LogTemp, Log, TEXT("ANavigationVolume3D::ExecutePathfindingOnThread - Path successfully found. Actor: %s. Steps: %d"), *ActorNameForLogging, ResultBundle.PathPoints.Num());
+        // UE_LOG(LogTemp, Log, TEXT("ANavigationVolume3D::ExecutePathfindingOnThread - Path successfully found. Actor: %s. Steps: %d"), *ActorNameForLogging, ResultBundle.PathPoints.Num());
 
         ResultBundle.bIsLongPath_TaskLocal = ResultBundle.PathPoints.Num() > LongPathThreshold;
         ResultBundle.bShouldDrawThisPathAndExploration_TaskLocal = bDrawPathfindingDebug && (ResultBundle.bIsLongPath_TaskLocal || !bOnlyDrawDebugForLongPaths);

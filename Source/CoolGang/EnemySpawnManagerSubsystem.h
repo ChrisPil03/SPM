@@ -10,6 +10,7 @@ class UEnemySpawnConfigurationDataAsset;
 class APlayerLocationDetection;
 class AEnemySpawner;
 class AEnemyAI;
+class AObjectiveBase;
 
 USTRUCT() 
 struct FEnemyArrayWrapper
@@ -34,7 +35,6 @@ public:
     
     virtual void Tick(float DeltaTime) override;
     virtual TStatId GetStatId() const override;
-    
     void RegisterSpawner(APlayerLocationDetection* SpawnLocation, AEnemySpawner* Spawner);
     void MarkEnemyAsAlive(AEnemyAI* Enemy);
     void MarkEnemyAsDead(AEnemyAI* Enemy);
@@ -71,7 +71,12 @@ protected:
     
     TMap<APlayerLocationDetection*, TArray<AEnemySpawner*>> SpawnersByLocation;
     TMap<TSubclassOf<AEnemyAI>, TArray<AEnemySpawner*>> CurrentSpawnersByType;
+    TMap<TSubclassOf<AEnemyAI>, TArray<AEnemySpawner*>> MainObjectiveSpawnersByType;
+    TMap<TSubclassOf<AEnemyAI>, TArray<AEnemySpawner*>> PlayerSpawnersByType;
     TArray<AEnemySpawner*> CurrentEnemySpawners;
+    TArray<AEnemySpawner*> PlayerEnemySpawners;
+    TArray<AEnemySpawner*> MainObjectiveEnemySpawners;
+    bool MainObjectiveActive = false;
 
     double UpdatedSpawnInterval;
     double SpawnInterval;
@@ -79,19 +84,31 @@ protected:
     double SpawnIntervalIncreaseProgress;
 
     UPROPERTY()
-    float RelocateDistanceThreshold = 5000.f * 5000.f;
+    float RelocateDistanceThreshold = 6500.f * 6500.f;
 
     FTimerDelegate OutOfRangeDelegate;
     FTimerHandle OutOfRangeCheckTimer;
     float RangeCheckTimerInterval = 1.f;
 
 private:
+
+    void ChangeEnemySpawnersToMainObjective(AObjectiveBase* MainObjective);
+
+    void ChangeEnemySpawnersToPlayer(AObjectiveBase* MainObjective);
+
+    void FetchEnemySpawnerCount(const UWorld::FActorsInitializedParams& Params);
+
+    void RegisterMainObjectiveEnemySpawners();
+    
     TSubclassOf<AEnemyAI> GetRandomAvailableEnemyTypeToSpawn() const;
     
     UPROPERTY(VisibleInstanceOnly, Category = "Enemy Spawn Manager|Limits")
     TMap<TSubclassOf<AEnemyAI>, int32> MaxEnemyCounts;
 
     int32 MaximumEnemies;
+
+    int32 TotalSpawnersCount = 0;
+    int32 CurrentSpawnersCount = 0;
     
     UPROPERTY(VisibleInstanceOnly, Category = "Enemy Spawn Manager|Runtime")
     TMap<TSubclassOf<AEnemyAI>, FEnemyArrayWrapper> AliveEnemiesByTypeMap;

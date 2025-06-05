@@ -100,17 +100,17 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 		
 		if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.PiercingActive")))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PiercingActive"));
+			// UE_LOG(LogTemp, Warning, TEXT("PiercingActive"));
 			bHasTarget = PiercingBulletTrace(HitResults,StartPoint, EndPoint, QueryParams);
 		}
 		else if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.ChainingActive")))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ChainingActive"));
+			// UE_LOG(LogTemp, Warning, TEXT("ChainingActive"));
 			bHasTarget = ChainingBulletTrace(HitResults, StartPoint, EndPoint, QueryParams);
 		}
 		else if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Weapon.LaserActive")))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("LaserActive"));
+			// UE_LOG(LogTemp, Warning, TEXT("LaserActive"));
 			AGunBase* Gun = Cast<AGunBase>(GetOwningActorFromActorInfo());
 			StartPoint = Gun->MuzzlePosition->GetComponentLocation();
 			bHasTarget = LaserBulletTrace(HitResults,StartPoint, EndPoint, QueryParams);
@@ -133,7 +133,7 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 				TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("GA_FireWeapon::HitResultsLoop"));
 				if (Hit.GetActor()->IsA(AEnemyAI::StaticClass()))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *Hit.GetActor()->GetName());
+					// UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *Hit.GetActor()->GetName());
 					
 					NewTargetData =
 					new FGameplayAbilityTargetData_SingleTargetHit(Hit);
@@ -183,7 +183,7 @@ bool UGA_FireWeapon::PiercingBulletTrace(TArray<FHitResult>& HitResults, const F
 			TArray<FHitResult> ValidHits;
 			for (const FHitResult& HitResult : PiercingHitResults)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+				// UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
 				if (HitResult.GetActor()->IsA(AEnemyAI::StaticClass()))
 				{
 					if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
@@ -215,23 +215,25 @@ bool UGA_FireWeapon::LaserBulletTrace(TArray<FHitResult>& HitResults, const FVec
 	
 	bool bHit = GetWorld()->SweepMultiByChannel(LaserHitResults,
 	StartPoint, EndPoint, FQuat::Identity, PIERCING_TRACE, FCollisionShape::MakeSphere(50), QueryParams);
-	FVector BlockedPoint = LaserHitResults.Last().Location;
-	DrawDebugCapsule(
-	GetWorld(),
-	(StartPoint + BlockedPoint) * 0.5f,         // Capsule center = midpoint
-	(BlockedPoint - StartPoint).Size() * 0.5f,  // Half-height = half length
-	50.f,                                   // Radius (matches FCollisionShape)
-	FRotationMatrix::MakeFromZ(BlockedPoint - StartPoint).ToQuat(),  // Rotation to align with trace
-	FColor::Red,
-	false,
-	2.0f
-);
+	
 	if (bHit)
 	{
+		// FVector BlockedPoint = LaserHitResults.Last().Location;
+		// DrawDebugCapsule(
+		// 	GetWorld(),
+		// 	(StartPoint + BlockedPoint) * 0.5f,         // Capsule center = midpoint
+		// 	(BlockedPoint - StartPoint).Size() * 0.5f,  // Half-height = half-length
+		// 	50.f,                                   // Radius (matches FCollisionShape)
+		// 	FRotationMatrix::MakeFromZ(BlockedPoint - StartPoint).ToQuat(),  // Rotation to align with trace
+		// 	FColor::Red,
+		// 	false,
+		// 	2.0f
+		// );
+		
 		TArray<FHitResult> ValidHits;
 		for (const FHitResult& HitResult : LaserHitResults)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
+			// UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitResult.Component->GetName());
 			if (HitResult.GetActor()->IsA(AEnemyAI::StaticClass()))
 			{
 				if (!IsDuplicateHit(ValidHits, HitResult.GetActor()))
@@ -368,8 +370,8 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
             {
                 float DistanceSq = FVector::DistSquared(CurrentHitLocation, Enemy->GetActorLocation());
                 
-                UE_LOG(LogTemp, Warning, TEXT("Potential chain target: %s; Distance: %f"), 
-                    *Enemy->GetActorNameOrLabel(), FMath::Sqrt(DistanceSq));
+                // UE_LOG(LogTemp, Warning, TEXT("Potential chain target: %s; Distance: %f"), 
+                    // *Enemy->GetActorNameOrLabel(), FMath::Sqrt(DistanceSq));
                 
                 // Visualize potential chain
                 //DrawDebugLine(
@@ -402,7 +404,7 @@ void UGA_FireWeapon::ProcessHitChain(const FHitResult& InitialHit, TArray<FHitRe
         	GetWorld(), CurrentHitLocation, ClosestHitResult.Location,
         	FColor::Yellow, false, 2.0f
         	);
-        UE_LOG(LogTemp, Warning, TEXT("Chained to target: %s"), *ClosestActor->GetActorNameOrLabel());
+        // UE_LOG(LogTemp, Warning, TEXT("Chained to target: %s"), *ClosestActor->GetActorNameOrLabel());
         
         // Update current position for next chain
         CurrentHitLocation = ClosestHitResult.Location;

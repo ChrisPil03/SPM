@@ -34,7 +34,7 @@ void APlayerLocationDetection::BeginPlay()
 
 void APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone()
 {
-	UE_LOG(LogTemp, Display, TEXT("FindPlayerAlreadyInsideDetectionZone"));
+	// UE_LOG(LogTemp, Display, TEXT("FindPlayerAlreadyInsideDetectionZone"));
 	TArray<AActor*> OverlappingActors;
 	TriggerBox->GetOverlappingActors(OverlappingActors, APlayerCharacter::StaticClass());
 	for (AActor* OverlappingActor : OverlappingActors)

@@ -15,7 +15,10 @@ void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	EnemySpawnManager = GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>();
+
+    if (!SpawnArea) return;
 	EnemySpawnManager->RegisterSpawner(SpawnArea, this);
+    // UE_LOG(LogTemp, Warning, TEXT("EnemySpawner Registering"))
 }
 
 
@@ -60,7 +63,7 @@ AEnemyAI* AEnemySpawner::SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) con
         return nullptr;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: ATTEMPTING to spawn/reuse EnemyClass '%s'."), *EnemyClass->GetName());
+    // UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: ATTEMPTING to spawn/reuse EnemyClass '%s'."), *EnemyClass->GetName());
 
     // --- Get Actor Transform ---
     FVector Location = GetActorLocation();
@@ -70,7 +73,7 @@ AEnemyAI* AEnemySpawner::SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) con
     // Assuming these getters return copies or const references as appropriate
     auto AliveMap = EnemySpawnManager->GetAliveEnemiesMap();
     auto DeadMap = EnemySpawnManager->GetDeadEnemiesMap();
-    UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Retrieved AliveMap (Size: %d) and DeadMap (Size: %d)."), AliveMap.Num(), DeadMap.Num());
+    // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Retrieved AliveMap (Size: %d) and DeadMap (Size: %d)."), AliveMap.Num(), DeadMap.Num());
 
     // --- Prepare Local TArrays (as per your original structure) ---
     TArray<AEnemyAI*> AliveEnemies; // Will store enemies of the specific EnemyClass
@@ -83,17 +86,17 @@ AEnemyAI* AEnemySpawner::SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) con
         if (AliveEnemyArrayWrapper)
         {
             AliveEnemies = AliveEnemyArrayWrapper->Enemies; // Copy the array
-            UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Found ALIVE list for '%s'. Count: %d."), *EnemyClass->GetName(), AliveEnemies.Num());
+            // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Found ALIVE list for '%s'. Count: %d."), *EnemyClass->GetName(), AliveEnemies.Num());
         }
         else
         {
-            UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: No ALIVE list found in AliveMap for '%s'. Assuming 0 alive."), *EnemyClass->GetName());
+            // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: No ALIVE list found in AliveMap for '%s'. Assuming 0 alive."), *EnemyClass->GetName());
             // AliveEnemies will remain empty, which is correct if no entry for EnemyClass
         }
     }
     else
     {
-        UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Overall AliveMap is empty."));
+        // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Overall AliveMap is empty."));
     }
 
     // --- Populate DeadEnemies for the specific EnemyClass ---
@@ -105,36 +108,36 @@ AEnemyAI* AEnemySpawner::SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) con
         if (DeadEnemyArrayWrapper)
         {
             DeadEnemies = DeadEnemyArrayWrapper->Enemies; // Copy the array
-            UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Found DEAD list for '%s'. Count: %d."), *EnemyClass->GetName(), DeadEnemies.Num());
+            // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Found DEAD list for '%s'. Count: %d."), *EnemyClass->GetName(), DeadEnemies.Num());
         }
         else
         {
-            UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: No DEAD list found in DeadMap for '%s'. Assuming 0 dead."), *EnemyClass->GetName());
+            // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: No DEAD list found in DeadMap for '%s'. Assuming 0 dead."), *EnemyClass->GetName());
             // DeadEnemies will remain empty
         }
     }
     else
     {
-        UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Overall DeadMap is empty."));
+        // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Overall DeadMap is empty."));
     }
     
     // --- Calculate Total and Check Cap ---
     int TotalSpawnedEnemiesOfType = AliveEnemies.Num() + DeadEnemies.Num();
-    UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Total EXISTING instances for '%s': %d (Alive: %d, Dead: %d)"),
-        *EnemyClass->GetName(), TotalSpawnedEnemiesOfType, AliveEnemies.Num(), DeadEnemies.Num());
+    // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: Total EXISTING instances for '%s': %d (Alive: %d, Dead: %d)"),
+    //     *EnemyClass->GetName(), TotalSpawnedEnemiesOfType, AliveEnemies.Num(), DeadEnemies.Num());
 
     int MaxForType = EnemySpawnManager->GetMaxEnemiesByType(EnemyClass); // Assuming this function exists and is correct
-    UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: MAX instances configured for '%s': %d"), *EnemyClass->GetName(), MaxForType);
+    // UE_LOG(LogTemp, Verbose, TEXT("AEnemySpawner::SpawnEnemy: MAX instances configured for '%s': %d"), *EnemyClass->GetName(), MaxForType);
 
     if (AliveEnemies.Num() < MaxForType)
     {
-        UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: Under cap for '%s' (Total: %d < Max: %d). Proceeding with spawn/reuse."),
-            *EnemyClass->GetName(), TotalSpawnedEnemiesOfType, MaxForType);
+        // UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: Under cap for '%s' (Total: %d < Max: %d). Proceeding with spawn/reuse."),
+        //     *EnemyClass->GetName(), TotalSpawnedEnemiesOfType, MaxForType);
 
         if (DeadEnemies.Num() > 0)
         {
-            UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: Dead enemies available for '%s' (Count: %d). Attempting to REUSE DeadEnemies[0]."),
-                *EnemyClass->GetName(), DeadEnemies.Num());
+            // UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: Dead enemies available for '%s' (Count: %d). Attempting to REUSE DeadEnemies[0]."),
+            //     *EnemyClass->GetName(), DeadEnemies.Num());
             // The ReuseDeadEnemy function is critical here. It needs to:
             // 1. Remove DeadEnemies[0] from the DeadMap in the EnemySpawnManager.
             // 2. Reset DeadEnemies[0]'s state.
@@ -142,7 +145,7 @@ AEnemyAI* AEnemySpawner::SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) con
             AEnemyAI* ReusedEnemy = ReuseDeadEnemy(DeadEnemies[0]); // Assuming this exists and does the above
             if (ReusedEnemy)
             {
-                UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: SUCCESSFULLY REUSED enemy '%s' for class '%s'."), *ReusedEnemy->GetName(), *EnemyClass->GetName());
+                // UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: SUCCESSFULLY REUSED enemy '%s' for class '%s'."), *ReusedEnemy->GetName(), *EnemyClass->GetName());
             }
             else
             {
@@ -152,11 +155,11 @@ AEnemyAI* AEnemySpawner::SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) con
         }
         else // No dead enemies to reuse, spawn new
         {
-            UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: No dead enemies for '%s'. Attempting to SPAWN NEW instance."), *EnemyClass->GetName());
+            // UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: No dead enemies for '%s'. Attempting to SPAWN NEW instance."), *EnemyClass->GetName());
             AEnemyAI* NewEnemy = GetWorld()->SpawnActor<AEnemyAI>(EnemyClass, Location, Rotation);
             if (NewEnemy)
             {
-                UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: SUCCESSFULLY SPAWNED new enemy '%s' of type '%s'."), *NewEnemy->GetName(), *EnemyClass->GetName());
+                // UE_LOG(LogTemp, Log, TEXT("AEnemySpawner::SpawnEnemy: SUCCESSFULLY SPAWNED new enemy '%s' of type '%s'."), *NewEnemy->GetName(), *EnemyClass->GetName());
                 // IMPORTANT: After spawning, you MUST inform EnemySpawnManager:
                 EnemySpawnManager->MarkEnemyAsAlive(NewEnemy);
                 // EnemySpawnManager->RegisterEnemy(NewEnemy); // If needed for a different counter
@@ -170,8 +173,8 @@ AEnemyAI* AEnemySpawner::SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) con
     }
     else // Cap reached
     {
-        UE_LOG(LogTemp, Warning, TEXT("AEnemySpawner::SpawnEnemy: Max instance CAP REACHED for '%s' (Total: %d >= Max: %d). Returning nullptr."),
-            *EnemyClass->GetName(), TotalSpawnedEnemiesOfType, MaxForType);
+        // UE_LOG(LogTemp, Warning, TEXT("AEnemySpawner::SpawnEnemy: Max instance CAP REACHED for '%s' (Total: %d >= Max: %d). Returning nullptr."),
+        //     *EnemyClass->GetName(), TotalSpawnedEnemiesOfType, MaxForType);
         return nullptr;
     }
 }
