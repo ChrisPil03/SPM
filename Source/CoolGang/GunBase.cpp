@@ -106,7 +106,7 @@ void AGunBase::CalculateTimeBetweenShots(float NewFireRate)
 void AGunBase::OnDamageChanged(const FOnAttributeChangeData& Data) const
 {
 	float NewDamage = Data.NewValue;
-	UE_LOG(LogTemp, Warning, TEXT("NEw damage: %f"), NewDamage);
+	// UE_LOG(LogTemp, Warning, TEXT("NEw damage: %f"), NewDamage);
 	OnDamageChangedDelegate.Broadcast(NewDamage);
 }
 

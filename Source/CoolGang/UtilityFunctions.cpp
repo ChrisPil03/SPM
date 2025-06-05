@@ -19,7 +19,7 @@ void UtilityFunctions::PrintActiveGameplayEffects(UAbilitySystemComponent* Abili
         if (ActiveEffect && ActiveEffect->Spec.Def)
         {
             const UGameplayEffect* GameplayEffect = ActiveEffect->Spec.Def;
-            UE_LOG(LogTemp, Log, TEXT("Active Gameplay Effect: %s"), *GameplayEffect->GetName());
+            // UE_LOG(LogTemp, Log, TEXT("Active Gameplay Effect: %s"), *GameplayEffect->GetName());
         }
     }
 }
