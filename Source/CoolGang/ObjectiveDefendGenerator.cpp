@@ -57,8 +57,7 @@ void AObjectiveDefendGenerator::OnCurrentHealthChanged(const FOnAttributeChangeD
 		EnqueueVoiceLine(DownToHalfHealthVoiceLine, -1);
 		bHalfHealthVoiceLinePlayed = true;
 	}
-	if (!bLowHealthVoiceLinePlayed &&
-		HealthComponent->GetCurrentHealth() - (Health / MaxHealth <= 0.1f))
+	if (!bLowHealthVoiceLinePlayed && Health / MaxHealth <= 0.1f)
 	{
 		EnqueueVoiceLine(LowHealthVoiceLine, -1);
 		bLowHealthVoiceLinePlayed = true;
@@ -171,19 +170,11 @@ void AObjectiveDefendGenerator::SetIsActive(const bool bNewState)
 
 FVector AObjectiveDefendGenerator::GetWaypointTargetLocation() const
 {
-	// if (ControlPanel)
-	// {
-	// 	// FVector Origin;
-	// 	// FVector Extent;
-	// 	// ControlPanel->GetActorBounds(false, Origin, Extent, false);
-	// 	return ControlPanel->GetActorLocation();
-	// }
 	return Super::GetWaypointTargetLocation();
 }
 
 void AObjectiveDefendGenerator::FailObjective()
 {
-	UE_LOG(LogTemp, Display, TEXT("FailObjective"));
 	if (!GetIsFailed())
 	{
 		SetObjectiveState(EObjectiveState::Failed);
@@ -194,7 +185,7 @@ void AObjectiveDefendGenerator::FailObjective()
 
 void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 {
-	if (!GetIsActive() && CurrentShield > 0)
+	if (CurrentShield > 0)
 	{
 		CurrentShield -= Damage;
 
@@ -222,7 +213,7 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 		{
 			OnShieldChanged.Broadcast();
 		}
-	}else
+	} else
 	{
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
 		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_DamageGeneratorHealth, 1.f, Context);

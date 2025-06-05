@@ -16,21 +16,21 @@ void UBTService_Target::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	AAIController* OwnerController = OwnerComp.GetAIOwner();
 	if (!OwnerController)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UBTService_Target: OwnerController is null."));
+		// UE_LOG(LogTemp, Warning, TEXT("UBTService_Target: OwnerController is null."));
 		return;
 	}
 
 	APawn* OwnerPawn = OwnerController->GetPawn();
 	if (!OwnerPawn)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UBTService_Target: OwnerPawn is null."));
+		// UE_LOG(LogTemp, Warning, TEXT("UBTService_Target: OwnerPawn is null."));
 		return;
 	}
 
 	AEnemyAI* EnemyAI = Cast<AEnemyAI>(OwnerPawn);
 	if (!EnemyAI)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UBTService_Target: Pawn is not an AEnemyAI. Pawn is: %s"), *GetNameSafe(OwnerPawn));
+		// UE_LOG(LogTemp, Warning, TEXT("UBTService_Target: Pawn is not an AEnemyAI. Pawn is: %s"), *GetNameSafe(OwnerPawn));
 		return;
 	}
 

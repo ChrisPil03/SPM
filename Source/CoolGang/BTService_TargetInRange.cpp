@@ -20,14 +20,14 @@ void UBTService_TargetInRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8
 	AEnemyAI* Enemy = Cast<AEnemyAI>(OwnerComp.GetAIOwner()->GetPawn());
 	if (Enemy == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Enemy is nullptr"));
+		// UE_LOG(LogTemp, Warning, TEXT("Enemy is nullptr"));
 		return;
 	}
 	
 	AActor* Target = Cast<AActor>(Enemy->GetTarget().GetObject());
 	if (Target == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Target is nullptr"));
+		// UE_LOG(LogTemp, Warning, TEXT("Target is nullptr"));
 		return;
 	}
 

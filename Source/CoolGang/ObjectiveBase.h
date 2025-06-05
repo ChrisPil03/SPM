@@ -179,7 +179,7 @@ public:
 
 private:
 	void FindObjectiveManager();
-	void FindAnnouncementSubsystem();
+	void FindVoiceLineSubsystem();
 	// void FindDisplayTextMessageSubsystem();
 	void BroadcastObjectiveInProgress();
 	void BroadcastObjectiveIsActive();

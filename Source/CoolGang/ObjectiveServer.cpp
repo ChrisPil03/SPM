@@ -76,7 +76,7 @@ void AObjectiveServer::SetServerState(const EServerState NewState)
 
 void AObjectiveServer::StartRestoration()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Restoration Started"));
+	// UE_LOG(LogTemp, Warning, TEXT("Restoration Started"));
 
 	// if (bInstantRestoration)
 	// {
@@ -229,7 +229,7 @@ void AObjectiveServer::SetPausedMaterials()
 		SetServerLightColor(false);
 	}else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Red meterial not set"));
+		// UE_LOG(LogTemp, Warning, TEXT("Red meterial not set"));
 	}
 }
 
@@ -241,6 +241,6 @@ void AObjectiveServer::ResetMaterial()
 		SetServerLightColor(true);
 	} else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Standard meterial not set"));
+		// UE_LOG(LogTemp, Warning, TEXT("Standard meterial not set"));
 	}
 }
