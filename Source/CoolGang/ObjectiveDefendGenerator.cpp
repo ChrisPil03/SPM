@@ -52,16 +52,16 @@ void AObjectiveDefendGenerator::OnCurrentHealthChanged(const FOnAttributeChangeD
 	Health = Data.NewValue;
 	OnGeneratorHealthChangedDelegate.Broadcast(Health);
 	
-	if (!bHalfHealthVoiceLinePlayed && Health / MaxHealth <= 0.5f)
-	{
-		EnqueueVoiceLine(DownToHalfHealthVoiceLine, -1);
-		bHalfHealthVoiceLinePlayed = true;
-	}
-	if (!bLowHealthVoiceLinePlayed && Health / MaxHealth <= 0.1f)
-	{
-		EnqueueVoiceLine(LowHealthVoiceLine, -1);
-		bLowHealthVoiceLinePlayed = true;
-	}
+	// if (!bHalfHealthVoiceLinePlayed && Health / MaxHealth <= 0.5f)
+	// {
+	// 	EnqueueVoiceLine(DownToHalfHealthVoiceLine, -1);
+	// 	bHalfHealthVoiceLinePlayed = true;
+	// }
+	// if (!bLowHealthVoiceLinePlayed && Health / MaxHealth <= 0.1f)
+	// {
+	// 	EnqueueVoiceLine(LowHealthVoiceLine, -1);
+	// 	bLowHealthVoiceLinePlayed = true;
+	// }
 }
 
 void AObjectiveDefendGenerator::StartObjective()
