@@ -69,6 +69,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Event")
 	FOnObjectiveEvent OnShieldDestroyed;
 
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnObjectiveEvent OnStartActivating;
+
 private:
 
 	UPROPERTY()
@@ -77,8 +80,8 @@ private:
 	void BindControlPanel();
 	void BindCompletionFunction();
 	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
-	bool CannotTakeDamage() const;
 	void ActivateObjective();
+	void StartActivationProcess();
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;

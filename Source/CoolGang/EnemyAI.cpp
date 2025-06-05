@@ -91,8 +91,6 @@ void AEnemyAI::StartDeathSequence(AActor* DeathCauser)
 	PerformPreDeathActions(DeathCauser);
 }
 
-
-
 void AEnemyAI::InitEnemyStats()
 {
 	if (AbilitySystemComponent)
@@ -213,6 +211,10 @@ void AEnemyAI::Die()
 
 		for (auto BlackboardValue : BlackboardData->Keys)
 		{
+			if (BlackboardValue.EntryName.ToString() == "SplinePath")
+			{
+				continue;
+			}
 			Blackboard->ClearValue(BlackboardValue.EntryName);
 		}
 		GetMovementComponent()->Velocity.Set(0.f,0.f,0.f);

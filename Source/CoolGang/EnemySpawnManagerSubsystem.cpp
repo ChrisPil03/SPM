@@ -421,10 +421,8 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
     if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner(Enemy->GetClass()))
     {
         AEnemyAIController* AIController = Cast<AEnemyAIController>(Enemy->GetController());
-        AIController->BrainComponent->StopLogic("Relocating");
         ChosenSpawner->RelocateEnemy(Enemy);
-        AIController->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(Enemy->GetBehaviorTree()->BlackboardAsset));
-        AIController->BrainComponent->StartLogic();
+        AIController->BrainComponent->GetBlackboardComponent()->SetValueAsBool("HasBeenRelocated", true);
     }
 }
 
