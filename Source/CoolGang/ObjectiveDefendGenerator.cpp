@@ -106,11 +106,6 @@ void AObjectiveDefendGenerator::RegisterControlPanelInteraction(AInteractableObj
 	StartObjective();
 }
 
-bool AObjectiveDefendGenerator::CannotTakeDamage() const
-{
-	return !GetIsActive() || GetIsComplete() || GetIsFailed() || GetIsNotStarted();
-}
-
 void AObjectiveDefendGenerator::ActivateObjective()
 {
 	bIsActivating = false;
@@ -192,23 +187,12 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 		if (CurrentShield <= 0)
 		{
 			CurrentShield = 0;
-			bIsActivating = true;
-			GetWorld()->GetTimerManager().SetTimer(
-				ActivationDelayTimerHandle,
-				this,
-				&AObjectiveDefendGenerator::ActivateObjective,
-				ActivationDelay,
-				false);
-			if (ObjectiveManager)
-			{
-				ObjectiveManager->DeactivateAllSubObjectives();
-			}
 			if (OnShieldDestroyed.IsBound())
 			{
 				OnShieldDestroyed.Broadcast();
 			}
+			StartActivationProcess();
 		}
-
 		if (OnShieldChanged.IsBound())
 		{
 			OnShieldChanged.Broadcast();
@@ -223,6 +207,25 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), -Damage);  // negative Damage
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
 		}
+	}
+}
+
+void AObjectiveDefendGenerator::StartActivationProcess()
+{
+	bIsActivating = true;
+	GetWorld()->GetTimerManager().SetTimer(
+		ActivationDelayTimerHandle,
+		this,
+		&AObjectiveDefendGenerator::ActivateObjective,
+		ActivationDelay,
+		false);
+	if (ObjectiveManager)
+	{
+		ObjectiveManager->DeactivateAllSubObjectives();
+	}
+	if (OnStartActivating.IsBound())
+	{
+		OnStartActivating.Broadcast();
 	}
 }
 
