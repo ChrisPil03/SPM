@@ -178,6 +178,7 @@ void AObjectiveBase::ResetObjective()
 void AObjectiveBase::CompleteObjective()
 {
 	SetObjectiveState(EObjectiveState::Complete);
+	SetIsActive(false);
 	StopDamageShield();
 	EnqueueVoiceLine(ObjectiveCompletedVoiceLine, 1);
 	if (OnObjectiveCompleted.IsBound())
