@@ -82,7 +82,7 @@ void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		if (CheckToReset())
 		{
 			Reset();
-			UE_LOG(LogTemp, Warning, TEXT("Reset dash"));
+			// UE_LOG(LogTemp, Warning, TEXT("Reset dash"));
 		}
 	}
 	if (!bIsDashing && bShouldDecelerate)
@@ -99,7 +99,7 @@ void UDashComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		{
 			bShouldDecelerate = false; // Stop decelerating
 			CharacterMovement->GroundFriction = OriginalGroundFriction;
-			UE_LOG(LogTemp, Warning, TEXT(" Stop decelerating"));
+			// UE_LOG(LogTemp, Warning, TEXT(" Stop decelerating"));
 		}
 	}
 }

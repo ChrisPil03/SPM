@@ -62,7 +62,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		
 		if (OnObjectiveActivated.IsBound())
 		{
-			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
+			// UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
 			OnObjectiveActivated.Broadcast(this);
 		}
 		if (EnableWaypoint.IsBound())
@@ -74,7 +74,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 			if (OnEnterObjectiveRoom.IsBound())
 			{
 				OnEnterObjectiveRoom.Broadcast();
-				UE_LOG(LogTemp, Warning, TEXT("Broadcasting OnEnterRoom"))
+				// UE_LOG(LogTemp, Warning, TEXT("Broadcasting OnEnterRoom"))
 			}
 		}
 	} else
@@ -82,7 +82,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		StopDamageShield();
 		if (OnObjectiveDeactivated.IsBound())
 		{
-			UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
+			// UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
 			OnObjectiveDeactivated.Broadcast(this);
 		}
 		if (EnableWaypoint.IsBound())

@@ -215,7 +215,6 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 		}
 	} else
 	{
-		UE_LOG(LogTemp, Error, TEXT("Damage generator HP"));
 		FGameplayEffectContextHandle Context = AbilitySystemComponent->MakeEffectContext();
 		FGameplayEffectSpecHandle Spec = AbilitySystemComponent->MakeOutgoingSpec(GE_DamageGeneratorHealth, 1.f, Context);
 
@@ -223,7 +222,6 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 		{
 			Spec.Data->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Data.Health"), -Damage);  // negative Damage
 			AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
-			UE_LOG(LogTemp, Error, TEXT("Spec was valid, damaged generator HP: %f"), -Damage);
 		}
 	}
 }
