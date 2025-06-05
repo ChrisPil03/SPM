@@ -14,7 +14,9 @@ public class CoolGang : ModuleRules
 			"GameplayAbilities",
 			"GameplayTasks",
 			"GameplayTags",
-			"NavigationSystem"
+			"NavigationSystem",
+			"Slate",       // Slate is a low-level UI framework in Unreal Engine 
+			"SlateCore",   
 		});
 
 		// Uncomment if you are using Slate UI
