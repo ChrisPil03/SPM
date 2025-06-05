@@ -120,7 +120,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<UGameplayEffect> GE_InitWeaponStats;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> FireAbilityClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
