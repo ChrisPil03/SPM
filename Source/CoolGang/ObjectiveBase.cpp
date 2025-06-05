@@ -3,7 +3,6 @@
 #include "Door.h"
 #include "PlayerLocationDetection.h"
 #include "VoiceLineSubsystem.h"
-// #include "Gate.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "ObjectiveDefendGenerator.h"
@@ -47,26 +46,23 @@ void AObjectiveBase::BeginPlay()
 	Super::BeginPlay();
 	SetIsActive(false);
 	FindObjectiveManager();
-	FindAnnouncementSubsystem();
-	// FindDisplayTextMessageSubsystem();
+	FindVoiceLineSubsystem();
 	BindPlayerLocationDetection();
 	ProgressTimer = MakeUnique<FProgressTimer>(ObjectiveTime);
 }
 
 void AObjectiveBase::SetIsActive(const bool bNewState)
 {
-	//UE_LOG(LogEngine, Warning, TEXT("State has changed to: %d"), bNewState)
 	bIsActive = bNewState;
 	if (bNewState)
 	{
 		OpenDoors();
-		// DisplayMessageForSeconds(ActivatedMessage, 3.f);
 		EnqueueVoiceLine(ObjectiveActivatedVoiceLine, 2);
 		StartDamageShield();
 		
 		if (OnObjectiveActivated.IsBound())
 		{
-			UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
+			// UE_LOG(LogEngine, Warning, TEXT("Broadcasting ACTIVATE."))
 			OnObjectiveActivated.Broadcast(this);
 		}
 		if (EnableWaypoint.IsBound())
@@ -78,7 +74,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 			if (OnEnterObjectiveRoom.IsBound())
 			{
 				OnEnterObjectiveRoom.Broadcast();
-				UE_LOG(LogTemp, Warning, TEXT("Broadcasting OnEnterRoom"))
+				// UE_LOG(LogTemp, Warning, TEXT("Broadcasting OnEnterRoom"))
 			}
 		}
 	} else
@@ -86,10 +82,9 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		StopDamageShield();
 		if (OnObjectiveDeactivated.IsBound())
 		{
-			UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
+			// UE_LOG(LogEngine, Warning, TEXT("Broadcasting DEACTIVATE."))
 			OnObjectiveDeactivated.Broadcast(this);
 		}
-		// StopMalfunctioning();
 		if (EnableWaypoint.IsBound())
 		{
 			EnableWaypoint.Broadcast(this, false);
@@ -160,8 +155,6 @@ void AObjectiveBase::StartObjective()
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
 		StopDamageShield();
-		// StopMalfunctioning();
-		// DisplayMessageForSeconds(StartedMessage, 3.f);
 		EnqueueVoiceLine(ObjectiveStartedVoiceLine, 0);
 
 		if (EnableWaypoint.IsBound())
@@ -178,7 +171,6 @@ void AObjectiveBase::StartObjective()
 
 void AObjectiveBase::ResetObjective()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("Objective Reset"));
 	ResetProgress();
 	SetObjectiveState(EObjectiveState::NotStarted);
 }
@@ -187,7 +179,6 @@ void AObjectiveBase::CompleteObjective()
 {
 	SetObjectiveState(EObjectiveState::Complete);
 	StopDamageShield();
-	//DisplayMessageForSeconds(CompletedMessage, 3.f);
 	EnqueueVoiceLine(ObjectiveCompletedVoiceLine, 1);
 	if (OnObjectiveCompleted.IsBound())
 	{
@@ -217,7 +208,6 @@ void AObjectiveBase::FailObjective()
 	{
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
-		//DisplayMessageForSeconds(FailedMessage, 3.f);
 		EnqueueVoiceLine(ObjectiveFailedVoiceLine, 1);
 		DamageGeneratorShield(ShieldChunkDamage);
 
@@ -244,9 +234,6 @@ void AObjectiveBase::FailObjective()
 
 FVector AObjectiveBase::GetWaypointTargetLocation() const
 {
-	// FVector Origin;
-	// FVector Extent;
-	// GetActorBounds(false, Origin, Extent, false);
 	return GetActorLocation();
 }
 
@@ -300,15 +287,10 @@ void AObjectiveBase::FindObjectiveManager()
 	ObjectiveManager = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>();
 }
 
-void AObjectiveBase::FindAnnouncementSubsystem()
+void AObjectiveBase::FindVoiceLineSubsystem()
 {
 	VoiceLineSubsystem = GetGameInstance()->GetSubsystem<UVoiceLineSubsystem>();
 }
-
-// void AObjectiveBase::FindDisplayTextMessageSubsystem()
-// {
-// 	DisplayTextMessageSubsystem = GetWorld()->GetSubsystem<UDisplayTextMessageSubsystem>();
-// }
 
 void AObjectiveBase::BroadcastObjectiveInProgress()
 {
@@ -405,7 +387,6 @@ void AObjectiveBase::CloseDoors()
 	{
 		if (Door && Door->IsOpen())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CLosing door"));
 			Door->Close();
 		}
 	}
@@ -417,7 +398,6 @@ void AObjectiveBase::OpenDoors()
 	{
 		if (Door && !Door->IsOpen())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Opening door"));
 			Door->Open();
 		}
 	}
@@ -430,11 +410,3 @@ void AObjectiveBase::EnqueueVoiceLine(USoundBase* VoiceLine, const int32 Priorit
 		VoiceLineSubsystem->EnqueueVoiceLine(VoiceLine, Priority);
 	}
 }
-
-// void AObjectiveBase::DisplayMessageForSeconds(const FString& Message, const float Seconds) const
-// {
-// 	if (DisplayTextMessageSubsystem)
-// 	{
-// 		DisplayTextMessageSubsystem->DisplayMessageForSeconds(Message, Seconds);
-// 	}
-// }
