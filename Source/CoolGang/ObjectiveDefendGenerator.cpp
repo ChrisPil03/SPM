@@ -9,13 +9,13 @@
 #include "Kismet/GameplayStatics.h"
 
 AObjectiveDefendGenerator::AObjectiveDefendGenerator() :
+	MaxHealth(10000.f),
 	ActivationDelay(10.f),
 	bHalfHealthVoiceLinePlayed(false),
 	bLowHealthVoiceLinePlayed(false),
 	bIsActivating(false),
 	CurrentShield(0.f),
-	MaxShield(20000.f),
-	MaxHealth(10000.f)
+	MaxShield(20000.f)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetIsTimeBased(true);
