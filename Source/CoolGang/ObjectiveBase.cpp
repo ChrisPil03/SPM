@@ -1,7 +1,9 @@
 #include "ObjectiveBase.h"
+
+#include "Door.h"
 #include "PlayerLocationDetection.h"
 #include "VoiceLineSubsystem.h"
-#include "Gate.h"
+// #include "Gate.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "ObjectiveDefendGenerator.h"
@@ -11,6 +13,9 @@ AObjectiveBase::AObjectiveBase() :
 	ShieldBaseDamage(500.f),
 	ShieldChunkDamage(5000.f),
 	ScoreType(EScoreType::ObjectiveGeneratorCompleted),
+	ObjectiveFailSound(nullptr),
+	ObjectiveStartSound(nullptr),
+	ObjectiveCompletedSound(nullptr),
 	bIsActive(false),
 	ObjectiveState(EObjectiveState::NotStarted),
 	ObjectiveName("MISSING NAME"),
@@ -30,7 +35,6 @@ AObjectiveBase::AObjectiveBase() :
 	ObjectiveCompletedVoiceLine(nullptr),
 	ObjectiveFailedVoiceLine(nullptr),
 	VoiceLineSubsystem(nullptr),
-	RoomGate(nullptr),
 	bPlayerInRoom(false),
 	IconMaterialInstance(nullptr),
 	ShieldDamageInterval(5.f)
@@ -55,10 +59,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 	bIsActive = bNewState;
 	if (bNewState)
 	{
-		if (RoomGate)
-		{
-			RoomGate->OpenGate();
-		}
+		OpenDoors();
 		// DisplayMessageForSeconds(ActivatedMessage, 3.f);
 		EnqueueVoiceLine(ObjectiveActivatedVoiceLine, 2);
 		StartDamageShield();
@@ -93,9 +94,9 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 		{
 			EnableWaypoint.Broadcast(this, false);
 		}
-		if (!bPlayerInRoom && RoomGate)
+		if (!bPlayerInRoom)
 		{
-			RoomGate->CloseGate();
+			CloseDoors();
 		}
 	}
 }
@@ -200,9 +201,9 @@ void AObjectiveBase::CompleteObjective()
 	{
 		ObjectiveManager->RegisterCompletedObjective(this);
 	}
-	if (!bPlayerInRoom && RoomGate)
+	if (!bPlayerInRoom)
 	{
-		RoomGate->CloseGate();
+		CloseDoors();
 	}
 	if (ObjectiveCompletedSound)
 	{
@@ -220,9 +221,9 @@ void AObjectiveBase::FailObjective()
 		EnqueueVoiceLine(ObjectiveFailedVoiceLine, 1);
 		DamageGeneratorShield(ShieldChunkDamage);
 
-		if (!bPlayerInRoom && RoomGate)
+		if (!bPlayerInRoom)
 		{
-			RoomGate->CloseGate();
+			CloseDoors();
 		}
 
 		if (EnableWaypoint.IsBound())
@@ -361,10 +362,7 @@ void AObjectiveBase::OnTriggerExitRoom(APlayerLocationDetection* Room)
 	
 	if (!GetIsActive())
 	{
-		if (RoomGate)
-		{
-			RoomGate->CloseGate();	
-		}
+		CloseDoors();
 	}else
 	{
 		if (OnExitObjectiveRoom.IsBound())
@@ -399,6 +397,30 @@ void AObjectiveBase::StopDamageShield()
 void AObjectiveBase::BaseDamageGeneratorShield()
 {
 	DamageGeneratorShield(ShieldBaseDamage);
+}
+
+void AObjectiveBase::CloseDoors()
+{
+	for (ADoor* Door : Doors)
+	{
+		if (Door && Door->IsOpen())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("CLosing door"));
+			Door->Close();
+		}
+	}
+}
+
+void AObjectiveBase::OpenDoors()
+{
+	for (ADoor* Door : Doors)
+	{
+		if (Door && !Door->IsOpen())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Opening door"));
+			Door->Open();
+		}
+	}
 }
 
 void AObjectiveBase::EnqueueVoiceLine(USoundBase* VoiceLine, const int32 Priority) const

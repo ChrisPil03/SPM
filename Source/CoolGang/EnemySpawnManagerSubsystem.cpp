@@ -16,11 +16,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogEnemySpawnSub, Log, All);
 
-TStatId UEnemySpawnManagerSubsystem::GetStatId() const
-{
-    RETURN_QUICK_DECLARE_CYCLE_STAT(UEnemySpawnSubsystem, STATGROUP_Tickables);
-}
-
 void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
@@ -56,7 +51,6 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
     FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::FetchEnemySpawnerCount);
     FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::BindPlayerLocationDetection);
     
-    UE_LOG(LogEnemySpawnSub, Log, TEXT("EnemySpawnSubsystem Initialized."));
 }
 
 
@@ -219,6 +213,12 @@ void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
 
         SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
     }
+}
+
+TStatId UEnemySpawnManagerSubsystem::GetStatId() const
+{
+   
+    RETURN_QUICK_DECLARE_CYCLE_STAT(UEnemySpawnSubsystem, STATGROUP_Tickables);
 }
 
 void UEnemySpawnManagerSubsystem::SpawnEnemy()
@@ -516,15 +516,7 @@ void UEnemySpawnManagerSubsystem::OnEnterTriggerBox(APlayerLocationDetection* Sp
                     CurrentSpawnersByType = PlayerSpawnersByType;
                 }
             }
-            else
-            {
-                UE_LOG(LogEnemySpawnSub, Warning, TEXT("Found an invalid Spawner pointer associated with SpawnBox %s."), *SpawnBox->GetName());
-            }
         }
-    }
-    else
-    {
-        UE_LOG(LogEnemySpawnSub, Warning, TEXT("OnEnterTriggerBox: SpawnBox '%s' not found as a key in SpawnersByLocation map. No spawners added."), *SpawnBox->GetName());
     }
 }
 
@@ -532,7 +524,6 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
 {
     if (!IsValid(SpawnBox))
     {
-        UE_LOG(LogEnemySpawnSub, Warning, TEXT("OnExitTriggerBox called with invalid SpawnBox pointer."));
         return;
     }
 
@@ -572,10 +563,6 @@ void UEnemySpawnManagerSubsystem::OnExitTriggerBox(APlayerLocationDetection* Spa
             CurrentEnemySpawners = PlayerEnemySpawners;
             CurrentSpawnersByType = PlayerSpawnersByType;
         }
-    }
-    else
-    {
-        UE_LOG(LogEnemySpawnSub, Warning, TEXT("OnExitTriggerBox: SpawnBox '%s' not found as a key in SpawnersByLocation map. No spawners removed."), *SpawnBox->GetName());
     }
 }
 

@@ -7,8 +7,9 @@
 #include "ScoreManagerComponent.h"
 #include "ObjectiveBase.generated.h"
 
+class ADoor;
 class UVoiceLineSubsystem;
-class AGate;
+// class AGate;
 class UDisplayTextMessageSubsystem;
 class APlayerLocationDetection;
 class ASystemIntegrity;
@@ -189,6 +190,9 @@ private:
 	void StartDamageShield();
 	void StopDamageShield();
 	void BaseDamageGeneratorShield();
+
+	void CloseDoors();
+	void OpenDoors();
 	
 	FTimerHandle DamageShieldTimerHandle;
 
@@ -269,8 +273,11 @@ private:
 	UPROPERTY(BlueprintAssignable, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Events")
 	FOnObjectiveEvent OnObjectiveCompleted;
 
+	// UPROPERTY(EditInstanceOnly, Category = "Room")
+	// AGate* RoomGate;
+
 	UPROPERTY(EditInstanceOnly, Category = "Room")
-	AGate* RoomGate;
+	TArray<ADoor*> Doors;
 
 	UPROPERTY(VisibleAnywhere, Category = "Room")
 	bool bPlayerInRoom;
