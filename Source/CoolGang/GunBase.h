@@ -77,7 +77,7 @@ public:
 	UNiagaraSystem* UltimateImpactEffect;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Effect" )
-	 UNiagaraSystem* MuzzleFlashEffect;
+	UNiagaraSystem* MuzzleFlashEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Effect" )
 	UNiagaraSystem* UltimateMuzzleFlashEffect;
