@@ -47,24 +47,22 @@ public:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
+protected:
 	// maybe need to change later
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* Mesh;
 	
 	UPROPERTY(EditAnywhere)
 	USceneComponent* Root;
+
 	///   Sound   ///
 	UPROPERTY(EditAnywhere,BlueprintReadOnly , Category = "Gun | Sound" )
 	USoundCue* BulletSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
-	USoundCue* PullTriggerSound;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
 	USoundCue* ReloadSound;
 
-	
 	
 	///   Effect   ///
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Effect" )
@@ -81,12 +79,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Effect" )
 	UNiagaraSystem* UltimateMuzzleFlashEffect;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Gameplay)
-	USceneComponent* MuzzlePosition;
-	
-	UPROPERTY(EditAnywhere, Category = "Camera Shake")
-	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 	
 	/////////////////  Gun property  //////////////////////////
 	UPROPERTY(EditAnywhere, Category = "Gun | Stat")
@@ -119,9 +111,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gun | Stat")
 	float TimeBetweenShots;
 	
-	void InitWeaponStats();
-	void GiveAbilities();
-	
 	UPROPERTY()
 	const class UWeaponAttributeSet* WeaponAttributeSet;
 	
@@ -131,21 +120,26 @@ public:
 	UPROPERTY(EditAnywhere, Category = "GameplayEffect Class")
 	TSubclassOf<UGameplayEffect> GE_InitWeaponStats;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> FireAbilityClass;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> ReloadAbilityClass;
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	/// Ultimate ///
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayAbility> UltimateAbilityClass;
 	
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> UltimateEffectClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
+	float UltimateCooldown {0};
+	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly )
 	UMaterialInstance* PickupMat;
 
+public:
 	UFUNCTION(BlueprintNativeEvent,BlueprintCallable )
 	void StartFire();
 	virtual void StartFire_Implementation();
@@ -169,6 +163,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void OnEquipped();
 
+	void Initialize();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Gameplay, meta = (AllowPrivateAccess = "true"))
+	USceneComponent* MuzzlePosition;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera Shake", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UCameraShakeBase> CameraShakeClass;
+	
+protected:
 	UFUNCTION(BlueprintCallable)
 	void OnUltimateReady();
 
@@ -180,33 +183,16 @@ public:
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite )
 	bool bIsUltimateReady;
-	
-	UFUNCTION(BlueprintCallable)
-	int GetMagazineSize(){return MagazineSize;};
 
 	UFUNCTION(BlueprintCallable)
 	bool IsAutomatic(){return bIsAutomatic;};
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetAmmoCountText(float Ammo);
-
-	// UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	// void SetMaxAmmoText(float Ammo);
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
-	EWeaponType WeaponType;
-
-	EWeaponType GetWeaponType() const { return WeaponType; }
 	
+	void InitWeaponStats();
+	void GiveAbilities();
 	
-	UFUNCTION(BlueprintCallable)
-	TSubclassOf<UCameraShakeBase> GetCameraShakeClass() const
-	{
-		return CameraShakeClass;
-	}
-	
-	void Initialize();
-protected:
 	UFUNCTION()
 	void CalculateTimeBetweenShots(float NewFireRate);
 
