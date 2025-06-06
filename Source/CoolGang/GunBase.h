@@ -171,6 +171,9 @@ public:
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
+	float UltimateDuration {0};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
 	float UltimateCooldown {0};
 	
 protected:

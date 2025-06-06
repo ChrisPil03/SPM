@@ -180,7 +180,6 @@ void AObjectiveBase::CompleteObjective()
 	SetObjectiveState(EObjectiveState::Complete);
 	SetIsActive(false);
 	StopDamageShield();
-	EnqueueVoiceLine(ObjectiveCompletedVoiceLine, 1);
 	if (OnObjectiveCompleted.IsBound())
 	{
 		OnObjectiveCompleted.Broadcast();
@@ -196,6 +195,9 @@ void AObjectiveBase::CompleteObjective()
 	if (!bPlayerInRoom)
 	{
 		CloseDoors();
+	}else
+	{
+		EnqueueVoiceLine(ObjectiveCompletedVoiceLine, 1);
 	}
 	if (ObjectiveCompletedSound)
 	{
@@ -209,19 +211,19 @@ void AObjectiveBase::FailObjective()
 	{
 		SetObjectiveState(EObjectiveState::Failed);
 		SetIsActive(false);
-		EnqueueVoiceLine(ObjectiveFailedVoiceLine, 1);
 		DamageGeneratorShield(ShieldChunkDamage);
 
 		if (!bPlayerInRoom)
 		{
 			CloseDoors();
+		}else
+		{
+			EnqueueVoiceLine(ObjectiveFailedVoiceLine, 1);
 		}
-
 		if (EnableWaypoint.IsBound())
 		{
 			EnableWaypoint.Broadcast(this, false);
 		}
-
 		if (ObjectiveManager)
 		{
 			ObjectiveManager->RegisterFailedObjective(this);
