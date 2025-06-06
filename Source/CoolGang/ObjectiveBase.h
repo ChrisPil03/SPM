@@ -279,7 +279,7 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "Room")
 	TArray<ADoor*> Doors;
 
-	UPROPERTY(VisibleAnywhere, Category = "Room")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Room")
 	bool bPlayerInRoom;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

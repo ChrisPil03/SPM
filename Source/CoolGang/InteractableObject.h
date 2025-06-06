@@ -52,6 +52,10 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInteractableEvent OnActivated;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnInteractableEvent OnReset;
+	
 private:
 	void ShowInteractableOutline(const bool bNewState);
 	void BindInteractTrigger();
