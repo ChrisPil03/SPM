@@ -12,8 +12,19 @@ bool ACyberWarriorGameModeBase::GameIsOver() const
 	return bGameHasEnded;
 }
 
+bool ACyberWarriorGameModeBase::IsGameActive() const
+{
+	return bGameIsActive;
+}
+
+void ACyberWarriorGameModeBase::SetGameActiveState(bool State)
+{
+	bGameIsActive = State;
+}
+
 void ACyberWarriorGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+	bGameIsActive = false;
 	bGameHasEnded = false;
 }
