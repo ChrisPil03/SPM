@@ -54,6 +54,11 @@ void AInteractableObject::Interact(AActor* Interactor)
 void AInteractableObject::ResetInteractable()
 {
 	SetCanInteractWith(false);
+
+	if (OnReset.IsBound())
+	{
+		OnReset.Broadcast();
+	}
 }
 
 void AInteractableObject::SetCanInteractWith(bool const bNewState)

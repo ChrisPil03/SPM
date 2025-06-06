@@ -1,5 +1,6 @@
 #include "EnemySpawnManagerSubsystem.h"
 #include "AIController.h"
+#include "DiveGameMode.h"
 #include "EnemySpawner.h"
 #include "EnemyAI.h"
 #include "EnemyAIController.h"
@@ -13,12 +14,10 @@
 #include "ObjectiveManagerSubsystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-
-DEFINE_LOG_CATEGORY_STATIC(LogEnemySpawnSub, Log, All);
-
 void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+
     const UEnemySpawnManagerSettings* Settings = UEnemySpawnManagerSettings::Get();
     if (Settings && Settings->SpawnConfigurationDataAssetPath.IsValid())
     {
@@ -37,16 +36,15 @@ void UEnemySpawnManagerSubsystem::Initialize(FSubsystemCollectionBase& Collectio
         UE_LOG(LogTemp, Warning, TEXT("SpawnConfigurationDataAssetPath is not set in EnemySpawnManagerSettings or settings are invalid."));
     }
     MainObjectiveActive = false;
-    UpdatedSpawnInterval = BaselineSpawnInterval;
-    SpawnInterval = BaselineSpawnInterval;
-    SpawnIntervalIncreaseCount = 0;
-    SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
+
     OutOfRangeDelegate.BindUFunction(this, FName("CheckOutOfRange"));
     GetWorld()->GetTimerManager().SetTimer(OutOfRangeCheckTimer, OutOfRangeDelegate, RangeCheckTimerInterval, true);
     AliveEnemiesByTypeMap.Empty();
     DeadEnemiesByTypeMap.Empty();
     SpawnersByLocation.Empty();
     CurrentEnemySpawners.Empty();
+
+    
 
     FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::FetchEnemySpawnerCount);
     FWorldDelegates::OnWorldInitializedActors.AddUObject(this, &UEnemySpawnManagerSubsystem::BindPlayerLocationDetection);
@@ -185,40 +183,7 @@ void UEnemySpawnManagerSubsystem::ApplySpawnConfiguration(const UEnemySpawnConfi
         }
     }
 
-    BaselineSpawnInterval           = ConfigData->BaselineSpawnInterval;
-    MinimumSpawnInterval            = ConfigData->MinimumSpawnInterval;
-    MaxSpawnIntervalIncreaseCount   = ConfigData->MaxSpawnIntervalIncreaseCount;
-    SpawnIntervalScale              = ConfigData->SpawnIntervalScale;
-    SpawnAccelerationRate           = ConfigData->SpawnAccelerationRate;
-    SpawnIntervalIncreaseTimer      = ConfigData->SpawnIntervalIncreaseTimer;
-
     // UE_LOG(LogTemp, Log, TEXT("Enemy spawn configuration applied. %d types configured."), MaxEnemyCounts.Num());
-}
-
-void UEnemySpawnManagerSubsystem::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-    
-    SpawnInterval -= DeltaTime;
-    if (SpawnInterval <= 0.f)
-    {
-        SpawnEnemy();
-        SpawnInterval = UpdatedSpawnInterval;
-    }
-
-    SpawnIntervalIncreaseProgress -= DeltaTime;
-    if (SpawnIntervalIncreaseProgress <= 0.f)
-    {
-        UpdatedSpawnInterval = CalculateSpawnTimer(SpawnIntervalIncreaseCount++, BaselineSpawnInterval, MinimumSpawnInterval, SpawnIntervalScale, MaxSpawnIntervalIncreaseCount, SpawnAccelerationRate);
-
-        SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
-    }
-}
-
-TStatId UEnemySpawnManagerSubsystem::GetStatId() const
-{
-   
-    RETURN_QUICK_DECLARE_CYCLE_STAT(UEnemySpawnSubsystem, STATGROUP_Tickables);
 }
 
 void UEnemySpawnManagerSubsystem::SpawnEnemy()
@@ -421,10 +386,8 @@ void UEnemySpawnManagerSubsystem::RelocateToRandomSpawner(AEnemyAI* Enemy)
     if (AEnemySpawner* ChosenSpawner = ChooseRandomSpawner(Enemy->GetClass()))
     {
         AEnemyAIController* AIController = Cast<AEnemyAIController>(Enemy->GetController());
-        AIController->BrainComponent->StopLogic("Relocating");
         ChosenSpawner->RelocateEnemy(Enemy);
-        AIController->BrainComponent->GetBlackboardComponent()->InitializeBlackboard(*(Enemy->GetBehaviorTree()->BlackboardAsset));
-        AIController->BrainComponent->StartLogic();
+        AIController->BrainComponent->GetBlackboardComponent()->SetValueAsBool("HasBeenRelocated", true);
     }
 }
 
@@ -473,6 +436,7 @@ void UEnemySpawnManagerSubsystem::CheckOutOfRange()
 
 void UEnemySpawnManagerSubsystem::BindPlayerLocationDetection(const UWorld::FActorsInitializedParams& Params)
 {
+    GameMode = Cast<ADiveGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
     // UE_LOG(LogTemp, Warning, TEXT("Binding Player Location Detection"));
     TArray<AActor*> FoundLocations;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerLocationDetection::StaticClass(), FoundLocations);
@@ -584,17 +548,4 @@ TArray<AEnemyAI*> UEnemySpawnManagerSubsystem::GetAliveEnemiesByType(const TSubc
 int32 UEnemySpawnManagerSubsystem::GetMaxEnemiesByType(const TSubclassOf<AEnemyAI>& EnemyClass) const
 {
     return (*MaxEnemyCounts.Find(EnemyClass));
-}
-
-float UEnemySpawnManagerSubsystem::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
-{
-
-  float tNorm = (maxCycles <= 0) ? 0.0f : FMath::Clamp(float(cycleIndex) / float(maxCycles), 0.0f, 1.0f);
-
-  float deltaNorm = FMath::Pow(tNorm, exponent);
-
-  float t = baselineInterval
-          - intervalScale * deltaNorm;
-
-  return FMath::Max(minimumInterval, t);
 }
