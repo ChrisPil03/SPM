@@ -162,6 +162,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void OnEquipped();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnUnequipped();
+
 	void Initialize();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Gameplay, meta = (AllowPrivateAccess = "true"))
@@ -175,6 +178,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
 	float UltimateCooldown {0};
+
+
 	
 protected:
 	UFUNCTION(BlueprintCallable)
@@ -236,6 +241,8 @@ protected:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Weapon")
 	FOnReloadCancelDelegate OnReloadCancelDelegate;
+	
+	
 };
 
 
