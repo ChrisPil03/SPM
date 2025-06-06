@@ -149,8 +149,8 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	TArray<AGunBase*> Guns;
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
-	void GiveGun(const TSubclassOf<AGunBase>& GunClass);
+	UFUNCTION(BlueprintCallable, Category = "Weapon", meta = (AllowPrivateAccess = "true"), meta = (AllowClasses = "AGunBase"))
+	void GiveGun(const TSubclassOf<AGunBase> GunClass);
 
 	UPROPERTY()
 	AGunBase* EquippedGun;
