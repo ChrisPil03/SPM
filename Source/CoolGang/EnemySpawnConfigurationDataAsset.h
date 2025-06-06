@@ -30,23 +30,5 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Enemy Configurations", meta = (TitleProperty = "EnemyClass"))
 	TArray<FEnemyTypeSpawnConfig> EnemyConfigs;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Rate", meta = (ClampMin = "0", UIMin = "0"))
-	double BaselineSpawnInterval = 4.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Rate", meta = (ClampMin = "0", UIMin = "0"))
-	double MinimumSpawnInterval = .4f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Rate", meta = (ClampMin = "0", UIMin = "0"))
-	int32 MaxSpawnIntervalIncreaseCount = 15;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Rate", meta = (ClampMin = "0", UIMin = "0"))
-	double SpawnIntervalScale = 2.5;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Rate", meta = (ClampMin = "0", UIMin = "0"))
-	double SpawnAccelerationRate = 3.4;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn Rate", meta = (ClampMin = "0", UIMin = "0"))
-	double SpawnIntervalIncreaseTimer = 20.0;
-	
 	UEnemySpawnConfigurationDataAsset() {}
 };

@@ -281,6 +281,11 @@ void AObjectiveBase::ResetProgress()
 {
 	ProgressTimer->ResetTimer();
 	Progress = ProgressTimer->GetProgress();
+
+	if (OnUniqueProgressChanged.IsBound())
+	{
+		OnUniqueProgressChanged.Broadcast();
+	}
 }
 
 void AObjectiveBase::FindObjectiveManager()

@@ -84,8 +84,18 @@ void AObjectiveRestoreServers::SetIsActive(const bool bNewState)
 	
 	if (bNewState)
 	{
+		for (AObjectiveServer* Server : AllServers)
+		{
+			Server->SetServerLightColor(true);
+		}
+		
 		SelectServers();
 		ActivateControlPanel(true);
+
+		if (OnUniqueProgressChanged.IsBound())
+		{
+			OnUniqueProgressChanged.Broadcast();
+		}
 	}
 }
 
@@ -189,13 +199,20 @@ void AObjectiveRestoreServers::ResetSelectedServers()
 
 void AObjectiveRestoreServers::ResetServerRoom()
 {
-	ActivateControlPanel(false);
-	ResetSelectedServers();
-	ServerInteractions = 0;
+	FailingServers.Empty();
 	if (OnUniqueProgressChanged.IsBound())
 	{
 		OnUniqueProgressChanged.Broadcast();
 	}
+	ActivateControlPanel(false);
+	ResetSelectedServers();
+	ServerInteractions = 0;
+	
+	for (AObjectiveServer* Server : AllServers)
+	{
+		Server->SetServerLightColor(false);
+	}
+	
 	// SetServerHallStatus(EServerHallStatus::Operating);
 	// ResetHeatBuildup();
 	// CoolingProgress = 0;

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 
+#include "EnemySpawnManagerSubsystem.h"
 #include "ObjectiveManagerSubsystem.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
@@ -11,7 +12,6 @@
 void ADiveGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 
@@ -34,21 +34,41 @@ ADiveGameMode::ADiveGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+	
+	UpdatedSpawnInterval = BaselineSpawnInterval;
+	SpawnInterval = BaselineSpawnInterval;
+	SpawnIntervalIncreaseCount = 0;
+	SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
 }
 
 void ADiveGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (!bGameHasEnded)
+	if (bGameIsActive)
 	{
 		HandleElapsedTime(DeltaSeconds);
 		NextObjectiveTimer -= DeltaSeconds;
 		if (NextObjectiveTimer <= 0)
 		{
-			NextObjectiveTimer = ComputeTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
+			NextObjectiveTimer = CalculateObjectiveTimer(ObjectiveCount++, BaselineObjectiveTimer, MinimumObjectiveTimer,TimeScalingValue);
 			//UE_LOG(LogTemp, Warning, TEXT("Activating random objective"))
 			GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ActivateRandomObjective(ObjectiveMalfunctionTimer, 0.1, 10);
 	
+		}
+
+		SpawnInterval -= DeltaSeconds;
+		if (SpawnInterval <= 0.f)
+		{
+			GetWorld()->GetSubsystem<UEnemySpawnManagerSubsystem>()->SpawnEnemy();
+			SpawnInterval = UpdatedSpawnInterval;
+		}
+
+		SpawnIntervalIncreaseProgress -= DeltaSeconds;
+		if (SpawnIntervalIncreaseProgress <= 0.f)
+		{
+			UpdatedSpawnInterval = CalculateSpawnTimer(SpawnIntervalIncreaseCount++, BaselineSpawnInterval, MinimumSpawnInterval, SpawnIntervalScale, MaxSpawnIntervalIncreaseCount, SpawnAccelerationRate);
+
+			SpawnIntervalIncreaseProgress = SpawnIntervalIncreaseTimer;
 		}
 	}
 }
@@ -56,6 +76,7 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 void ADiveGameMode::EndGame()
 {
 	UE_LOG(LogTemp, Display, TEXT("EndGame"));
+	bGameIsActive = false;
 	bGameHasEnded = true;
 	AController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	Controller->GameHasEnded(Controller->GetPawn(), false);
@@ -76,10 +97,23 @@ void ADiveGameMode::GetElapsedMinutesAndSeconds(int32& OutMinutes, int32& OutSec
 }
 
 
-float ADiveGameMode::ComputeTimer(int cycleIndex, float T0, float Tmin, float k)
+float ADiveGameMode::CalculateObjectiveTimer(int cycleIndex, float T0, float Tmin, float k)
 {
 	float t = T0 - k * std::logf(cycleIndex + 1);
 	return std::max(Tmin, t);
+}
+
+float ADiveGameMode::CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent)
+{
+
+	float tNorm = (maxCycles <= 0) ? 0.0f : FMath::Clamp(float(cycleIndex) / float(maxCycles), 0.0f, 1.0f);
+
+	float deltaNorm = FMath::Pow(tNorm, exponent);
+
+	float t = baselineInterval
+			- intervalScale * deltaNorm;
+
+	return FMath::Max(minimumInterval, t);
 }
 
 void ADiveGameMode::HandleElapsedTime(const float DeltaTime)

@@ -55,13 +55,14 @@ void APlayerCharacter::BeginPlay()
 	).AddUObject(this, &APlayerCharacter::OnCurrentHealthChanged);
 	
 	InitPlayerStats();
-	GiveGun(Pistol);
-	GiveGun(Shotgun);
-	GiveGun(Rifle);
+	
 
 	bDead = false;
 	
-	EquippedGun->SetActorHiddenInGame(false);
+	//GiveGun(Pistol);
+	//GiveGun(Shotgun);
+	//GiveGun(Rifle);
+	//ChangeEquippedGun(2);
 	
 	UE_LOG(LogTemp, Display, TEXT("Begin play for character"));
 	if (OnPlayerConstructed.IsBound())
@@ -306,6 +307,7 @@ void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 void APlayerCharacter::ChangeEquippedGun(int32 WeaponSlot)
 {
 	EquipWeapon(Guns[WeaponSlot]);
+	OnWeaponChangedDelegate.Broadcast(WeaponSlot);
 	
 }
 
