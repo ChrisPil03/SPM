@@ -78,8 +78,9 @@ void AGunBase::CancelReload()
 
 void AGunBase::OnUltimateReady()
 {
-	OnUltimateReadyDelegate.Broadcast();
 	bIsUltimateReady = true;
+	OnUltimateReadyDelegate.Broadcast();
+	
 }
 
 void AGunBase::OnUltimateStart()
