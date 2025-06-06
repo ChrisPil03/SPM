@@ -14,7 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerConstructed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerTakeDamage);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrentHealthChangedDelegate, float, CurrentHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDeath);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FONCurrentWeaponChanged, int, WeaponIndex);
 class AGunBase;
 struct FOnAttributeChangeData;
 UCLASS(BlueprintType)
@@ -89,6 +89,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ChangeEquippedGun(int32 WeaponSlot);
 
+	UPROPERTY(BlueprintAssignable, Category = "Events | Player | Weapon")
+	FONCurrentWeaponChanged OnWeaponChangedDelegate;
+
 	UFUNCTION(BlueprintCallable)
 	AGunBase* GetEquippedGun() const{ return EquippedGun;};
 	
@@ -146,6 +149,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Abilities", meta = (AllowPrivateAccess = "true"))
 	TArray<AGunBase*> Guns;
 
+	UFUNCTION(BlueprintCallable, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	void GiveGun(const TSubclassOf<AGunBase>& GunClass);
 
 	UPROPERTY()

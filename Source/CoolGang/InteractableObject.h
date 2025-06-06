@@ -35,6 +35,8 @@ public:
 	virtual void Interact(AActor* Interactor) override;
 	virtual void ResetInteractable();
 	bool GetCanInteractWith() const { return bCanInteractWith && bPlayerInProximity; }
+
+	UFUNCTION(BlueprintCallable)
 	void SetCanInteractWith(bool const bNewState);
 	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
 

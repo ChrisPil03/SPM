@@ -20,9 +20,14 @@ public:
 	virtual void PlayerKilled(APlayerCharacter* PlayerKilled);
 
 	virtual bool GameIsOver() const;
+	virtual bool IsGameActive() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetGameActiveState(bool State);
 	
 protected:
 	virtual void BeginPlay() override;
+	bool bGameIsActive;
 	bool bGameHasEnded;
 	
 };
