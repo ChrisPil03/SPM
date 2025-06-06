@@ -46,17 +46,6 @@ void AObjectiveTimedTasks::CompleteObjective()
 	Super::CompleteObjective();
 }
 
-void AObjectiveTimedTasks::IncreaseObjectiveProgress(float const DeltaTime)
-{
-	Super::IncreaseObjectiveProgress(DeltaTime);
-	
-	// if (GetObjectiveProgress() == FProgressTimer::FullCompletion)
-	// {
-	// 	UE_LOG(LogTemp, Error, TEXT("Failed"));
-	// 	FailObjective();
-	// }
-}
-
 void AObjectiveTimedTasks::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -130,6 +119,11 @@ void AObjectiveTimedTasks::RegisterInteraction(AInteractableObject* Interactable
 	}
 
 	InteractedTasks++;
+
+	if (OnUniqueProgressChanged.IsBound())
+	{
+		OnUniqueProgressChanged.Broadcast();
+	}
 
 	if (InteractedTasks == AllInteractableObjects.Num())
 	{
