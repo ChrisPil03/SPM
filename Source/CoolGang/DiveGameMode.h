@@ -39,32 +39,60 @@ protected:
 	 virtual void BeginPlay() override;
 	
 private:
-	static float ComputeTimer(int cycleIndex, float T0 = 180.0f, float Tmin = 50.0f, float k  = 20.0f);
+	static float CalculateObjectiveTimer(int cycleIndex, float T0 = 180.0f, float Tmin = 50.0f, float k  = 20.0f);
 	void HandleElapsedTime(const float DeltaTime);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Objective", meta = (AllowPrivateAccess))
 	float BaselineObjectiveTimer = 30.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Objective", meta = (AllowPrivateAccess))
 	float MinimumObjectiveTimer = 15.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Objective", meta = (AllowPrivateAccess))
 	float TimeScalingValue = 2.f;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Objective", meta = (AllowPrivateAccess))
 	float NextObjectiveTimer = 10.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Objective", meta = (AllowPrivateAccess))
 	float ObjectiveMalfunctionTimer = 30.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	int32 EnemiesKilled = 0;
 
-	UPROPERTY(VisibleAnywhere, meta = (AllowPrivateAccess))
+	UPROPERTY(VisibleAnywhere, Category="Objective", meta = (AllowPrivateAccess))
 	int32 ObjectiveCount = 0;
 
 	UPROPERTY(VisibleAnywhere, Category = "Timer")
 	float ElapsedTime = 0.f;
 
 	FOnMinutePassed OnMinutePassed;
+
+
+	static float CalculateSpawnTimer(int cycleIndex, float baselineInterval, float minimumInterval, float intervalScale, int maxCycles, float exponent);
+	
+	UPROPERTY(EditDefaultsOnly, Category="Spawning", meta = (AllowPrivateAccess))
+	double BaselineSpawnInterval = 4.0;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning", meta = (AllowPrivateAccess))
+	double MinimumSpawnInterval = 0.2;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning", meta = (AllowPrivateAccess))
+	int32 MaxSpawnIntervalIncreaseCount = 20;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning", meta = (AllowPrivateAccess))
+	double SpawnIntervalScale = 2.5;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning", meta = (AllowPrivateAccess))
+	double SpawnAccelerationRate = 3.2;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Spawning", meta = (AllowPrivateAccess))
+	double SpawnIntervalIncreaseTimer = 20.0;
+
+	double UpdatedSpawnInterval;
+	double SpawnInterval;
+	int32 SpawnIntervalIncreaseCount;
+	double SpawnIntervalIncreaseProgress;
+
+	
 };
