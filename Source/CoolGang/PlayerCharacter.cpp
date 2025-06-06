@@ -337,7 +337,7 @@ void APlayerCharacter::OnCurrentHealthChanged(const FOnAttributeChangeData& Data
 	OnCurrentHealthChangedDelegate.Broadcast(NewCurrentHealth);
 }
 
-void APlayerCharacter::GiveGun(const TSubclassOf<AGunBase>& GunClass)
+void APlayerCharacter::GiveGun(const TSubclassOf<AGunBase> GunClass)
 {
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
 	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
