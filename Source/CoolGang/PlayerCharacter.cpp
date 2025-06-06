@@ -296,6 +296,7 @@ void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 		EquippedGun->CancelReload();
 		// UE_LOG(LogTemp, Warning, TEXT("CancelReload"));
 		ReleasedTrigger();
+		EquippedGun->OnUnequipped();
 	}
 
 	EquippedGun = NewWeapon;
