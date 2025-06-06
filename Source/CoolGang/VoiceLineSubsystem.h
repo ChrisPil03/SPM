@@ -12,9 +12,9 @@ struct FVoiceLineEntry
 	GENERATED_BODY()
 
 	UPROPERTY()
-	USoundBase* VoiceLine;
+	USoundBase* VoiceLine = nullptr;
 	UPROPERTY()
-	int32 Priority;
+	int32 Priority = 0;
 };
 
 UCLASS()
