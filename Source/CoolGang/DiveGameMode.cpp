@@ -44,7 +44,7 @@ ADiveGameMode::ADiveGameMode()
 void ADiveGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (bGameIsActive)
+	if (bGameIsActive && !bGameHasEnded)
 	{
 		HandleElapsedTime(DeltaSeconds);
 		NextObjectiveTimer -= DeltaSeconds;
@@ -75,6 +75,10 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 
 void ADiveGameMode::EndGame()
 {
+	if (OnGameOver.IsBound())
+	{
+		OnGameOver.Broadcast();
+	}
 	UE_LOG(LogTemp, Display, TEXT("EndGame"));
 	bGameIsActive = false;
 	bGameHasEnded = true;
