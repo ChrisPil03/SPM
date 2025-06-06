@@ -195,13 +195,12 @@ void AObjectiveServer::ResumeRestoration()
 
 void AObjectiveServer::ResetServer()
 {
-	Super::Reset();
+	Super::ResetInteractable();
 	SetServerState(EServerState::Idle);
 	ProgressTimer->ResetTimer();
 	FailProgressTimer->ResetTimer();
 	RestoreProgress = 0;
 	ResetMaterial();
-	SetCanInteractWith(false);
 	SetSmokeEffectActive(false);
 	GetWorld()->GetTimerManager().ClearTimer(MalfunctionTimerHandle);
 }
