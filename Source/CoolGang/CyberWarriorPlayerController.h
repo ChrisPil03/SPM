@@ -40,6 +40,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> OutOfTimeScreenClass;
 
+	UFUNCTION(BlueprintCallable)
+	void DisplayResultScreen();
 	
 	UPROPERTY(EditAnywhere)
 	float RestartDelay = 5;
