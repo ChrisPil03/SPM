@@ -143,7 +143,7 @@ void AObjectiveRestoreServers::PrepareSelectedServers()
 	{
 		// Server->SetCanInteractWith(false);
 		// Server->SetServerState(EServerState::NeedRestoring);
-		Server->SetOnInteractFunction(this, &AObjectiveRestoreServers::OnInteract);
+		Server->InteractDelegate.AddDynamic(this, &AObjectiveRestoreServers::OnInteract);
 		// Server->SetHeatUpFunction(HeatUpDelegate);
 		if (!Server->CompleteDelegate.IsAlreadyBound(this, &AObjectiveRestoreServers::RegisterServerRestored))
 		{
@@ -178,7 +178,7 @@ void AObjectiveRestoreServers::BindControlPanel()
 {
 	if (ControlPanel)
 	{
-		ControlPanel->SetOnInteractFunction(this, &AObjectiveRestoreServers::RegisterControlPanelInteraction);
+		ControlPanel->InteractDelegate.AddDynamic(this, &AObjectiveRestoreServers::RegisterControlPanelInteraction);
 	}else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ObjectiveRestoreServers: ControlPanel is missing"));

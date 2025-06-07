@@ -29,24 +29,23 @@ void AInteractableObject::Tick(float DeltaTime)
 
 void AInteractableObject::Interact(AActor* Interactor)
 {
-	if (InteractDelegate.IsBound())
-	{
-		InteractDelegate.Broadcast(this);
-	}
 	if (GetCanInteractWith())
 	{
-		
-		if (!PerformDelegate.IsBound())
+		if (InteractDelegate.IsBound())
 		{
-			return;
+			InteractDelegate.Broadcast(this);
 		}
-		PerformDelegate.Broadcast(this);
+		// if (!PerformDelegate.IsBound())
+		// {
+		// 	return;
+		// }
+		// PerformDelegate.Broadcast(this);
 		SetCanInteractWith(false);
 
 		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
 		UGameplayStatics::GetPlayerCharacter(this, 0)))
 		{
-			Player->ClearAvailableInteractable(this);
+			Player->ClearInteractable(this);
 		}
 	}
 }
@@ -65,12 +64,20 @@ void AInteractableObject::SetCanInteractWith(bool const bNewState)
 {
 	if (!bNewState)
 	{
-		InteractionNotAvailable(nullptr);
+		InteractionTriggerExit(nullptr);
 	}else
 	{
 		if (OnActivated.IsBound())
 		{
 			OnActivated.Broadcast();
+		}
+		if (bPlayerInProximity)
+		{
+			if (APlayerCharacter* Player = Cast<APlayerCharacter>(
+				UGameplayStatics::GetPlayerCharacter(this, 0)))
+			{
+				Player->ShowInteractPrompt(true);
+			}
 		}
 	}
 	bCanInteractWith = bNewState;
@@ -87,36 +94,32 @@ void AInteractableObject::BindInteractTrigger()
 {
 	if (InteractTrigger)
 	{
-		InteractTrigger->AddOnTriggerEnterFunction(this, &AInteractableObject::InteractionAvailable);
-		InteractTrigger->AddOnTriggerExitFunction(this, &AInteractableObject::InteractionNotAvailable);
+		InteractTrigger->AddOnTriggerEnterFunction(this, &AInteractableObject::InteractionTriggerEnter);
+		InteractTrigger->AddOnTriggerExitFunction(this, &AInteractableObject::InteractionTriggerExit);
 	}
 }
 
-void AInteractableObject::InteractionAvailable(APlayerLocationDetection* Trigger)
+void AInteractableObject::InteractionTriggerEnter(APlayerLocationDetection* Trigger)
 {
-	if (bCanInteractWith)
-	{
-		bPlayerInProximity = true;
+	bPlayerInProximity = true;
 
-		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
-			UGameplayStatics::GetPlayerCharacter(this, 0)))
-		{
-			Player->AddAvailableInteractable(this);
-		}
+	if (APlayerCharacter* Player = Cast<APlayerCharacter>(
+		UGameplayStatics::GetPlayerCharacter(this, 0)))
+	{
+		Player->AddInteractable(this);
+		UE_LOG(LogTemp, Warning, TEXT("Entered interaction box"));
 	}
 }
 
-void AInteractableObject::InteractionNotAvailable(APlayerLocationDetection* Trigger)
+void AInteractableObject::InteractionTriggerExit(APlayerLocationDetection* Trigger)
 {
-	if (bCanInteractWith)
-	{
-		bPlayerInProximity = false;
+	bPlayerInProximity = false;
 		
-		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
-			UGameplayStatics::GetPlayerCharacter(this, 0)))
-		{
-			Player->ClearAvailableInteractable(this);
-		}
+	if (APlayerCharacter* Player = Cast<APlayerCharacter>(
+		UGameplayStatics::GetPlayerCharacter(this, 0)))
+	{
+		Player->ClearInteractable(this);
+		UE_LOG(LogTemp, Warning, TEXT("Exited interaction box"));
 	}
 }
 

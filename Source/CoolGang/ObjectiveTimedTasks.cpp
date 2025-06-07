@@ -14,9 +14,7 @@ void AObjectiveTimedTasks::BeginPlay()
 
 	for (AInteractableObject* Interactable : AllInteractableObjects)
 	{
-		FPerformDelegate Delegate;
-		Delegate.AddUObject(this, &AObjectiveTimedTasks::RegisterInteraction);
-		Interactable->SetInteractFunction(Delegate);
+		Interactable->InteractDelegate.AddDynamic(this, &AObjectiveTimedTasks::RegisterInteraction);
 	}
 	SetInteractablesInteractable(false);
 	FTimerCompletionDelegate Delegate;
