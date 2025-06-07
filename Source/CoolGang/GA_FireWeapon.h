@@ -61,14 +61,18 @@ class COOLGANG_API UGA_FireWeapon : public UGameplayAbility
 	void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& TargetData);
 
 	UFUNCTION(BlueprintCallable)
-	void Fire();
+	bool Fire();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void SpawnImpactEffect(const FHitResult& HitResult) const;
 
 private:
 	bool GetTraceStartLocationAndRotation(FVector& OutStartPoint, FRotator& OutRotation) const;
 	bool IsDuplicateHit(const TArray<FHitResult>& ExistingHits, const AActor* Actor);
 
 	void DrawImpactPointDeBug(const FVector& Location) const;
-	void SpawnImpactEffect(const FHitResult& HitResult) const;
+
+	
 
 	UPROPERTY()
 	FGameplayAbilityTargetDataHandle TargetDator;
