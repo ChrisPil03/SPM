@@ -22,7 +22,7 @@ void UGA_FireWeapon::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
+	//EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
 
 bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -42,14 +42,14 @@ void UGA_FireWeapon::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FG
 	
 }
 
-void UGA_FireWeapon::Fire()
+bool UGA_FireWeapon::Fire()
 {
 	TArray<FHitResult> HitResults;
 	TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("GA_FireWeapon::Fire"));
-	BulletTrace(HitResults);
+	return BulletTrace(HitResults);
 
-	// Pass it to your ability logic
-	//OnTargetDataReady(TargetData);
+
+	//OnTargetDataReady(TargetDator);
 
 }
 
@@ -281,7 +281,11 @@ bool UGA_FireWeapon::ChainingBulletTrace(TArray<FHitResult>& HitResults, const F
     		{
     			ProcessHitChain(InitialHit, PelletHits, MaxChainDepth, SphereRadius, OverlapQueryParams);
     		}
-			
+
+    		if (!Enemy)
+    		{
+    			SpawnImpactEffect(InitialHit);
+    		}
     		if (!PelletHits.IsEmpty())
     		{
 				HitResults.Append(PelletHits);
@@ -437,7 +441,7 @@ void UGA_FireWeapon::DrawImpactPointDeBug(const FVector& Location) const
 			);
 }
 
-void UGA_FireWeapon::SpawnImpactEffect(const FHitResult& HitResult) const
+void UGA_FireWeapon::SpawnImpactEffect_Implementation(const FHitResult& HitResult) const
 {
 	FGameplayCueParameters CueParams;
 	FGameplayEffectContextHandle EffectContext = GetActorInfo().AbilitySystemComponent.Get()->MakeEffectContext();
