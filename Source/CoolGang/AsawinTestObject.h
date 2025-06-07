@@ -26,6 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintImplementableEvent)
 	void Interact(AActor* Interactor);
+	virtual bool CanInteract() override { return false; }
 
 };
 

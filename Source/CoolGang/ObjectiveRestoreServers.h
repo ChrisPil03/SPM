@@ -87,6 +87,7 @@ private:
 	void ResetServerRoom();
 	void SetRandomServersToSelect();
 
+	UFUNCTION()
 	void OnInteract(AInteractableObject* InteractableObject);
 
 	// void InitializeTimers();
