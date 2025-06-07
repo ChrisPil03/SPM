@@ -193,7 +193,7 @@ void AObjectiveCapture::BindInteractable()
 {
 	if (ControlPanel)
 	{
-		ControlPanel->SetOnInteractFunction(this, &AObjectiveCapture::RegisterControlPanelInteraction);	
+		ControlPanel->InteractDelegate.AddDynamic(this, &AObjectiveCapture::RegisterControlPanelInteraction);
 	}
 }
 

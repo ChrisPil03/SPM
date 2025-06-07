@@ -57,9 +57,9 @@ void AObjectiveServer::Interact(AActor* Interactor)
 		ResumeRestoration();
 		ResetMaterial();
 
-		if (PerformDelegate.IsBound())
+		if (InteractDelegate.IsBound())
 		{
-			PerformDelegate.Broadcast(this);
+			InteractDelegate.Broadcast(this);
 		}
 	}
 }
