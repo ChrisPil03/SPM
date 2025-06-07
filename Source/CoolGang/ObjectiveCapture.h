@@ -52,6 +52,7 @@ public:
 private:
 	void FindInteractable();
 	void BindInteractable();
+	UFUNCTION()
 	void RegisterControlPanelInteraction(AInteractableObject* Interactable);
 	
 	UFUNCTION()

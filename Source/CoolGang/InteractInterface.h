@@ -24,5 +24,5 @@ class COOLGANG_API IInteractInterface
 public:
 	
 	virtual void Interact(AActor* Interactor) = 0;
-	
+	virtual bool CanInteract() = 0;
 };

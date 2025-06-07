@@ -28,24 +28,25 @@ protected:
 
 	UStaticMeshComponent* GetMesh() const { return Mesh; }
 
-	FPerformDelegate PerformDelegate;
+	// FPerformDelegate PerformDelegate;
 public:
 	virtual void Tick(float DeltaTime) override;
 	
 	virtual void Interact(AActor* Interactor) override;
+	virtual bool CanInteract() override { return bCanInteractWith; }
 	virtual void ResetInteractable();
 	bool GetCanInteractWith() const { return bCanInteractWith && bPlayerInProximity; }
 
 	UFUNCTION(BlueprintCallable)
 	void SetCanInteractWith(bool const bNewState);
-	void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
+	// void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
 
 	
-	template <typename T>
-	void SetOnInteractFunction(T* Object, void (T::*Func)(AInteractableObject*))
-	{
-		PerformDelegate.AddUObject(Object, Func);
-	}
+	// template <typename T>
+	// void SetOnInteractFunction(T* Object, void (T::*Func)(AInteractableObject*))
+	// {
+	// 	PerformDelegate.AddUObject(Object, Func);
+	// }
 
 	UPROPERTY(BlueprintAssignable)
 	FInteractDelegate InteractDelegate;
@@ -59,8 +60,8 @@ public:
 private:
 	void ShowInteractableOutline(const bool bNewState);
 	void BindInteractTrigger();
-	void InteractionAvailable(APlayerLocationDetection* Trigger);
-	void InteractionNotAvailable(APlayerLocationDetection* Trigger);
+	void InteractionTriggerEnter(APlayerLocationDetection* Trigger);
+	void InteractionTriggerExit(APlayerLocationDetection* Trigger);
 	void FindInteractTrigger();
 	
 	UPROPERTY(EditAnywhere, Category = "Interact")
