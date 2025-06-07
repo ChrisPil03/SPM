@@ -111,8 +111,10 @@ public:
 	
 	void Die();
 
-	void AddAvailableInteractable(IInteractInterface* Interactable);
-	void ClearAvailableInteractable(IInteractInterface* Interactable);
+	// ------- Interact -------- //
+	void AddInteractable(IInteractInterface* Interactable);
+	void ClearInteractable(IInteractInterface* Interactable);
+	void ShowInteractPrompt(const bool bShow) const; // Should not be in player
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess="true"), Category="Component")
@@ -180,7 +182,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite ,meta = (AllowPrivateAccess = "true"), Category = "Component")
 	UScoreManagerComponent* ScoreManagerComponent;
 	
-	// IInteractInterface* AvailableInteractable;
+	// ------- Interact ------- //
 	TArray<IInteractInterface*> AvailableInteractions;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))

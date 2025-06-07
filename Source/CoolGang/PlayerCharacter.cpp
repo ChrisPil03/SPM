@@ -425,29 +425,48 @@ void APlayerCharacter::InitPlayerStats()
 // ----------------- Interact ----------------- //
 // -------------------------------------------- //
 
-void APlayerCharacter::AddAvailableInteractable(IInteractInterface* Interactable)
+void APlayerCharacter::AddInteractable(IInteractInterface* Interactable)
 {
 	if (!AvailableInteractions.Contains(Interactable))
 	{
 		AvailableInteractions.Add(Interactable);	
 	}
-	
-	if (InteractWidget)
+	if (Interactable->CanInteract())
 	{
-		InteractWidget->SetVisibility(ESlateVisibility::Visible);
+		ShowInteractPrompt(true);
 	}
 }
 
-void APlayerCharacter::ClearAvailableInteractable(IInteractInterface* Interactable)
+void APlayerCharacter::ClearInteractable(IInteractInterface* Interactable)
 {
 	if (AvailableInteractions.Contains(Interactable))
 	{
 		AvailableInteractions.Remove(Interactable);
-
-		if (AvailableInteractions.IsEmpty() && InteractWidget)
+	}
+	for (IInteractInterface* Inter : AvailableInteractions)
+	{
+		if (Inter->CanInteract())
 		{
-			InteractWidget->SetVisibility(ESlateVisibility::Hidden);
+			return;
 		}
+	}
+	ShowInteractPrompt(false);
+}
+
+void APlayerCharacter::ShowInteractPrompt(const bool bShow) const
+{
+	if (!InteractWidget)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Interact widget not found"));
+		return;
+	}
+	if (bShow && InteractWidget->GetVisibility() != ESlateVisibility::Visible)
+	{
+		InteractWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+	else if (!bShow && InteractWidget->GetVisibility() != ESlateVisibility::Collapsed)
+	{
+		InteractWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
@@ -455,9 +474,13 @@ void APlayerCharacter::Interact()
 {
 	if (!AvailableInteractions.IsEmpty())
 	{
-		if (IInteractInterface* Interactable = AvailableInteractions.Last())
+		for (int i = AvailableInteractions.Num() - 1; i >= 0; i--)
 		{
-			Interactable->Interact(this);
-		}	
+			if (AvailableInteractions[i]->CanInteract())
+			{
+				AvailableInteractions[i]->Interact(this);
+				return;
+			}
+		}
 	}
 }

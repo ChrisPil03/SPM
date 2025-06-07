@@ -57,8 +57,14 @@ protected:
 	USceneComponent* Root;
 
 	///   Sound   ///
-	UPROPERTY(EditAnywhere,BlueprintReadOnly , Category = "Gun | Sound" )
+	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Gun | Sound" )
 	USoundCue* BulletSound;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Gun | Sound" )
+	USoundCue* NormalBulletSound;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Gun | Sound" )
+	USoundCue* UltimateBulletSound;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
 	USoundCue* ReloadSound;
