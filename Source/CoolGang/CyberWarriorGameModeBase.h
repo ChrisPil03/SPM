@@ -19,10 +19,16 @@ class COOLGANG_API ACyberWarriorGameModeBase : public AGameModeBase
 public:
 	virtual void PlayerKilled(APlayerCharacter* PlayerKilled);
 
+	UFUNCTION(BlueprintCallable)
 	virtual bool GameIsOver() const;
+	virtual bool IsGameActive() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetGameActiveState(bool State);
 	
 protected:
 	virtual void BeginPlay() override;
+	bool bGameIsActive;
 	bool bGameHasEnded;
 	
 };

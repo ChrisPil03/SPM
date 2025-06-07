@@ -55,13 +55,14 @@ void APlayerCharacter::BeginPlay()
 	).AddUObject(this, &APlayerCharacter::OnCurrentHealthChanged);
 	
 	InitPlayerStats();
-	GiveGun(Pistol);
-	GiveGun(Shotgun);
-	GiveGun(Rifle);
+	
 
 	bDead = false;
 	
-	EquippedGun->SetActorHiddenInGame(false);
+	//GiveGun(Pistol);
+	//GiveGun(Shotgun);
+	//GiveGun(Rifle);
+	//ChangeEquippedGun(2);
 	
 	UE_LOG(LogTemp, Display, TEXT("Begin play for character"));
 	if (OnPlayerConstructed.IsBound())
@@ -251,6 +252,10 @@ void APlayerCharacter::ReleasedTrigger()
 
 void APlayerCharacter::ActivateGunAbility()
 {
+	if (!EquippedGun)
+	{
+		return;
+	}
 	EquippedGun->ActivateAbility();
 }
 
@@ -291,6 +296,7 @@ void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 		EquippedGun->CancelReload();
 		// UE_LOG(LogTemp, Warning, TEXT("CancelReload"));
 		ReleasedTrigger();
+		EquippedGun->OnUnequipped();
 	}
 
 	EquippedGun = NewWeapon;
@@ -305,7 +311,12 @@ void APlayerCharacter::EquipWeapon(AGunBase* NewWeapon)
 
 void APlayerCharacter::ChangeEquippedGun(int32 WeaponSlot)
 {
-	EquipWeapon(Guns[WeaponSlot]);
+	if (Guns.IsValidIndex(WeaponSlot) && Guns[WeaponSlot] != nullptr)
+	{
+		EquipWeapon(Guns[WeaponSlot]);
+		OnWeaponChangedDelegate.Broadcast(WeaponSlot);
+	}
+	
 	
 }
 
@@ -335,7 +346,7 @@ void APlayerCharacter::OnCurrentHealthChanged(const FOnAttributeChangeData& Data
 	OnCurrentHealthChangedDelegate.Broadcast(NewCurrentHealth);
 }
 
-void APlayerCharacter::GiveGun(const TSubclassOf<AGunBase>& GunClass)
+void APlayerCharacter::GiveGun(const TSubclassOf<AGunBase> GunClass)
 {
 	EquippedGun = GetWorld()->SpawnActor<AGunBase>(GunClass);
 	EquippedGun->AttachToComponent(GunComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);

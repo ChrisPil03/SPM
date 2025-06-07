@@ -133,8 +133,7 @@ protected:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UGameplayEffect> UltimateEffectClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
-	float UltimateCooldown {0};
+	
 	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly )
 	UMaterialInstance* PickupMat;
@@ -163,6 +162,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void OnEquipped();
 
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnUnequipped();
+
 	void Initialize();
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Gameplay, meta = (AllowPrivateAccess = "true"))
@@ -170,6 +172,14 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera Shake", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<UCameraShakeBase> CameraShakeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
+	float UltimateDuration {0};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gun | Ultimate", meta = (AllowPrivateAccess = "true"))
+	float UltimateCooldown {0};
+
+
 	
 protected:
 	UFUNCTION(BlueprintCallable)
@@ -231,6 +241,8 @@ protected:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Weapon")
 	FOnReloadCancelDelegate OnReloadCancelDelegate;
+	
+	
 };
 
 
