@@ -183,6 +183,18 @@ TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
         for (TObjectPtr<USphereComponent> Node : EnemyTargetSpheres)
         {
             if (!Node) continue;
+
+            // --- START: NEW LINE OF SIGHT CHECK ---
+            bool bHasLineOfSight;
+            {
+                TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_PC_GetMovementNodes_LineOfSightCheck"));
+                bHasLineOfSight = HasLineOfSightToNode(Node.Get());
+            }
+            if (!bHasLineOfSight)
+            {
+                continue;
+            }
+            // --- END: NEW LINE OF SIGHT CHECK ---
         
             bool bIsInsideSolid;
             {
@@ -220,6 +232,39 @@ TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
     }
     
 	return ResultArray;
+}
+
+bool APlayerCharacter::HasLineOfSightToNode(const USphereComponent* Node) const
+{
+    if (!Node || !GetWorld())
+    {
+        return false;
+    }
+
+    FVector StartLocation = GetActorLocation();
+    FVector EndLocation = Node->GetComponentLocation();
+
+    FHitResult HitResult;
+	
+    FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(LineOfSight), false, this);
+
+    if (Node->GetOwner())
+    {
+        TraceParams.AddIgnoredActor(Node->GetOwner());
+    }
+	
+    bool bHit = GetWorld()->LineTraceSingleByObjectType(
+        HitResult,
+        StartLocation,
+        EndLocation,
+        FCollisionObjectQueryParams(
+            ECC_TO_BITFIELD(ECC_WorldStatic) |
+            ECC_TO_BITFIELD(ECC_WorldDynamic) |
+            ECC_TO_BITFIELD(ECC_GameTraceChannel2)), // Objective Channel
+        TraceParams
+    );
+	
+    return !bHit;
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

@@ -6,6 +6,7 @@
 void ACyberWarriorPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsWinner)
 {
 	Super::GameHasEnded(EndGameFocus, bIsWinner);
+	SetInputMode(FInputModeUIOnly());
 	FlushPressedKeys();
 }
 
@@ -16,8 +17,6 @@ void ACyberWarriorPlayerController::DisplayResultScreen()
 	if (LoseScreen != nullptr)
 	{
 		LoseScreen->AddToViewport();
-			
-		SetInputMode(FInputModeUIOnly());
 		SetShowMouseCursor(true);
 	}
 }
