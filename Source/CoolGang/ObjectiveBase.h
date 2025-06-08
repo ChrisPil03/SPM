@@ -168,13 +168,13 @@ public:
 	FOnObjectiveEvent OnUniqueProgressChanged;
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundCue* ObjectiveFailSound;
+	USoundBase* ObjectiveFailSound;
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundCue* ObjectiveStartSound;
+	USoundBase* ObjectiveStartSound;
 
 	UPROPERTY(EditAnywhere, Category = "Sound")
-	USoundCue* ObjectiveCompletedSound;
+	USoundBase* ObjectiveCompletedSound;
 	
 
 private:

@@ -58,16 +58,16 @@ protected:
 
 	///   Sound   ///
 	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Gun | Sound" )
-	USoundCue* BulletSound;
+	USoundBase* BulletSound;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Gun | Sound" )
-	USoundCue* NormalBulletSound;
+	USoundBase* NormalBulletSound;
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite , Category = "Gun | Sound" )
-	USoundCue* UltimateBulletSound;
+	USoundBase* UltimateBulletSound;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Gun | Sound" )
-	USoundCue* ReloadSound;
+	USoundBase* ReloadSound;
 
 	
 	///   Effect   ///
