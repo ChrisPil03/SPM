@@ -56,8 +56,6 @@ protected:
 public:
 	UFUNCTION()
 	virtual TArray<USphereComponent*> GetMovementNodes() override;
-
-	bool HasLineOfSightToNode(const USphereComponent* Node) const;
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -69,6 +67,8 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void Interact();
+
+	bool HasLineOfSightToNode(const USphereComponent* Node) const;
 
 	UFUNCTION(BlueprintCallable)
 	void PullTrigger();

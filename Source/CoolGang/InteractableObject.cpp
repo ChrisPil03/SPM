@@ -35,18 +35,7 @@ void AInteractableObject::Interact(AActor* Interactor)
 		{
 			InteractDelegate.Broadcast(this);
 		}
-		// if (!PerformDelegate.IsBound())
-		// {
-		// 	return;
-		// }
-		// PerformDelegate.Broadcast(this);
 		SetCanInteractWith(false);
-
-		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
-		UGameplayStatics::GetPlayerCharacter(this, 0)))
-		{
-			Player->ClearInteractable(this);
-		}
 	}
 }
 
@@ -62,10 +51,7 @@ void AInteractableObject::ResetInteractable()
 
 void AInteractableObject::SetCanInteractWith(bool const bNewState)
 {
-	if (!bNewState)
-	{
-		InteractionTriggerExit(nullptr);
-	}else
+	if (bNewState)
 	{
 		if (OnActivated.IsBound())
 		{
@@ -78,6 +64,13 @@ void AInteractableObject::SetCanInteractWith(bool const bNewState)
 			{
 				Player->ShowInteractPrompt(true);
 			}
+		}
+	}else
+	{
+		if (APlayerCharacter* Player = Cast<APlayerCharacter>(
+			UGameplayStatics::GetPlayerCharacter(this, 0)))
+		{
+			Player->ShowInteractPrompt(false);
 		}
 	}
 	bCanInteractWith = bNewState;
@@ -102,9 +95,8 @@ void AInteractableObject::BindInteractTrigger()
 void AInteractableObject::InteractionTriggerEnter(APlayerLocationDetection* Trigger)
 {
 	bPlayerInProximity = true;
-
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(
-		UGameplayStatics::GetPlayerCharacter(this, 0)))
+	UGameplayStatics::GetPlayerCharacter(this, 0)))
 	{
 		Player->AddInteractable(this);
 	}
@@ -113,9 +105,8 @@ void AInteractableObject::InteractionTriggerEnter(APlayerLocationDetection* Trig
 void AInteractableObject::InteractionTriggerExit(APlayerLocationDetection* Trigger)
 {
 	bPlayerInProximity = false;
-		
 	if (APlayerCharacter* Player = Cast<APlayerCharacter>(
-		UGameplayStatics::GetPlayerCharacter(this, 0)))
+	UGameplayStatics::GetPlayerCharacter(this, 0)))
 	{
 		Player->ClearInteractable(this);
 	}
