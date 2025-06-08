@@ -80,7 +80,7 @@ void AGunBase::OnUltimateReady()
 {
 	bIsUltimateReady = true;
 	OnUltimateReadyDelegate.Broadcast();
-	
+	 
 }
 
 void AGunBase::OnUltimateStart()

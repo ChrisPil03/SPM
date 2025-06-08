@@ -457,7 +457,6 @@ void APlayerCharacter::ShowInteractPrompt(const bool bShow) const
 {
 	if (!InteractWidget)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Interact widget not found"));
 		return;
 	}
 	if (bShow && InteractWidget->GetVisibility() != ESlateVisibility::Visible)

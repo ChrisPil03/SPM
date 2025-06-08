@@ -19,16 +19,12 @@ class COOLGANG_API AInteractableObject : public AActor, public IInteractInterfac
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AInteractableObject();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UStaticMeshComponent* GetMesh() const { return Mesh; }
-
-	// FPerformDelegate PerformDelegate;
 public:
 	virtual void Tick(float DeltaTime) override;
 	
@@ -39,14 +35,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetCanInteractWith(bool const bNewState);
-	// void SetInteractFunction(const FPerformDelegate& NewFunction) { PerformDelegate = NewFunction; }
 
-	
-	// template <typename T>
-	// void SetOnInteractFunction(T* Object, void (T::*Func)(AInteractableObject*))
-	// {
-	// 	PerformDelegate.AddUObject(Object, Func);
-	// }
+	UFUNCTION(BlueprintCallable)
+	void ShowInteractableOutline(const bool bNewState);
 
 	UPROPERTY(BlueprintAssignable)
 	FInteractDelegate InteractDelegate;
@@ -58,7 +49,6 @@ public:
 	FOnInteractableEvent OnReset;
 	
 private:
-	void ShowInteractableOutline(const bool bNewState);
 	void BindInteractTrigger();
 	void InteractionTriggerEnter(APlayerLocationDetection* Trigger);
 	void InteractionTriggerExit(APlayerLocationDetection* Trigger);

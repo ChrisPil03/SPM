@@ -146,6 +146,11 @@ void AObjectiveDefendGenerator::ResetObjective()
 	{
 		OnUniqueProgressChanged.Broadcast();
 	}
+
+	if (ControlPanel)
+	{
+		ControlPanel->ResetInteractable();
+	}
 	
 	// if (GE_ResetGeneratorHealth)
 	// {
@@ -213,6 +218,7 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 void AObjectiveDefendGenerator::StartActivationProcess()
 {
 	bIsActivating = true;
+	EnqueueVoiceLine(ShieldFailingVoiceLine, 0);
 	GetWorld()->GetTimerManager().SetTimer(
 		ActivationDelayTimerHandle,
 		this,
