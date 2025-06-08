@@ -102,6 +102,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Audio")
 	USoundBase* LowHealthVoiceLine;
 
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* ShieldFailingVoiceLine;
+
 	bool bHalfHealthVoiceLinePlayed;
 	bool bLowHealthVoiceLinePlayed;
 
