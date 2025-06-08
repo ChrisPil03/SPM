@@ -75,6 +75,9 @@ void ADiveGameMode::Tick(float DeltaSeconds)
 
 void ADiveGameMode::EndGame()
 {
+	GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ResetAllSubObjectives();
+	GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->ResetMainObjective();
+	
 	if (OnGameOver.IsBound())
 	{
 		OnGameOver.Broadcast();
