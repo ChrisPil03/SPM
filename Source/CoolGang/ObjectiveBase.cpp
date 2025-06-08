@@ -57,7 +57,7 @@ void AObjectiveBase::SetIsActive(const bool bNewState)
 	if (bNewState)
 	{
 		OpenDoors();
-		EnqueueVoiceLine(ObjectiveActivatedVoiceLine, 2);
+		EnqueueVoiceLine(ObjectiveActivatedVoiceLine, 3);
 		StartDamageShield();
 		
 		if (OnObjectiveActivated.IsBound())
@@ -155,7 +155,7 @@ void AObjectiveBase::StartObjective()
 	{
 		SetObjectiveState(EObjectiveState::InProgress);
 		StopDamageShield();
-		EnqueueVoiceLine(ObjectiveStartedVoiceLine, 0);
+		EnqueueVoiceLine(ObjectiveStartedVoiceLine, 1);
 
 		if (EnableWaypoint.IsBound())
 		{
@@ -197,7 +197,7 @@ void AObjectiveBase::CompleteObjective()
 		CloseDoors();
 	}else
 	{
-		EnqueueVoiceLine(ObjectiveCompletedVoiceLine, 1);
+		EnqueueVoiceLine(ObjectiveCompletedVoiceLine, 2);
 	}
 	if (ObjectiveCompletedSound)
 	{
@@ -218,7 +218,7 @@ void AObjectiveBase::FailObjective()
 			CloseDoors();
 		}else
 		{
-			EnqueueVoiceLine(ObjectiveFailedVoiceLine, 1);
+			EnqueueVoiceLine(ObjectiveFailedVoiceLine, 2);
 		}
 		if (EnableWaypoint.IsBound())
 		{
