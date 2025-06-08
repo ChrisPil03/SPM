@@ -107,7 +107,6 @@ void AInteractableObject::InteractionTriggerEnter(APlayerLocationDetection* Trig
 		UGameplayStatics::GetPlayerCharacter(this, 0)))
 	{
 		Player->AddInteractable(this);
-		UE_LOG(LogTemp, Warning, TEXT("Entered interaction box"));
 	}
 }
 
@@ -119,7 +118,6 @@ void AInteractableObject::InteractionTriggerExit(APlayerLocationDetection* Trigg
 		UGameplayStatics::GetPlayerCharacter(this, 0)))
 	{
 		Player->ClearInteractable(this);
-		UE_LOG(LogTemp, Warning, TEXT("Exited interaction box"));
 	}
 }
 
