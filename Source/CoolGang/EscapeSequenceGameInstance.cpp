@@ -22,10 +22,11 @@ void UEscapeSequenceGameInstance::BeginLoadingScreen(const FString& InMapName)
 			GameViewportClient->Fade(8, true); // Fade to black
 		}
 		FLoadingScreenAttributes LoadingScreen;
-		LoadingScreen.bAutoCompleteWhenLoadingCompletes = false;
+		LoadingScreen.bAutoCompleteWhenLoadingCompletes = true;
+		LoadingScreen.MoviePaths.Add(TEXT("IntroMovie"));
 		LoadingScreen.MinimumLoadingScreenDisplayTime = 2.0f;
-		UUserWidget* LoadingWidget = CreateWidget<UUserWidget>(this, LoadingScreenWidgetClass);
-		LoadingScreen.WidgetLoadingScreen = LoadingWidget->TakeWidget();
+		LoadingScreen.PlaybackType = EMoviePlaybackType::MT_LoadingLoop;
+
 		GetMoviePlayer()->SetupLoadingScreen(LoadingScreen);
 	}
 }
