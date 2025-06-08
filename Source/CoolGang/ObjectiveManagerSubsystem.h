@@ -26,7 +26,8 @@ public:
 	void ActivateMainObjective();
 	void RegisterCompletedObjective(AObjectiveBase* CompletedObjective);
 	void RegisterFailedObjective(AObjectiveBase* FailedObjective);
-	void ResetAllObjectives();
+	void ResetAllSubObjectives();
+	void ResetMainObjective();
 	TArray<AObjectiveBase*> GetAllSubObjectives() const;
 
 	UFUNCTION(BlueprintPure)

@@ -100,11 +100,19 @@ void UObjectiveManagerSubsystem::RegisterFailedObjective(AObjectiveBase* FailedO
 	BroadcastFailedObjective(FailedObjective);
 }
 
-void UObjectiveManagerSubsystem::ResetAllObjectives()
+void UObjectiveManagerSubsystem::ResetAllSubObjectives()
 {
 	for (AObjectiveBase* Objective : SubObjectivesInLevel)
 	{
 		Objective->ResetObjective();
+	}
+}
+
+void UObjectiveManagerSubsystem::ResetMainObjective()
+{
+	if (MainObjective)
+	{
+		MainObjective->ResetObjective();
 	}
 }
 
