@@ -112,7 +112,7 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 		{
 			// UE_LOG(LogTemp, Warning, TEXT("LaserActive"));
 			AGunBase* Gun = Cast<AGunBase>(GetOwningActorFromActorInfo());
-			StartPoint = Gun->MuzzlePosition->GetComponentLocation();
+			//StartPoint = Gun->MuzzlePosition->GetComponentLocation();
 			bHasTarget = LaserBulletTrace(HitResults,StartPoint, EndPoint, QueryParams);
 		}
 		else
