@@ -146,6 +146,11 @@ void AObjectiveDefendGenerator::ResetObjective()
 	{
 		OnUniqueProgressChanged.Broadcast();
 	}
+
+	if (ControlPanel)
+	{
+		ControlPanel->ResetInteractable();
+	}
 	
 	// if (GE_ResetGeneratorHealth)
 	// {

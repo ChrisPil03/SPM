@@ -96,7 +96,7 @@ TArray<FString> AObjectiveTimedTasks::GetUniqueObjectiveProgress() const
 	}
 	
 	return {
-		FString::Printf(TEXT("Buttons pressed: %d / %d"), GetInteractions(), GetTotalInteractables()),
+		FString::Printf(TEXT("Circuit breaks pulled: %d / %d"), GetInteractions(), GetTotalInteractables()),
 		FString::Printf(TEXT("Time left: %s:%s"), *Minutes, *Seconds)
 	};
 }
