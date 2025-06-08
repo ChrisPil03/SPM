@@ -23,10 +23,10 @@ struct FIntRange
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	int32 Max;
+	int32 Max = 0;
 
 	UPROPERTY(EditAnywhere)
-	int32 Min;
+	int32 Min = 0;
 
 	int32 GetRandomValue() const { return FMath::RandRange(Min, Max); }
 };
@@ -87,6 +87,7 @@ private:
 	void ResetServerRoom();
 	void SetRandomServersToSelect();
 
+	UFUNCTION()
 	void OnInteract(AInteractableObject* InteractableObject);
 
 	// void InitializeTimers();

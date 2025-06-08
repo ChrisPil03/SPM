@@ -295,7 +295,7 @@ void AObjectiveDefendGenerator::BindControlPanel()
 {
 	if (ControlPanel)
 	{
-		ControlPanel->SetOnInteractFunction(this, &AObjectiveDefendGenerator::RegisterControlPanelInteraction);
+		ControlPanel->InteractDelegate.AddDynamic(this, &AObjectiveDefendGenerator::RegisterControlPanelInteraction);
 	}
 }
 

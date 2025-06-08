@@ -1,11 +1,7 @@
 
 #include "CyberWarriorPlayerController.h"
-
-#include "DiveGameMode.h"
 #include "TimerManager.h"
 #include "Blueprint/UserWidget.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Kismet/GameplayStatics.h"
 
 void ACyberWarriorPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsWinner)
 {

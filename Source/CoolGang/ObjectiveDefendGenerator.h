@@ -79,9 +79,10 @@ private:
 	
 	void BindControlPanel();
 	void BindCompletionFunction();
-	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
 	void ActivateObjective();
 	void StartActivationProcess();
+	UFUNCTION()
+	void RegisterControlPanelInteraction(AInteractableObject* InteractableObject);
 
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
 	UCapsuleComponent* CapsuleComponent;
