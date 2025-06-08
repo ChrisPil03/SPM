@@ -218,6 +218,7 @@ void AObjectiveDefendGenerator::DamageGeneratorShield(const float Damage)
 void AObjectiveDefendGenerator::StartActivationProcess()
 {
 	bIsActivating = true;
+	EnqueueVoiceLine(ShieldFailingVoiceLine, 0);
 	GetWorld()->GetTimerManager().SetTimer(
 		ActivationDelayTimerHandle,
 		this,
