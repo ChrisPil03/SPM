@@ -74,7 +74,7 @@ bool UGA_FireWeapon::GetTraceStartLocationAndRotation(FVector& OutStartPoint, FR
 bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("GA_FireWeapon::BulletTrace"));
-	bool bHasTarget;
+	bool bHasTarget = false;
 	FVector StartPoint;
 	FRotator Rotation;
 	GetTraceStartLocationAndRotation(StartPoint, Rotation);
@@ -134,13 +134,9 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 				if (Hit.GetActor()->IsA(AEnemyAI::StaticClass()))
 				{
 					// UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *Hit.GetActor()->GetName());
-					
 					NewTargetData =
 					new FGameplayAbilityTargetData_SingleTargetHit(Hit);
-					// Add it to the handle (this builds an array internally)
 					TargetDator.Add(NewTargetData);
-					
-					bHasTarget = true;
 				}
 				else
 				{
@@ -155,7 +151,6 @@ bool UGA_FireWeapon::BulletTrace(TArray<FHitResult>& HitResults)
 			TargetDator.Clear();
 			HitResults.Empty();	
 		}
-		
 	}
 	
 	return bHasTarget;
