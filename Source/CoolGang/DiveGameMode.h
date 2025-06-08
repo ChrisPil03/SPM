@@ -7,6 +7,7 @@
 #include "DiveGameMode.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnMinutePassed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGameOver);
 
 class ASystemIntegrity;
 
@@ -66,6 +67,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Timer")
 	float ElapsedTime = 0.f;
 
+	UPROPERTY(BlueprintAssignable, meta = (AllowPrivateAccess))
+	FOnGameOver OnGameOver;
+	
 	FOnMinutePassed OnMinutePassed;
 
 
