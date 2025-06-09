@@ -2,7 +2,6 @@
 
 #include "CustomGameViewportClient.h"
 #include "MoviePlayer.h"
-#include "Blueprint/UserWidget.h"
 
 void UEscapeSequenceGameInstance::Init()
 {
