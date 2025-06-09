@@ -84,7 +84,6 @@ public:
 	UPROPERTY(EditAnywhere,  Category = "Sound", meta = (AllowPrivateAccess = "true"))
 	class USoundBase* MovementSound;
 	
-
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IAttackable> GetTarget() const;
 

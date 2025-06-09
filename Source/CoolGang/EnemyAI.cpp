@@ -49,17 +49,9 @@ void AEnemyAI::BeginPlay()
 			FadeDMI->SetScalarParameterValue(TEXT("Radial Radius"), 0.0f);
 		}
 	}
-		
-	// TArray<AObjectiveBase*> AllObjectives = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetAllSubObjectives();
-	// for (AObjectiveBase* Objective : AllObjectives)
-	// {
-	// 	if (Objective && Objective->GetClass()->ImplementsInterface(UAttackable::StaticClass()))
-	// 	{
-	// 		//Objective->AddOnObjectiveInProgressFunction(this, &AEnemyAI::AttackObjective);
-	// 		Objective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
-	// 		Objective->AddOnObjectiveDeactivatedFunction(this, &AEnemyAI::AttackPlayer);
-	// 	}
-	// }
+
+	Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 2000.f * 2000.f);
+	
 	if (AObjectiveDefendGenerator* MainObjective = GetWorld()->GetSubsystem<UObjectiveManagerSubsystem>()->GetMainObjective())
 	{
 		MainObjective->AddOnObjectiveActivatedFunction(this, &AEnemyAI::AttackObjective);
@@ -72,7 +64,6 @@ void AEnemyAI::BeginPlay()
 		AudioComponent->SetSound(MovementSound);
 		AudioComponent->Play();
 	}
-
 	
 	GiveAbilities();
 	InitEnemyStats();
@@ -219,7 +210,7 @@ void AEnemyAI::Die()
 		}
 		GetMovementComponent()->Velocity.Set(0.f,0.f,0.f);
 		Cast<AEnemyAIController>(Controller)->BrainComponent->Cleanup();
-		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 5000.f * 5000.f);
+		Cast<AEnemyAIController>(Controller)->BrainComponent->GetBlackboardComponent()->SetValueAsFloat("DistanceToTargetSquared", 2000.f * 2000.f);
 	}
 
 	AudioComponent->FadeOut(0.5f, 0.0f);
