@@ -24,10 +24,11 @@ void ACyberWarriorPlayerController::DisplayResultScreen()
 void ACyberWarriorPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	HUD = CreateWidget(this, HUDClass);
-	if (HUD != nullptr)
-	{
-		HUD->AddToViewport();
-		OnHUDReadyDelegate.Broadcast();
-	}
+	// HUD = CreateWidget(this, HUDClass);
+	// if (HUD != nullptr)
+	// {
+	// 	HUD->ClearFlags(RF_Transactional);
+	// 	HUD->AddToViewport();
+	// 	OnHUDReadyDelegate.Broadcast();
+	// }
 }

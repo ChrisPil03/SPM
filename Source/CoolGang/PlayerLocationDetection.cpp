@@ -28,9 +28,15 @@ void APlayerLocationDetection::BeginPlay()
 		TriggerBox->OnComponentEndOverlap.AddDynamic(this, &APlayerLocationDetection::OnEndOverlap);
 
 		APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-		PlayerCharacter->OnPlayerConstructed.AddDynamic(this, &APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone);
+		
+		// Add this validity check to prevent the crash.
+		if (IsValid(PlayerCharacter))
+		{
+			PlayerCharacter->OnPlayerConstructed.AddDynamic(this, &APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone);
+		}
 	}
 }
+
 
 void APlayerLocationDetection::FindPlayerAlreadyInsideDetectionZone()
 {
