@@ -184,7 +184,6 @@ TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
         {
             if (!Node) continue;
 
-            // --- START: NEW LINE OF SIGHT CHECK ---
             bool bHasLineOfSight;
             {
                 TRACE_CPUPROFILER_EVENT_SCOPE(TEXT("STAT_PC_GetMovementNodes_LineOfSightCheck"));
@@ -194,7 +193,6 @@ TArray<USphereComponent*> APlayerCharacter::GetMovementNodes()
             {
                 continue;
             }
-            // --- END: NEW LINE OF SIGHT CHECK ---
         
             bool bIsInsideSolid;
             {
@@ -260,7 +258,7 @@ bool APlayerCharacter::HasLineOfSightToNode(const USphereComponent* Node) const
         FCollisionObjectQueryParams(
             ECC_TO_BITFIELD(ECC_WorldStatic) |
             ECC_TO_BITFIELD(ECC_WorldDynamic) |
-            ECC_TO_BITFIELD(ECC_GameTraceChannel2)), // Objective Channel
+            ECC_TO_BITFIELD(ECC_GameTraceChannel2)),
         TraceParams
     );
 	

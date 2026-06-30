@@ -66,7 +66,7 @@ void UBTService_TargetLocationGround::TickNode(UBehaviorTreeComponent& OwnerComp
     FVector BaseTargetLocation;
     bool bBaseTargetFound = false;
     
-    FHitResult HitResult; // Declare commonly used out params outside tight scopes
+    FHitResult HitResult;
     FNavLocation ProjectedGroundPoint, ProjectedNodeLocation, ProjectedImpactLocation, ProjectedNodeLoc;
 
     if (bPreferNavMeshProjectionForAirborneTarget && NavSys && DefaultNavData)

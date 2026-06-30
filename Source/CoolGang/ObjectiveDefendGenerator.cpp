@@ -108,6 +108,9 @@ void AObjectiveDefendGenerator::RegisterControlPanelInteraction(AInteractableObj
 
 void AObjectiveDefendGenerator::ActivateObjective()
 {
+	ADiveGameMode* GameMode = Cast<ADiveGameMode>(GetWorld()->GetAuthGameMode());
+	if (GameMode->GameIsOver()) return;
+	
 	bIsActivating = false;
 	if (ObjectiveManager)
 	{

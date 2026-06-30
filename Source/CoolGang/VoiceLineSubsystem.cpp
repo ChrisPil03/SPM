@@ -1,4 +1,6 @@
 #include "VoiceLineSubsystem.h"
+
+#include "DiveGameMode.h"
 #include "Components/AudioComponent.h"
 
 void UVoiceLineSubsystem::EnqueueVoiceLine(USoundBase* VoiceLine, const int32 Priority)
@@ -58,6 +60,9 @@ void UVoiceLineSubsystem::OnWorldInitialized(const UWorld::FActorsInitializedPar
 
 void UVoiceLineSubsystem::PlayNextInQueue()
 {
+	ADiveGameMode* GameMode = Cast<ADiveGameMode>(GetWorld()->GetAuthGameMode());
+	if (GameMode->GameIsOver()) return;
+	
 	if (!VoiceLineQueue.IsEmpty())
 	{
 		FVoiceLineEntry NextVoiceLine = VoiceLineQueue.Last();

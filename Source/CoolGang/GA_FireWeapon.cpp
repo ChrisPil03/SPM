@@ -32,6 +32,12 @@ bool UGA_FireWeapon::CheckCost(const FGameplayAbilitySpecHandle Handle, const FG
 	const UWeaponAttributeSet* Attributes = ASC->GetSet<UWeaponAttributeSet>();
 	// Check that at least 1 bullet is available
 	int32 CurrentAmmo = FMath::TruncToInt(Attributes->GetAmmoCount());
+	if (ASC->HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag("Status.OnUltimate")))
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("ignore cost"));
+		return true;
+	}
+	
 	return CurrentAmmo >= 1;
 }
 

@@ -99,6 +99,7 @@ AEnemyAI* AEnemySpawner::SpawnEnemy(const TSubclassOf<AEnemyAI>& EnemyClass) con
         AEnemyAI* NewEnemy = GetWorld()->SpawnActor<AEnemyAI>(EnemyClass, Location, Rotation);
         if (NewEnemy)
         {
+        	
             EnemySpawnManager->MarkEnemyAsAlive(NewEnemy);
         }
         return NewEnemy;
